@@ -306,6 +306,16 @@ page AdminUIButtonsPage {
 }
 //#endregion
 
+//#region SingeMe App 
+route SingmeAppRoute {
+  path: "/create", to: SingmeAppPage }
+page SingmeAppPage {
+  authRequired: true,
+  component: import SingmeAppPage from "@src/singme-app/dashboards/create/CreatePage"
+}
+//#endregion
+
+
 //#region Contact Form Messages
 // TODO: 
 // add functionality to allow users to send messages to admin

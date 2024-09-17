@@ -15,11 +15,20 @@ export default function App({ children }: { children: ReactNode }) {
   const { data: user } = useAuth();
 
   const shouldDisplayAppNavBar = useMemo(() => {
-    return location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/signup';
+    return (
+      location.pathname !== '/' &&
+      location.pathname !== '/login' &&
+      location.pathname !== '/signup' &&
+      location.pathname !== '/create'
+    );
   }, [location]);
 
   const isAdminDashboard = useMemo(() => {
     return location.pathname.startsWith('/admin');
+  }, [location]);
+
+  const isUserDashboard = useMemo(() => {
+    return location.pathname.startsWith('/create');
   }, [location]);
 
   useEffect(() => {
@@ -46,6 +55,8 @@ export default function App({ children }: { children: ReactNode }) {
     <>
       <div className='min-h-screen dark:text-white dark:bg-boxdark-2'>
         {isAdminDashboard ? (
+          <>{children}</>
+        ) : isUserDashboard ? (
           <>{children}</>
         ) : (
           <>
