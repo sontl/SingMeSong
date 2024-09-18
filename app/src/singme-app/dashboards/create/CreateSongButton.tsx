@@ -5,10 +5,10 @@ interface CreateSongButtonProps {
   lyricsValue: string;
 }
 
-const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue }) => {
+const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue, onClick }) => {
   return (
-    <Link
-      to='#'
+    <button
+      onClick={onClick}
       className='min-w-[7rem] font-medium  ring-1 ring-inset ring-slate-200  duration-200 ease-in-out focus:outline-none focus:shadow-none hover:shadow-none flex items-center justify-center inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10 shadow-lg '
     >
       <span>
@@ -19,7 +19,7 @@ const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue }) => {
         </svg>
       </span>
       Create Song
-    </Link>
+    </button>
   );
 };
 

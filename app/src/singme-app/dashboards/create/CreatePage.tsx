@@ -17,14 +17,30 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    // TODO add toast provider / wrapper
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const confirmed = confirm('Are you sure you want to save the changes?');
+    const confirmed = confirm('Are you sure you want to submit the song?');
     if (confirmed) {
-      toast.success('Your changes have been saved successfully!');
-    } else {
-      toast.error('Your changes have not been saved!');
+      const response = await fetch('/api/createSong', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: lyricsValue,
+          tags: musicStyleValue,
+          title: titleValue,
+          make_instrumental: false,
+          model: 'chirp-v3-5|chirp-v3-0',
+          wait_audio: false,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Song submitted successfully!');
+      } else {
+        toast.error('Failed to submit song.');
+      }
     }
   };
 
@@ -65,7 +81,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
                 <Title placeholder='Enter a title' value={titleValue} handleChange={handleTitleChange} />
 
                 <div className='flex justify-end gap-4.5'>
-                  <CreateSongButton lyricsValue={lyricsValue} />
+                  <CreateSongButton lyricsValue={lyricsValue} onClick={handleSubmit} />
                 </div>
               </form>
             </div>

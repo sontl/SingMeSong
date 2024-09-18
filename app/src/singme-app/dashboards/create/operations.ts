@@ -135,6 +135,42 @@ Please follow these rules:
     throw new HttpError(statusCode, errorMessage);
   }
 };
+
+export const createSong: CreateSong<{ prompt: string; tags: string; title: string }, { id: string; title: string; image_url: string; lyric: string; audio_url: string; video_url: string; created_at: string; model_name: string; status: string; gpt_description_prompt: string; prompt: string; type: string; tags: string }[]> = async ({ prompt, tags, title }, context) => {
+  if (!context.user) {
+    throw new HttpError(401);
+  }
+
+  try {
+    // Simulate API call to create song
+    const response = await fetch('https://api.example.com/createSong', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        tags,
+        title,
+        make_instrumental: false,
+        model: 'chirp-v3-5|chirp-v3-0',
+        wait_audio: false,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new HttpError(500, 'Failed to create song');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error: any) {
+    console.error(error);
+    const statusCode = error.statusCode || 500;
+    const errorMessage = error.message || 'Internal server error';
+    throw new HttpError(statusCode, errorMessage);
+  }
+};
 //#endregion
 
 export const generateGptResponse: GenerateGptResponse<GptPayload, GeneratedSchedule> = async ({ hours }, context) => {
