@@ -9,6 +9,8 @@ import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import MusicStyle from './MusicStyle';
 import Title from './Title';
+import Lyrics from './Lyrics';
+import CreateSongButton from './CreateSongButton';
 
 const CreatePage = ({ user }: { user: AuthUser }) => {
   const [lyricsValue, setLyricsValue] = useState('');
@@ -38,65 +40,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
             <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
               <form onSubmit={handleSubmit}>
                 <div className='p-7'>
-                  <div className='mb-5.5'>
-                    <label className='mb-3 block text-sm font-medium text-black dark:text-white' htmlFor='Username'>
-                      Lyrics
-                    </label>
-                    <div className='relative'>
-                      <span className='absolute left-4.5 top-4'>
-                        <svg
-                          className='fill-current'
-                          width='20'
-                          height='20'
-                          viewBox='0 0 20 20'
-                          fill='none'
-                          xmlns='http://www.w3.org/2000/svg'
-                        >
-                          {/* SVG content */}
-                        </svg>
-                      </span>
-
-                      <CustomTextarea
-                        id='lyricsTextarea'
-                        maxLength={3000}
-                        rows={16}
-                        placeholder='Enter your own lyrics or describe a song and click Write About... to generate lyrics'
-                        value={lyricsValue}
-                        onChange={handleLyricsChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className='flex justify-end gap-4.5'>
-                    <button
-                      className='min-w-[7rem] font-medium text-gray-800/90 bg-yellow-50 shadow-md ring-1 ring-inset ring-slate-200 py-2 px-4 rounded-md hover:bg-yellow-100 duration-200 ease-in-out focus:outline-none focus:shadow-none hover:shadow-none flex items-center justify-center'
-                      type='submit'
-                    >
-                      {lyricsValue.trim() === '' ? (
-                        <>
-                          <span className='mr-2'>
-                            <svg
-                              xmlns='http://www.w3.org/2000/svg'
-                              fill='none'
-                              viewBox='0 0 24 24'
-                              strokeWidth={1.5}
-                              stroke='currentColor'
-                              className='w-5 h-5 inline'
-                            >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                d='M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.035-.259a3.375 3.375 0 002.456-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z'
-                              />
-                            </svg>
-                          </span>
-                          Surprise Me
-                        </>
-                      ) : (
-                        `Write about: ${lyricsValue.slice(0, 20)}...`
-                      )}
-                    </button>
-                  </div>
+                  <Lyrics lyricsValue={lyricsValue} handleLyricsChange={handleLyricsChange} />
                 </div>
                 <div className='p-7'>
                   <MusicStyle placeholder='Enter style of music.' />
@@ -105,28 +49,9 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
                   <Title placeholder='Enter a title' />
                 </div>
                 <div className='p-7'>
-                  {' '}
                   <div className='flex justify-end gap-4.5'>
-                    <Link
-                      to='#'
-                      className='min-w-[7rem] font-medium  ring-1 ring-inset ring-slate-200  duration-200 ease-in-out focus:outline-none focus:shadow-none hover:shadow-none flex items-center justify-center inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10 shadow-lg '
-                    >
-                      <span>
-                        <svg
-                          className='fill-current'
-                          width='20'
-                          height='20'
-                          viewBox='0 0 24 24'
-                          xmlns='http://www.w3.org/2000/svg'
-                        >
-                          <path d='M10 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z' />
-                          <path d='M17.5 0l1.5 4.5H24l-4 3 1.5 4.5-4-3-4 3 1.5-4.5-4-3h5z' />
-                          <path d='M21 10l1 3h3l-2.5 1.8 1 3-2.5-1.8-2.5 1.8 1-3-2.5-1.8h3z' />
-                        </svg>
-                      </span>
-                      Create Song
-                    </Link>
-                  </div>{' '}
+                    <CreateSongButton lyricsValue={lyricsValue} />
+                  </div>
                 </div>
               </form>
             </div>
