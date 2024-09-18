@@ -3,9 +3,11 @@ import CustomTextarea from '../../elements/forms/CustomTextarea';
 
 interface TitleProps {
   placeholder: string;
+  value: string;
+  handleChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-const Title: React.FC<TitleProps> = ({ placeholder }) => {
+const Title: React.FC<TitleProps> = ({ placeholder, value, handleChange }) => {
   return (
     <div className='mb-5.5'>
       <label className='mb-3 block text-sm font-medium text-black dark:text-white' htmlFor='Username'>
@@ -42,7 +44,7 @@ const Title: React.FC<TitleProps> = ({ placeholder }) => {
             </defs>
           </svg>
         </span>
-        <CustomTextarea maxLength={80} rows={2} placeholder={placeholder} />
+        <CustomTextarea maxLength={80} rows={2} placeholder={placeholder} value={value} onChange={handleChange} />
       </div>
     </div>
   );

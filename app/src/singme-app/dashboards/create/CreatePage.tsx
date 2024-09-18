@@ -32,6 +32,17 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     setLyricsValue(event.target.value);
   };
 
+  const [musicStyleValue, setMusicStyleValue] = useState('');
+  const [titleValue, setTitleValue] = useState('');
+
+  const handleMusicStyleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMusicStyleValue(event.target.value);
+  };
+
+  const handleTitleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTitleValue(event.target.value);
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className='mx-auto max-w-270'>
@@ -40,14 +51,26 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
             <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
               <form onSubmit={handleSubmit}>
                 <div className='p-7'>
-                  <Lyrics lyricsValue={lyricsValue} handleLyricsChange={handleLyricsChange} />
+                  <Lyrics
+                    lyricsValue={lyricsValue}
+                    handleLyricsChange={handleLyricsChange}
+                    setLyricsValue={setLyricsValue}
+                    setMusicStyleValue={setMusicStyleValue}
+                    setTitleValue={setTitleValue}
+                  />
+                </div>
+                <div className='p-7'></div>
+                <div className='p-7'>
+                  <MusicStyle
+                    placeholder='Enter style of music.'
+                    value={musicStyleValue}
+                    handleChange={handleMusicStyleChange}
+                  />
                 </div>
                 <div className='p-7'>
-                  <MusicStyle placeholder='Enter style of music.' />
+                  <Title placeholder='Enter a title' value={titleValue} handleChange={handleTitleChange} />
                 </div>
-                <div className='p-7'>
-                  <Title placeholder='Enter a title' />
-                </div>
+
                 <div className='p-7'>
                   <div className='flex justify-end gap-4.5'>
                     <CreateSongButton lyricsValue={lyricsValue} />

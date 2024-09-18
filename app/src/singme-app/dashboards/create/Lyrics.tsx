@@ -1,12 +1,22 @@
 import React from 'react';
 import CustomTextarea from '../../elements/forms/CustomTextarea';
+import SurpriseMeButton from './SurpriseMeButton';
 
 interface LyricsProps {
   lyricsValue: string;
   handleLyricsChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  setLyricsValue: React.Dispatch<React.SetStateAction<string>>;
+  setMusicStyleValue: React.Dispatch<React.SetStateAction<string>>;
+  setTitleValue: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Lyrics: React.FC<LyricsProps> = ({ lyricsValue, handleLyricsChange }) => {
+const Lyrics: React.FC<LyricsProps> = ({
+  lyricsValue,
+  handleLyricsChange,
+  setLyricsValue,
+  setMusicStyleValue,
+  setTitleValue,
+}) => {
   return (
     <div className='mb-5.5'>
       <label className='mb-3 block text-sm font-medium text-black dark:text-white' htmlFor='Username'>
@@ -33,6 +43,13 @@ const Lyrics: React.FC<LyricsProps> = ({ lyricsValue, handleLyricsChange }) => {
           value={lyricsValue}
           onChange={handleLyricsChange}
         />
+        <div className='absolute bottom-2 left-2'>
+          <SurpriseMeButton
+            setLyricsValue={setLyricsValue}
+            setMusicStyleValue={setMusicStyleValue}
+            setTitleValue={setTitleValue}
+          />
+        </div>
       </div>
     </div>
   );

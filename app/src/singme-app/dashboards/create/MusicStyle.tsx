@@ -3,9 +3,11 @@ import CustomTextarea from '../../elements/forms/CustomTextarea';
 
 interface MusicStyleProps {
   placeholder: string;
+  value: string;
+  handleChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-const MusicStyle: React.FC<MusicStyleProps> = ({ placeholder }) => {
+const MusicStyle: React.FC<MusicStyleProps> = ({ placeholder, value, handleChange }) => {
   return (
     <div className='mb-5.5'>
       <label className='mb-3 block text-sm font-medium text-black dark:text-white' htmlFor='Username'>
@@ -42,7 +44,7 @@ const MusicStyle: React.FC<MusicStyleProps> = ({ placeholder }) => {
             </defs>
           </svg>
         </span>
-        <CustomTextarea maxLength={120} rows={3} placeholder={placeholder} />
+        <CustomTextarea maxLength={120} rows={3} placeholder={placeholder} value={value} onChange={handleChange} />
       </div>
     </div>
   );

@@ -313,6 +313,12 @@ page SingmeAppPage {
   authRequired: true,
   component: import SingmeAppPage from "@src/singme-app/dashboards/create/CreatePage"
 }
+
+action generateRandomLyrics {
+  fn: import { generateRandomLyrics } from "@src/singme-app/dashboards/create/operations",
+  entities: [User, GptResponse]
+}
+
 //#endregion
 
 

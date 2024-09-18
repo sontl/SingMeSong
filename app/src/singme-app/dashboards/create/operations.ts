@@ -24,6 +24,69 @@ type GptPayload = {
   hours: string;
 };
 
+//#region Random Lyrics Generation
+type RandomLyricsPayload = {};
+
+export const generateRandomLyrics: GenerateGptResponse<
+  RandomLyricsPayload,
+  { lyrics: string; musicStyle: string; title: string }
+> = async (_args, context) => {
+  if (!context.user) {
+    throw new HttpError(401);
+  }
+
+  try {
+    // check if openai is initialized correctly with the API key
+    if (openai instanceof Error) {
+      throw openai;
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a creative songwriter. You will generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
+        },
+        {
+          role: 'user',
+          content:
+            'Generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
+        },
+      ],
+      temperature: 0.8, // adjust this value to control the randomness of the output
+    });
+
+    const response = completion.choices[0].message?.content;
+    if (response) {
+      try {
+        const { lyrics, musicStyle, title } = JSON.parse(response);
+
+        await context.entities.GptResponse.create({
+          data: {
+            user: { connect: { id: context.user.id } },
+            content: JSON.stringify({ lyrics, musicStyle, title }),
+          },
+        });
+
+        return { lyrics, musicStyle, title };
+      } catch (error) {
+        console.error('Error parsing JSON response:', error);
+        throw new HttpError(500, 'Bad response format from OpenAI');
+      }
+    } else {
+      throw new HttpError(500, 'Bad response from OpenAI');
+    }
+  } catch (error: any) {
+    console.error(error);
+    const statusCode = error.statusCode || 500;
+    const errorMessage = error.message || 'Internal server error';
+    throw new HttpError(statusCode, errorMessage);
+  }
+};
+//#endregion
+
 export const generateGptResponse: GenerateGptResponse<GptPayload, GeneratedSchedule> = async ({ hours }, context) => {
   if (!context.user) {
     throw new HttpError(401);
