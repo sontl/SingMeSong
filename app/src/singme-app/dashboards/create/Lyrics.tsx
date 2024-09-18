@@ -45,6 +45,7 @@ const Lyrics: React.FC<LyricsProps> = ({
         />
         <div className='absolute bottom-2 left-2'>
           <SurpriseMeButton
+            lyricsValue={lyricsValue}
             setLyricsValue={setLyricsValue}
             setMusicStyleValue={setMusicStyleValue}
             setTitleValue={setTitleValue}

@@ -1,4 +1,5 @@
 import type { Task, GptResponse } from 'wasp/entities';
+import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type {
   GenerateGptResponse,
   CreateTask,
@@ -6,6 +7,7 @@ import type {
   UpdateTask,
   GetGptResponses,
   GetAllTasksByUser,
+  GenerateRandomLyrics,
 } from 'wasp/server/operations';
 import { HttpError } from 'wasp/server';
 import { GeneratedSchedule } from './schedule';
@@ -25,12 +27,13 @@ type GptPayload = {
 };
 
 //#region Random Lyrics Generation
-type RandomLyricsPayload = {};
-
-export const generateRandomLyrics: GenerateGptResponse<
+type RandomLyricsPayload = {
+  chat?: string;
+};
+export const generateRandomLyrics: GenerateRandomLyrics<
   RandomLyricsPayload,
   { lyrics: string; musicStyle: string; title: string }
-> = async (_args, context) => {
+> = async ({ chat }, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
@@ -41,24 +44,71 @@ export const generateRandomLyrics: GenerateGptResponse<
       throw openai;
     }
 
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: 'system',
+        content: `You are the Assistant Songwriter for Suno AI.
+Your job is to help the user create song lyrics to be used for singing by Suno AI.
+Please follow these rules:
+1. Write lyrics per the instructions provided by the user. (Length of 3000 characters for the whole song text!)
+2. Use the markup that Suno AI understands:
+   * Song Sections:
+      * [Intro]
+      * [Verse 1]
+      * [Chorus]
+      * [Rap Verse]
+      * [(Style) Verse/Chorus/...] (Indicate the style in parentheses)
+      * [Bridge]
+      * [Outro]
+      * [Instrumental intro/outro]
+      * More may be added, but they should be in brackets and English
+   * Sound Effects:
+      * [Laughter]
+      * [Cry]
+      * [Scream]
+      * [Whisper: "TEXT, **in the same language that the rest of the lyrics are in!!!** "]
+      * [Censored beep]
+      * [Sound of typing]
+      * [Gunshot]
+      * [Slowed and Reverbed Sample: "TEXT, **in the same language that the rest of the lyrics are in!!!** "]
+      * Almost anything the user can imagine (but keep it simple) can be written in brackets and used!
+3. Music Styles:
+   * male vocals
+   * phonk
+   * mini-phonk
+   * ulytra-bass
+   * agressive
+   * happy
+   * horror
+   * Any others, comma-separated in English. (Max of 120 characters!)
+4. Be sure to include [END] at the conclusion of the lyrics so Suno AI knows when to wrap up the singing.
+5. The music style have maximum of 120 characters. Choose the best style suited for the content of the song.
+6. The title have maximum of 80 characters.
+7. return in JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." } .`,
+      },
+    ];
+
+    if (chat) {
+      messages.push({
+        role: 'user',
+        content: `Based on the following chat: "${chat}", generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }`,
+      });
+    } else {
+      messages.push({
+        role: 'user',
+        content:
+          'Generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
+      });
+    }
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a creative songwriter. You will generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
-        },
-        {
-          role: 'user',
-          content:
-            'Generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
-        },
-      ],
+      messages,
       temperature: 0.8, // adjust this value to control the randomness of the output
     });
-
+    console.log('completion: ', completion);
     const response = completion.choices[0].message?.content;
+
     if (response) {
       try {
         const { lyrics, musicStyle, title } = JSON.parse(response);
