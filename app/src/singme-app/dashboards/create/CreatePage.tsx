@@ -1,19 +1,17 @@
+import React, { useState, useRef, useContext } from 'react';
 import { type AuthUser } from 'wasp/auth';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
-import { useState, useRef, useContext } from 'react';
 import MusicStyle from './MusicStyle';
 import Title from './Title';
 import Lyrics from './Lyrics';
-import { CgSpinner } from 'react-icons/cg';
-import { TiDelete } from 'react-icons/ti';
 import CreateSongButton from './CreateSongButton';
 import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
-import SongTable from './SongTable'; // Add this import
+import SongTable from './SongTable';
 import SongDetails from './SongDetails';
 import { type Song } from 'wasp/entities';
 import { SongContext } from '../../context/SongContext';
-import { SongProvider } from '../../context/SongContext';
+
 const CreatePage = ({ user }: { user: AuthUser }) => {
   const [lyricsValue, setLyricsValue] = useState('');
   const [musicStyleValue, setMusicStyleValue] = useState('');
@@ -21,6 +19,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { data: songs, isLoading: isSongsLoading } = useQuery(getAllSongsByUser);
   const songTableRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<'create' | 'list' | 'details'>('create');
 
   const { setCurrentSong, isPlaying, togglePlay } = useContext(SongContext);
 
@@ -52,12 +51,24 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
 
   return (
     <DefaultLayout user={user}>
-     
       <div className='max-w-screen-2xl mx-auto'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 h-[calc(100vh-100px)]'> {/* Set a fixed height for the grid */}
+        {/* Mobile Tab Navigation */}
+        <div className='md:hidden mb-4'>
+          <select 
+            value={activeTab} 
+            onChange={(e) => setActiveTab(e.target.value as 'create' | 'list' | 'details')}
+            className="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          >
+            <option value="create">Create Song</option>
+            <option value="list">Song List</option>
+            <option value="details">Song Details</option>
+          </select>
+        </div>
+
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 h-[calc(100vh-100px)]'>
           {/* Column 1: Song Creation */}
-          <div className='col-span-1 overflow-hidden flex flex-col'> {/* Use flex column */}
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 flex-grow overflow-y-auto'> {/* Make this div scrollable */}
+          <div className={`col-span-1 overflow-hidden flex flex-col ${activeTab !== 'create' ? 'hidden md:flex' : ''}`}>
+            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 flex-grow overflow-y-auto'>
               <Lyrics
                 lyricsValue={lyricsValue}
                 handleLyricsChange={handleLyricsChange}
@@ -84,8 +95,8 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
           </div>
           
           {/* Column 2: List of Created Songs */}
-          <div className='col-span-1 overflow-hidden'> {/* Add overflow-hidden */}
-            <div ref={songTableRef} className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'> {/* Make this div full height and scrollable */}
+          <div className={`col-span-1 overflow-hidden ${activeTab !== 'list' ? 'hidden md:block' : ''}`}>
+            <div ref={songTableRef} className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'>
               <SongTable 
                 songs={songs || []} 
                 isLoading={isSongsLoading} 
@@ -95,14 +106,13 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
           </div>
 
           {/* Column 3: Song Details */}
-          <div className='col-span-1 overflow-hidden'> {/* Add overflow-hidden */}
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'> {/* Make this div full height and scrollable */}
+          <div className={`col-span-1 overflow-hidden ${activeTab !== 'details' ? 'hidden md:block' : ''}`}>
+            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'>
               <SongDetails song={selectedSong} />
             </div>
           </div>
         </div>
       </div>
- 
     </DefaultLayout>     
   );
 };

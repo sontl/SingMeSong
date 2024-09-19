@@ -1,11 +1,11 @@
 import React from 'react';
-import { type Song , User } from 'wasp/entities';
+import { type Song, User } from 'wasp/entities';
 
 type SongDetailsProps = {
-  song: (Song ) | null;
+  song: Song | null;
 };
 
-const SongDetails: React.FC<SongDetailsProps> = ({ song }, user : User ) => {
+const SongDetails: React.FC<SongDetailsProps> = ({ song }) => {
   if (!song) {
     return (
       <div className='flex flex-col items-center justify-center h-full'>
@@ -18,14 +18,10 @@ const SongDetails: React.FC<SongDetailsProps> = ({ song }, user : User ) => {
   }
 
   return (
-    <div className='space-y-4 h-[calc(100vh-100px)] overflow-y-auto'>
+    <div className='space-y-4'>
       <img src={song.imageUrl || '/default-cover.jpg'} alt={song.title} className='w-full h-48 object-cover rounded-md' />
       <h2 className='text-2xl font-bold'>{song.title}</h2>
       <p className='text-sm text-gray-500'>{Array.isArray(song.tags) ? song.tags.join(', ') : song.tags}</p>
-      {/* <div className='flex items-center'>
-        <img src={'/default-avatar.jpg'} alt={user.username || ''} className='w-10 h-10 rounded-full mr-2' />
-        <span>{user.username}</span>
-      </div> */}
       <p className='text-sm text-gray-500'>Created: {new Date(song.createdAt).toLocaleDateString()}</p>
       <div>
         <h3 className='font-semibold mb-2'>Lyrics:</h3>

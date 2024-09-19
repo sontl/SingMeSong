@@ -15,12 +15,6 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
 
   const { currentSong, isPlaying, togglePlay } = useContext(SongContext);
 
-  useEffect(() => {
-    if (tableRef.current) {
-      tableRef.current.scrollTop = tableRef.current.scrollHeight;
-    }
-  }, [songs]);
-
   const formatDuration = (seconds: number) => {
     if (!seconds || seconds === 0) return '0:00';
     const minutes = Math.floor(seconds / 60);
@@ -48,7 +42,7 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
   }
 
   return (
-    <div ref={tableRef} className='space-y-4 h-[calc(100vh-100px)] overflow-y-auto'>
+    <div className='space-y-4'>
       {sortedSongs.map((song) => (
         <div key={song.id} className='rounded-md flex items-center cursor-pointer' onClick={() => onSongSelect(song)}>
           <div className='relative w-24 h-24 mr-4'>
