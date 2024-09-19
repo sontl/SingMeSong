@@ -195,7 +195,7 @@ export const createSong: CreateSong<
       songs.push(newSong);
 
       // Start the job to check and update song status for this specific song
-      checkSongStatusJob.delay(3).submit({ sId: song.id });
+      checkSongStatusJob.delay(10).submit({ sId: song.id });
     }
     return songs;
   } catch (error: any) {

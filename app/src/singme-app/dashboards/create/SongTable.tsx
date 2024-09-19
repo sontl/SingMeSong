@@ -9,21 +9,7 @@ type SongTableProps = {
 };
 
 const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect }) => {
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (songs.length === 0) {
-    return (
-      <div className='flex flex-col items-center justify-center h-full'>
-        <svg className='w-16 h-16 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
-          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' />
-        </svg>
-        <p className='mt-4 text-gray-500 dark:text-gray-400'>There are no songs created yet</p>
-      </div>
-    );
-  }
-
+  const tableRef = useRef<HTMLDivElement>(null);
   const [playingSongId, setPlayingSongId] = useState<string | null>(null);
   const [isHovering, setIsHovering] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -38,6 +24,12 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
       audio?.removeEventListener('ended', handleEnded);
     };
   }, [playingSongId]);
+
+  useEffect(() => {
+    if (tableRef.current) {
+      tableRef.current.scrollTop = tableRef.current.scrollHeight;
+    }
+  }, [songs]);
 
   const togglePlay = (song: Song, audioUrl: string) => {
     if (playingSongId === song.id) {
@@ -62,15 +54,30 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
   };
 
   const sortedSongs = [...songs].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (songs.length === 0) {
+    return (
+      <div className='flex flex-col items-center justify-center h-full'>
+        <svg className='w-16 h-16 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' />
+        </svg>
+        <p className='mt-4 text-gray-500 dark:text-gray-400'>There are no songs created yet</p>
+      </div>
+    );
+  }
+
   return (
-    <div className='space-y-4'>
+    <div ref={tableRef} className='space-y-4 h-[calc(100vh-200px)] overflow-y-auto'>
       {sortedSongs.map((song) => (
         <div key={song.id} className='rounded-md flex items-center cursor-pointer' onClick={() => onSongSelect(song)}>
           <div className='relative w-24 h-24 mr-4'>
-            <img src={song.imageUrl || '/default-cover.jpg'} alt={song.title} className='w-full h-full object-cover rounded-md' />
+            <img src={song.imageUrl || '/default-cover.png'} alt={song.title} className='w-full h-full object-cover rounded-md' />
             {song.status.toLowerCase() === 'pending' ? (
               <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md'>
                 <FaSpinner className='animate-spin text-white text-2xl' />

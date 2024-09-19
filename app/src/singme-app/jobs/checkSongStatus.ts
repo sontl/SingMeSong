@@ -12,7 +12,7 @@ export const checkAndUpdateSongStatus: CheckSongStatusJob<JobArgs, void> = async
   const song = await context.entities.Song.findFirst({
     where: {
       sId: sId,
-      status: 'PENDING',
+      status: { not: 'COMPLETED' },
     },
   });
 
@@ -31,24 +31,32 @@ async function processSong(song: Song, context: any) {
     const updatedSong = data[0];
 
     const updates: Partial<Song> = {};
+    let audioAndImageAvailable = true;
     let allUrlsAvailable = true;
 
     if (updatedSong.image_url && updatedSong.image_url !== song.imageUrl) {
       updates.imageUrl = updatedSong.image_url;
-    } else {
+    } else if (!updatedSong.image_url) {
+      audioAndImageAvailable = false;
       allUrlsAvailable = false;
     }
 
     if (updatedSong.audio_url && updatedSong.audio_url !== song.audioUrl) {
       updates.audioUrl = updatedSong.audio_url;
-    } else {
+    } else if (!updatedSong.audio_url) {
+      audioAndImageAvailable = false;
       allUrlsAvailable = false;
     }
 
     if (updatedSong.video_url && updatedSong.video_url !== song.videoUrl) {
       updates.videoUrl = updatedSong.video_url;
-    } else {
+    } else if (!updatedSong.video_url) {
       allUrlsAvailable = false;
+    }
+
+    // Check and update duration
+    if (updatedSong.duration && updatedSong.duration !== song.duration) {
+      updates.duration = updatedSong.duration;
     }
 
     if (Object.keys(updates).length > 0) {
@@ -58,13 +66,15 @@ async function processSong(song: Song, context: any) {
       });
     }
 
-    if (allUrlsAvailable) {
+    if (audioAndImageAvailable && song.status !== 'COMPLETED') {
       await context.entities.Song.update({
         where: { id: song.id },
         data: { status: 'COMPLETED' },
       });
-    } else {
-      // If not all URLs are available, the job will be retried automatically by PgBoss
+    }
+
+    if (!allUrlsAvailable) {
+      // If not all URLs are available, throw an error to trigger a retry
       throw new Error('Not all URLs are available yet');
     }
   } catch (error) {

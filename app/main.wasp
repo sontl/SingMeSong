@@ -334,7 +334,7 @@ job checkSongStatusJob {
   perform: {
     fn: import { checkAndUpdateSongStatus } from "@src/singme-app/jobs/checkSongStatus",
     executorOptions: {
-      pgBoss: {=json { "retryLimit": 10, "retryDelay": 300 } json=}
+      pgBoss: {=json { "retryLimit": 10, "retryDelay": 10 } json=}
     }
   },
   entities: [Song],

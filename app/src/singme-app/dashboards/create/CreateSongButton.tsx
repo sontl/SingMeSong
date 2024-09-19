@@ -8,9 +8,15 @@ interface CreateSongButtonProps {
   lyricsValue: string;
   musicStyleValue: string;
   titleValue: string;
+  onSongCreated: () => void; // Add this prop
 }
 
-const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue, musicStyleValue, titleValue }) => {
+const CreateSongButton: React.FC<CreateSongButtonProps> = ({ 
+  lyricsValue, 
+  musicStyleValue, 
+  titleValue,
+  onSongCreated // Add this prop
+}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
@@ -22,11 +28,10 @@ const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue, musicS
         title: titleValue,
       } as SunoPayload);
       console.log('songs: ', songs);
-      // show toast
       toast.success('Song created successfully');
+      onSongCreated(); // Call this function after successful creation
     } catch (error) {
       console.error('Error creating song:', error);
-      // show toast
       toast.error('Error creating song');
     } finally {
       setIsLoading(false);

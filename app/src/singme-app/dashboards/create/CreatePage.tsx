@@ -1,7 +1,7 @@
 import { type AuthUser } from 'wasp/auth';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import MusicStyle from './MusicStyle';
 import Title from './Title';
 import Lyrics from './Lyrics';
@@ -12,12 +12,14 @@ import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
 import SongTable from './SongTable'; // Add this import
 import SongDetails from './SongDetails';
 import { type Song } from 'wasp/entities';
+
 const CreatePage = ({ user }: { user: AuthUser }) => {
   const [lyricsValue, setLyricsValue] = useState('');
   const [musicStyleValue, setMusicStyleValue] = useState('');
   const [titleValue, setTitleValue] = useState('');
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { data: songs, isLoading: isSongsLoading } = useQuery(getAllSongsByUser);
+  const songTableRef = useRef<HTMLDivElement>(null);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -33,13 +35,19 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     setTitleValue(event.target.value);
   };
 
+  const handleSongCreated = () => {
+    if (songTableRef.current) {
+      songTableRef.current.scrollTop = songTableRef.current.scrollHeight;
+    }
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className='max-w-screen-2xl mx-auto'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 h-[calc(100vh-100px)]'> {/* Set a fixed height for the grid */}
           {/* Column 1: Song Creation */}
-          <div className='col-span-1'>
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7'>
+          <div className='col-span-1 overflow-hidden flex flex-col'> {/* Use flex column */}
+            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 flex-grow overflow-y-auto'> {/* Make this div scrollable */}
               <Lyrics
                 lyricsValue={lyricsValue}
                 handleLyricsChange={handleLyricsChange}
@@ -55,21 +63,26 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
               />
               <Title placeholder='Enter a title' value={titleValue} handleChange={handleTitleChange} className="focus:ring-2 focus:ring-blue-500 focus:outline-none" />
               <div className='flex justify-end gap-4.5 mt-5'>
-                <CreateSongButton lyricsValue={lyricsValue} musicStyleValue={musicStyleValue} titleValue={titleValue} />
+                <CreateSongButton 
+                  lyricsValue={lyricsValue} 
+                  musicStyleValue={musicStyleValue} 
+                  titleValue={titleValue}
+                  onSongCreated={handleSongCreated}
+                />
               </div>
             </div>
           </div>
 
           {/* Column 2: List of Created Songs */}
-          <div className='col-span-1'>
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7'>
+          <div className='col-span-1 overflow-hidden'> {/* Add overflow-hidden */}
+            <div ref={songTableRef} className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'> {/* Make this div full height and scrollable */}
               <SongTable songs={songs || []} isLoading={isSongsLoading} onSongSelect={setSelectedSong} />
             </div>
           </div>
 
           {/* Column 3: Song Details */}
-          <div className='col-span-1'>
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7'>
+          <div className='col-span-1 overflow-hidden'> {/* Add overflow-hidden */}
+            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'> {/* Make this div full height and scrollable */}
               <SongDetails song={selectedSong} />
             </div>
           </div>
