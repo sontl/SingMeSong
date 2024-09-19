@@ -15,6 +15,7 @@ import type {
 import { HttpError } from 'wasp/server';
 import { GeneratedSchedule } from './schedule';
 import OpenAI from 'openai';
+import { checkSongStatusJob } from 'wasp/server/jobs';
 
 const openai = setupOpenAI();
 function setupOpenAI() {
@@ -136,6 +137,7 @@ Please follow these rules:
   }
 };
 
+
 export const createSong: CreateSong<
   SunoPayload,
   Song[]
@@ -175,6 +177,7 @@ export const createSong: CreateSong<
       const newSong = await context.entities.Song.create({
         data: {
           user: { connect: { id: context.user.id } },
+          sId: song.id,
           title: song.title,
           tags: song.tags,
           prompt: song.prompt,
@@ -185,10 +188,14 @@ export const createSong: CreateSong<
           modelName: song.model_name,
           type: song.type,
           gptDescriptionPrompt: song.gpt_description_prompt,
-          status: 'PENDING', // Add this line
+          status: 'PENDING',
+          duration: song.duration,
         },
       });
       songs.push(newSong);
+
+      // Start the job to check and update song status for this specific song
+      checkSongStatusJob.delay(3).submit({ sId: song.id });
     }
     return songs;
   } catch (error: any) {

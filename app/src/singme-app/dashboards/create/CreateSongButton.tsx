@@ -25,8 +25,9 @@ const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue, musicS
       // show toast
       toast.success('Song created successfully');
     } catch (error) {
-      console.error('Error submitting song:', error);
-      toast.error('Error submitting song');
+      console.error('Error creating song:', error);
+      // show toast
+      toast.error('Error creating song');
     } finally {
       setIsLoading(false);
     }

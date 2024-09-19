@@ -329,6 +329,19 @@ query getAllSongsByUser {
   entities: [User, Song]
 }
 
+job checkSongStatusJob {
+  executor: PgBoss,
+  perform: {
+    fn: import { checkAndUpdateSongStatus } from "@src/singme-app/jobs/checkSongStatus",
+    executorOptions: {
+      pgBoss: {=json { "retryLimit": 10, "retryDelay": 300 } json=}
+    }
+  },
+  entities: [Song],
+}
+
+
+
 //#endregion
 
 

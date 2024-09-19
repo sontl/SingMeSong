@@ -5,7 +5,7 @@ import AppNavBar from './components/AppNavBar';
 import CookieConsentBanner from './components/cookie-consent/Banner';
 import { useMemo, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-
+import { Toaster } from 'react-hot-toast';
 /**
  * use this component to wrap all child components
  * this is useful for templates, themes, and context
@@ -65,6 +65,7 @@ export default function App({ children }: { children: ReactNode }) {
           </>
         )}
       </div>
+      <Toaster />
       <CookieConsentBanner />
     </>
   );

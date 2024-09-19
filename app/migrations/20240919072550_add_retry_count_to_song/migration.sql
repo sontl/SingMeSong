@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Song" ADD COLUMN     "retryCount" INTEGER NOT NULL DEFAULT 0;
