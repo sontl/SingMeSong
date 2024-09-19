@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { type Song } from 'wasp/entities';
 
 
@@ -7,7 +7,6 @@ type SongTableProps = {
   isLoading: boolean;
   onSongSelect: (song: Song) => void;
 };
-
 
 
 const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect }) => {
@@ -26,41 +25,67 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
     );
   }
 
-  const [playingAudio, setPlayingAudio] = useState<HTMLAudioElement | null>(null);
+  const [playingSongId, setPlayingSongId] = useState<string | null>(null);
+  const [isHovering, setIsHovering] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const togglePlay = (audioUrl: string) => {
-    if (playingAudio) {
-      playingAudio.pause();
-      setPlayingAudio(null);
+  useEffect(() => {
+    const audio = audioRef.current;
+    const handleEnded = () => setPlayingSongId(null);
+    
+    audio?.addEventListener('ended', handleEnded);
+    
+    return () => {
+      audio?.removeEventListener('ended', handleEnded);
+    };
+  }, [playingSongId]);
+
+  const togglePlay = (song: Song, audioUrl: string) => {
+    if (playingSongId === song.id) {
+      audioRef.current?.pause();
+      setPlayingSongId(null);
     } else {
-      const audio = new Audio(audioUrl);
-      audio.play();
-      setPlayingAudio(audio);
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      audioRef.current = new Audio(audioUrl);
+      audioRef.current.play();
+      setPlayingSongId(song.id);
+      onSongSelect(song); // Call onSongSelect when playing a song
     }
   };
 
   return (
     <div className='space-y-4'>
       {songs.map((song) => (
-        <div key={song.id} className=' rounded-md flex items-center cursor-pointer' onClick={() => onSongSelect(song)}>
+        <div key={song.id} className='rounded-md flex items-center cursor-pointer' onClick={() => onSongSelect(song)}>
           <div className='relative w-24 h-24 mr-4'>
             <img src={song.imageUrl || '/default-cover.jpg'} alt={song.title} className='w-full h-full object-cover rounded-md' />
-            {song.status.toLowerCase() === 'completed' ? (
+            {song.status.toLowerCase() === 'completed' && (
               <button
-                onClick={() => song.audioUrl && togglePlay(song.audioUrl)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  song.audioUrl && togglePlay(song, song.audioUrl);
+                }}
+                onMouseEnter={() => setIsHovering(song.id)}
+                onMouseLeave={() => setIsHovering(null)}
                 className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md'
               >
-                <svg className='w-12 h-12 text-white' fill='currentColor' viewBox='0 0 20 20'>
-                  <path fillRule='evenodd' d={playingAudio ? 'M10 18a8 8 0 100-16 8 8 0 000 16zM9 9a1 1 0 012 0v6a1 1 0 11-2 0V9z' : 'M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z'} clipRule='evenodd' />
-                </svg>
+                {playingSongId === song.id && isHovering !== song.id ? (
+                  <div className="flex space-x-1 items-end h-8">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="w-1 bg-white animate-waveform" style={{animationDelay: `${i * 0.2}s`}}></div>
+                    ))}
+                  </div>
+                ) : (
+                  <svg className='w-12 h-12 text-white' fill='currentColor' viewBox='0 0 20 20'>
+                    <path fillRule='evenodd' d={playingSongId === song.id
+                      ? 'M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z'
+                      : 'M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z'
+                    } clipRule='evenodd' />
+                  </svg>
+                )}
               </button>
-            ) : (
-              <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md'>
-                <svg className='animate-spin h-8 w-8 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-                  <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-                  <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-                </svg>
-              </div>
             )}
           </div>
           <div>
