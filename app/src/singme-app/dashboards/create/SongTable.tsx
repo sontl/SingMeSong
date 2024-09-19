@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { type Song } from 'wasp/entities';
 import { FaSpinner } from 'react-icons/fa';
+import { SongContext } from '../../context/SongContext';
 
 type SongTableProps = {
   songs: Song[];
@@ -10,41 +11,15 @@ type SongTableProps = {
 
 const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect }) => {
   const tableRef = useRef<HTMLDivElement>(null);
-  const [playingSongId, setPlayingSongId] = useState<string | null>(null);
   const [isHovering, setIsHovering] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    const handleEnded = () => setPlayingSongId(null);
-    
-    audio?.addEventListener('ended', handleEnded);
-    
-    return () => {
-      audio?.removeEventListener('ended', handleEnded);
-    };
-  }, [playingSongId]);
+  const { currentSong, isPlaying, togglePlay } = useContext(SongContext);
 
   useEffect(() => {
     if (tableRef.current) {
       tableRef.current.scrollTop = tableRef.current.scrollHeight;
     }
   }, [songs]);
-
-  const togglePlay = (song: Song, audioUrl: string) => {
-    if (playingSongId === song.id) {
-      audioRef.current?.pause();
-      setPlayingSongId(null);
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      audioRef.current = new Audio(audioUrl);
-      audioRef.current.play();
-      setPlayingSongId(song.id);
-      onSongSelect(song); // Call onSongSelect when playing a song
-    }
-  };
 
   const formatDuration = (seconds: number) => {
     if (!seconds || seconds === 0) return '0:00';
@@ -73,7 +48,7 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
   }
 
   return (
-    <div ref={tableRef} className='space-y-4 h-[calc(100vh-200px)] overflow-y-auto'>
+    <div ref={tableRef} className='space-y-4 h-[calc(100vh-100px)] overflow-y-auto'>
       {sortedSongs.map((song) => (
         <div key={song.id} className='rounded-md flex items-center cursor-pointer' onClick={() => onSongSelect(song)}>
           <div className='relative w-24 h-24 mr-4'>
@@ -86,14 +61,15 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  song.audioUrl && togglePlay(song, song.audioUrl);
+                  onSongSelect(song);
+                  togglePlay(song);
                 }}
                 onMouseEnter={() => setIsHovering(song.id)}
                 onMouseLeave={() => setIsHovering(null)}
                 className='absolute inset-0 flex items-center justify-center'
               >
                 <div className='w-12 h-12 flex items-center justify-center bg-black bg-opacity-50 rounded-full'>
-                  {playingSongId === song.id && isHovering !== song.id ? (
+                  {currentSong?.id === song.id && isPlaying && isHovering !== song.id ? (
                     <div className="flex space-x-1 items-end h-6">
                       {[...Array(3)].map((_, i) => (
                         <div key={i} className="w-1 bg-white animate-waveform" style={{animationDelay: `${i * 0.2}s`}}></div>
@@ -101,7 +77,7 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
                     </div>
                   ) : (
                     <svg className='w-10 h-10 text-white' fill='currentColor' viewBox='0 0 20 20'>
-                      <path fillRule='evenodd' d={playingSongId === song.id
+                      <path fillRule='evenodd' d={currentSong?.id === song.id && isPlaying
                         ? 'M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z'
                         : 'M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z'
                       } clipRule='evenodd' />

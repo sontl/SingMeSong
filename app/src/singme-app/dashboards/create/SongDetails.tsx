@@ -18,7 +18,7 @@ const SongDetails: React.FC<SongDetailsProps> = ({ song }, user : User ) => {
   }
 
   return (
-    <div className='space-y-4 h-[calc(100vh-200px)] overflow-y-auto'>
+    <div className='space-y-4 h-[calc(100vh-100px)] overflow-y-auto'>
       <img src={song.imageUrl || '/default-cover.jpg'} alt={song.title} className='w-full h-48 object-cover rounded-md' />
       <h2 className='text-2xl font-bold'>{song.title}</h2>
       <p className='text-sm text-gray-500'>{Array.isArray(song.tags) ? song.tags.join(', ') : song.tags}</p>

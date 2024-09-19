@@ -22,8 +22,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const { data: songs, isLoading: isSongsLoading } = useQuery(getAllSongsByUser);
   const songTableRef = useRef<HTMLDivElement>(null);
 
-  const { setCurrentSong } = useContext(SongContext);
-
+  const { setCurrentSong, isPlaying, togglePlay } = useContext(SongContext);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -47,8 +46,8 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
 
   const handleSongSelect = (song: Song) => {
     setSelectedSong(song);
-  
-    setCurrentSong(song); // This will update the current song in the FloatingMusicPlayer
+    //setCurrentSong(song);
+    //togglePlay(song); // Reset playing state when selecting a new song
   };
 
   return (

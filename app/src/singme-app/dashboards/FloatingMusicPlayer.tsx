@@ -1,74 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from 'react-icons/fa';
-import { type Song } from 'wasp/entities';
+import { SongContext } from '../context/SongContext';
 
 interface FloatingMusicPlayerProps {
-  currentSong: Song | null;
-  onPlay: () => void;
-  onPause: () => void;
   onNext: () => void;
   onPrevious: () => void;
 }
 
 const FloatingMusicPlayer: React.FC<FloatingMusicPlayerProps> = ({
-  currentSong,
-  onPlay,
-  onPause,
   onNext,
   onPrevious
 }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { currentSong, isPlaying, togglePlay, audioRef } = useContext(SongContext);
 
   useEffect(() => {
-    if (currentSong && currentSong.audioUrl) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.removeEventListener('timeupdate', updateProgress);
-        audioRef.current.removeEventListener('ended', handleEnded);
-      }
-      audioRef.current = new Audio(currentSong.audioUrl);
-      audioRef.current.addEventListener('timeupdate', updateProgress);
-      audioRef.current.addEventListener('ended', handleEnded);
-      if (isPlaying) {
-        audioRef.current.play();
-      }
-    }
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.removeEventListener('timeupdate', updateProgress);
-        audioRef.current.removeEventListener('ended', handleEnded);
+    const audio = audioRef.current;
+    const updateProgress = () => {
+      if (audio) {
+        const duration = audio.duration;
+        const currentTime = audio.currentTime;
+        setProgress((currentTime / duration) * 100);
       }
     };
-  }, [currentSong]);
 
-  const updateProgress = () => {
-    if (audioRef.current) {
-      const duration = audioRef.current.duration;
-      const currentTime = audioRef.current.currentTime;
-      setProgress((currentTime / duration) * 100);
-    }
-  };
-
-  const handleEnded = () => {
-    setIsPlaying(false);
-    setProgress(0);
-    onNext();
-  };
-
-  const togglePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current?.pause();
-      onPause();
-    } else {
-      audioRef.current?.play();
-      onPlay();
-    }
-    setIsPlaying(!isPlaying);
-  };
+    audio?.addEventListener('timeupdate', updateProgress);
+    return () => {
+      audio?.removeEventListener('timeupdate', updateProgress);
+    };
+  }, [audioRef]);
 
   if (!currentSong) return null;
 
@@ -88,7 +48,7 @@ const FloatingMusicPlayer: React.FC<FloatingMusicPlayerProps> = ({
           <button onClick={onPrevious} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             <FaStepBackward />
           </button>
-          <button onClick={togglePlayPause} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+          <button onClick={() => togglePlay(currentSong)} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             {isPlaying ? <FaPause /> : <FaPlay />}
           </button>
           <button onClick={onNext} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
