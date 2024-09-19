@@ -73,17 +73,9 @@ Please follow these rules:
       * [Gunshot]
       * [Slowed and Reverbed Sample: "TEXT, **in the same language that the rest of the lyrics are in!!!** "]
       * Almost anything the user can imagine (but keep it simple) can be written in brackets and used!
-3. Music Styles:
-   * male vocals
-   * phonk
-   * mini-phonk
-   * ulytra-bass
-   * agressive
-   * happy
-   * horror
-   * Any others, comma-separated in English. (Max of 120 characters!)
+3. Music Styles: Choose the best style suited for the content of the song (for example, male vocals, phonk, mini-phonk, ulytra-bass, agressive, happy, horror, etc.) Give 3 to 10 values, can include the Instrumental, just think the list of most suitable styles, comma-separated in English. (Max of 120 characters!)
 4. Be sure to include [END] at the conclusion of the lyrics so Suno AI knows when to wrap up the singing.
-5. The music style have maximum of 120 characters. Choose the best style suited for the content of the song.
+5. The music style have maximum of 120 characters. 
 6. The title have maximum of 80 characters.
 7. return in JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." } .`,
       },

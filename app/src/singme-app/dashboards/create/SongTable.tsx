@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import { type Song } from 'wasp/entities';
-import { FaSpinner } from 'react-icons/fa';
 import { SongContext } from '../../context/SongContext';
+import SongRow from './SongRow';
 
 type SongTableProps = {
   songs: Song[];
@@ -10,17 +10,7 @@ type SongTableProps = {
 };
 
 const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect }) => {
-  const tableRef = useRef<HTMLDivElement>(null);
-  const [isHovering, setIsHovering] = useState<string | null>(null);
-
   const { currentSong, isPlaying, togglePlay } = useContext(SongContext);
-
-  const formatDuration = (seconds: number) => {
-    if (!seconds || seconds === 0) return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
 
   const sortedSongs = [...songs].sort((a, b) => 
     new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -44,51 +34,14 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
   return (
     <div className='space-y-4'>
       {sortedSongs.map((song) => (
-        <div key={song.id} className='rounded-md flex items-center cursor-pointer' onClick={() => onSongSelect(song)}>
-          <div className='relative w-24 h-24 mr-4'>
-            <img src={song.imageUrl || '/default-cover.png'} alt={song.title} className='w-full h-full object-cover rounded-md' />
-            {song.status.toLowerCase() === 'pending' ? (
-              <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md'>
-                <FaSpinner className='animate-spin text-white text-2xl' />
-              </div>
-            ) : song.status.toLowerCase() === 'completed' && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSongSelect(song);
-                  togglePlay(song);
-                }}
-                onMouseEnter={() => setIsHovering(song.id)}
-                onMouseLeave={() => setIsHovering(null)}
-                className='absolute inset-0 flex items-center justify-center'
-              >
-                <div className='w-12 h-12 flex items-center justify-center bg-black bg-opacity-50 rounded-full'>
-                  {currentSong?.id === song.id && isPlaying && isHovering !== song.id ? (
-                    <div className="flex space-x-1 items-end h-6">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="w-1 bg-white animate-waveform" style={{animationDelay: `${i * 0.2}s`}}></div>
-                      ))}
-                    </div>
-                  ) : (
-                    <svg className='w-10 h-10 text-white' fill='currentColor' viewBox='0 0 20 20'>
-                      <path fillRule='evenodd' d={currentSong?.id === song.id && isPlaying
-                        ? 'M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z'
-                        : 'M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z'
-                      } clipRule='evenodd' />
-                    </svg>
-                  )}
-                </div>
-              </button>
-            )}
-            <div className='absolute bottom-1 left-1 bg-black bg-opacity-60 text-gray-200 text-xs px-1 py-0.5 rounded'>
-              {formatDuration(song.duration || 0)}
-            </div>
-          </div>
-          <div>
-            <h3 className='font-bold'>{song.title}</h3>
-            <p className='text-sm text-gray-500'>{Array.isArray(song.tags) ? song.tags.join(', ') : song.tags}</p>
-          </div>
-        </div>
+        <SongRow
+          key={song.id}
+          song={song}
+          onSongSelect={onSongSelect}
+          isCurrentSong={currentSong?.id === song.id}
+          isPlaying={isPlaying}
+          togglePlay={togglePlay}
+        />
       ))}
     </div>
   );
