@@ -175,3 +175,17 @@ span.flatpickr-weekday,
   animation: waveform 1s ease-in-out infinite;
   transform-origin: bottom;
 }
+
+
+
+.player-width {
+  width: calc(100% - 230px); /* Adjust 240px to match your sidebar width */
+  left: 220px; /* Add this line to align with the main content */
+}
+
+@media (max-width: 1024px) { /* Adjust breakpoint as needed */
+  .player-width {
+    width: 100%;
+    left: 0; /* Reset left position on smaller screens */
+  }
+}

@@ -6,6 +6,7 @@ import CookieConsentBanner from './components/cookie-consent/Banner';
 import { useMemo, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { SongProvider } from '../singme-app/context/SongContext';
 /**
  * use this component to wrap all child components
  * this is useful for templates, themes, and context
@@ -53,11 +54,12 @@ export default function App({ children }: { children: ReactNode }) {
 
   return (
     <>
+    
       <div className='min-h-screen dark:text-white dark:bg-boxdark-2'>
         {isAdminDashboard ? (
           <>{children}</>
         ) : isUserDashboard ? (
-          <>{children}</>
+          <><SongProvider>{children}</SongProvider></>
         ) : (
           <>
             {shouldDisplayAppNavBar && <AppNavBar />}

@@ -33,7 +33,7 @@ async function processSong(song: Song, context: any) {
     const updates: Partial<Song> = {};
     let audioAndImageAvailable = true;
     let allUrlsAvailable = true;
-
+    console.log(updatedSong);
     if (updatedSong.image_url && updatedSong.image_url !== song.imageUrl) {
       updates.imageUrl = updatedSong.image_url;
     } else if (!updatedSong.image_url) {

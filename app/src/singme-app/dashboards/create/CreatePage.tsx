@@ -1,7 +1,7 @@
 import { type AuthUser } from 'wasp/auth';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 import MusicStyle from './MusicStyle';
 import Title from './Title';
 import Lyrics from './Lyrics';
@@ -12,7 +12,8 @@ import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
 import SongTable from './SongTable'; // Add this import
 import SongDetails from './SongDetails';
 import { type Song } from 'wasp/entities';
-
+import { SongContext } from '../../context/SongContext';
+import { SongProvider } from '../../context/SongContext';
 const CreatePage = ({ user }: { user: AuthUser }) => {
   const [lyricsValue, setLyricsValue] = useState('');
   const [musicStyleValue, setMusicStyleValue] = useState('');
@@ -20,6 +21,9 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { data: songs, isLoading: isSongsLoading } = useQuery(getAllSongsByUser);
   const songTableRef = useRef<HTMLDivElement>(null);
+
+  const { setCurrentSong } = useContext(SongContext);
+
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -41,8 +45,15 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     }
   };
 
+  const handleSongSelect = (song: Song) => {
+    setSelectedSong(song);
+  
+    setCurrentSong(song); // This will update the current song in the FloatingMusicPlayer
+  };
+
   return (
     <DefaultLayout user={user}>
+     
       <div className='max-w-screen-2xl mx-auto'>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 h-[calc(100vh-100px)]'> {/* Set a fixed height for the grid */}
           {/* Column 1: Song Creation */}
@@ -72,11 +83,15 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
               </div>
             </div>
           </div>
-
+          
           {/* Column 2: List of Created Songs */}
           <div className='col-span-1 overflow-hidden'> {/* Add overflow-hidden */}
             <div ref={songTableRef} className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'> {/* Make this div full height and scrollable */}
-              <SongTable songs={songs || []} isLoading={isSongsLoading} onSongSelect={setSelectedSong} />
+              <SongTable 
+                songs={songs || []} 
+                isLoading={isSongsLoading} 
+                onSongSelect={handleSongSelect} 
+              />
             </div>
           </div>
 
@@ -88,7 +103,8 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
           </div>
         </div>
       </div>
-    </DefaultLayout>
+ 
+    </DefaultLayout>     
   );
 };
 
