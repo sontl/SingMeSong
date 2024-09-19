@@ -57,10 +57,10 @@ const SurpriseMeButton: React.FC<SurpriseMeButtonProps> = ({
               />
             </svg>
           </span>
-          Surprise Me
+          <span className='text-sm'>Surprise Me</span> {/* Added text-sm class */}
         </>
       ) : (
-        `Write about: ${lyricsValue.slice(0, 20)}...`
+        <span className='text-sm'>Write about: {lyricsValue.slice(0, 10)}...</span>
       )}
     </button>
   );

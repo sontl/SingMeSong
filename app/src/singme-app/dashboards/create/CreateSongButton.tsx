@@ -1,14 +1,41 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import { createSong } from 'wasp/client/operations';
+import { SunoPayload } from './types'; 
+import type { Song } from 'wasp/entities';
 
 interface CreateSongButtonProps {
   lyricsValue: string;
+  musicStyleValue: string;
+  titleValue: string;
 }
 
-const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue, onClick }) => {
+const CreateSongButton: React.FC<CreateSongButtonProps> = ({ lyricsValue, musicStyleValue, titleValue }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [songs, setSongs] = useState<Song[]>([]);
+
+  const handleClick = async () => {
+    setIsLoading(true);
+    try {
+      const songs: Song[] = await createSong({
+        prompt: lyricsValue,
+        tags: musicStyleValue,
+        title: titleValue,
+      } as SunoPayload);
+      console.log('songs: ', songs);
+      // show toast
+      toast.success('Song created successfully');
+    } catch (error) {
+      console.error('Error submitting song:', error);
+      toast.error('Error submitting song');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className='min-w-[7rem] font-medium  ring-1 ring-inset ring-slate-200  duration-200 ease-in-out focus:outline-none focus:shadow-none hover:shadow-none flex items-center justify-center inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10 shadow-lg '
     >
       <span>

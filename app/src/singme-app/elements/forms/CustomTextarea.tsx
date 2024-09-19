@@ -1,7 +1,7 @@
 // src/singme-app/elements/forms/CustomTextarea.tsx
 import React, { useState } from 'react';
 
-interface CustomTextareaProps {
+interface CustomTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   maxLength?: number;
   placeholder?: string;
   defaultValue?: string;
@@ -10,6 +10,7 @@ interface CustomTextareaProps {
   id?: string;
   value?: string;
   onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  className?: string;
 }
 
 const CustomTextarea: React.FC<CustomTextareaProps> = ({

@@ -319,6 +319,16 @@ action generateRandomLyrics {
   entities: [User, GptResponse]
 }
 
+action createSong {
+  fn: import { createSong } from "@src/singme-app/dashboards/create/operations",
+  entities: [User, Song],
+}
+
+query getAllSongsByUser {    
+  fn: import { getAllSongsByUser } from "@src/singme-app/dashboards/create/operations",
+  entities: [User, Song]
+}
+
 //#endregion
 
 

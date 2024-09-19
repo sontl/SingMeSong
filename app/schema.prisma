@@ -28,6 +28,8 @@ model User {
   contactFormMessages       ContactFormMessage[]
   tasks                     Task[]
   files                     File[]
+  songs                     Song[]
+  playlists                 Playlist[]
 }
 
 model GptResponse {
@@ -111,4 +113,51 @@ model ContactFormMessage {
   content                   String
   isRead                    Boolean         @default(false)
   repliedAt                 DateTime?
+}
+
+model Song {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  title                     String
+  imageUrl                  String?
+  lyric                     String?         @db.Text
+  audioUrl                  String?
+  videoUrl                  String?
+  modelName                 String?
+  status                    String
+  gptDescriptionPrompt      String?         @db.Text
+  prompt                    String?         @db.Text
+  type                      String?
+  tags                      String?
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+
+  playlists                 PlaylistSong[]
+}
+
+model Playlist {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  name                      String
+  description               String?
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+
+  songs                     PlaylistSong[]
+}
+
+model PlaylistSong {
+  playlist                  Playlist        @relation(fields: [playlistId], references: [id])
+  playlistId                String
+  song                      Song            @relation(fields: [songId], references: [id])
+  songId                    String
+  addedAt                   DateTime        @default(now())
+
+  @@id([playlistId, songId])
 }

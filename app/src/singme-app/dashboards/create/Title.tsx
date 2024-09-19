@@ -5,6 +5,7 @@ interface TitleProps {
   placeholder: string;
   value: string;
   handleChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  className?: string;
 }
 
 const Title: React.FC<TitleProps> = ({ placeholder, value, handleChange }) => {

@@ -8,6 +8,7 @@ interface LyricsProps {
   setLyricsValue: React.Dispatch<React.SetStateAction<string>>;
   setMusicStyleValue: React.Dispatch<React.SetStateAction<string>>;
   setTitleValue: React.Dispatch<React.SetStateAction<string>>;
+  className?: string;
 }
 
 const Lyrics: React.FC<LyricsProps> = ({
@@ -16,6 +17,7 @@ const Lyrics: React.FC<LyricsProps> = ({
   setLyricsValue,
   setMusicStyleValue,
   setTitleValue,
+  className,
 }) => {
   return (
     <div className='mb-5.5'>
@@ -42,8 +44,9 @@ const Lyrics: React.FC<LyricsProps> = ({
           placeholder='Enter your own lyrics or describe a song and click Write About... to generate lyrics'
           value={lyricsValue}
           onChange={handleLyricsChange}
+          className="pb-12" // Add bottom padding to make room for the button
         />
-        <div className='absolute bottom-2 left-2'>
+        <div className='absolute bottom-2 left-2 z-10'> {/* Add z-index to ensure button is above textarea */}
           <SurpriseMeButton
             lyricsValue={lyricsValue}
             setLyricsValue={setLyricsValue}

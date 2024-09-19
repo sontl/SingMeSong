@@ -5,6 +5,7 @@ interface MusicStyleProps {
   placeholder: string;
   value: string;
   handleChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  className?: string;
 }
 
 const MusicStyle: React.FC<MusicStyleProps> = ({ placeholder, value, handleChange }) => {

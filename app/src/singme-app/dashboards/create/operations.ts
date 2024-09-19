@@ -1,4 +1,5 @@
-import type { Task, GptResponse } from 'wasp/entities';
+import type { Task, GptResponse, Song } from 'wasp/entities';
+import { SunoPayload, GptPayload } from './types';
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type {
   GenerateGptResponse,
@@ -7,7 +8,9 @@ import type {
   UpdateTask,
   GetGptResponses,
   GetAllTasksByUser,
+  GetAllSongsByUser,
   GenerateRandomLyrics,
+  CreateSong,
 } from 'wasp/server/operations';
 import { HttpError } from 'wasp/server';
 import { GeneratedSchedule } from './schedule';
@@ -21,10 +24,7 @@ function setupOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
-//#region Actions
-type GptPayload = {
-  hours: string;
-};
+
 
 //#region Random Lyrics Generation
 type RandomLyricsPayload = {
@@ -136,26 +136,31 @@ Please follow these rules:
   }
 };
 
-export const createSong: CreateSong<{ prompt: string; tags: string; title: string }, { id: string; title: string; image_url: string; lyric: string; audio_url: string; video_url: string; created_at: string; model_name: string; status: string; gpt_description_prompt: string; prompt: string; type: string; tags: string }[]> = async ({ prompt, tags, title }, context) => {
+export const createSong: CreateSong<
+  SunoPayload,
+  Song[]
+> = async ({ prompt, tags, title }, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
 
   try {
     // Simulate API call to create song
-    const response = await fetch('https://api.example.com/createSong', {
+    const body = JSON.stringify({
+      prompt,
+      tags,
+      title,
+      make_instrumental: false,
+      model: 'chirp-v3-5',
+      wait_audio: false,
+    });
+    console.log('body: ', body);
+    const response = await fetch('https://suno-api-bay-ten.vercel.app/api/custom_generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        prompt,
-        tags,
-        title,
-        make_instrumental: false,
-        model: 'chirp-v3-5|chirp-v3-0',
-        wait_audio: false,
-      }),
+      body: body,
     });
 
     if (!response.ok) {
@@ -163,13 +168,46 @@ export const createSong: CreateSong<{ prompt: string; tags: string; title: strin
     }
 
     const data = await response.json();
-    return data;
+    console.log('data: ', data);
+    // data is array of songs. Loop through each song and create a new song entity in the database.
+    const songs = [];
+    for (const song of data) {
+      const newSong = await context.entities.Song.create({
+        data: {
+          user: { connect: { id: context.user.id } },
+          title: song.title,
+          tags: song.tags,
+          prompt: song.prompt,
+          audioUrl: song.audio_url,
+          lyric: song.lyric,
+          imageUrl: song.image_url,
+          videoUrl: song.video_url,
+          modelName: song.model_name,
+          type: song.type,
+          gptDescriptionPrompt: song.gpt_description_prompt,
+          status: 'PENDING', // Add this line
+        },
+      });
+      songs.push(newSong);
+    }
+    return songs;
   } catch (error: any) {
     console.error(error);
     const statusCode = error.statusCode || 500;
     const errorMessage = error.message || 'Internal server error';
     throw new HttpError(statusCode, errorMessage);
   }
+};
+
+export const getAllSongsByUser: GetAllSongsByUser<void, Song[]> = async (_args, context) => {
+  if (!context.user) {
+    throw new HttpError(401);
+  }
+  return context.entities.Song.findMany({
+    where: {
+      user: { id: context.user.id },
+    },
+  });
 };
 //#endregion
 
