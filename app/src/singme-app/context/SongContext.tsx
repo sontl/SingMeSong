@@ -101,6 +101,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Reset the audio element
       audioRef.current.innerHTML = '';
       audioRef.current.removeAttribute('src');
+      setIsAudioLoading(true);
       audioRef.current.load();
 
       if (song.audioUrl) {
@@ -119,6 +120,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Error playing audio:', error);
         setIsPlaying(false);
+      } finally {
+        setIsAudioLoading(false);
       }
     }
   };

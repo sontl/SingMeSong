@@ -73,7 +73,7 @@ const FloatingMusicPlayer: React.FC = () => {
     }
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async () => {
     if (isAudioEnded) {
       setIsAudioEnded(false);
       if (audioRef.current) {
@@ -82,8 +82,13 @@ const FloatingMusicPlayer: React.FC = () => {
     }
     if (currentSong) {
       setIsAudioLoading(true);
-      togglePlay(currentSong);
-      setIsAudioLoading(false);
+      try {
+        await togglePlay(currentSong);
+      } catch (error) {
+        console.error('Error toggling play:', error);
+      } finally {
+        setIsAudioLoading(false);
+      }
     }
   };
 

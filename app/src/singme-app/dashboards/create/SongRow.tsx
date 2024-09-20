@@ -9,10 +9,10 @@ type SongRowProps = {
   isPlaying: boolean;
   isAudioEnded: boolean; // Add this line
   togglePlay: (song: Song) => void;
-  isLoading: boolean;
+  isAudioLoading: boolean;
 };
 
-const SongRow: React.FC<SongRowProps> = ({ song, onSongSelect, isCurrentSong, isPlaying, isAudioEnded, togglePlay, isLoading }) => {
+const SongRow: React.FC<SongRowProps> = ({ song, onSongSelect, isCurrentSong, isPlaying, isAudioEnded, togglePlay, isAudioLoading }) => {
   const [isHovering, setIsHovering] = useState(false);
 
   const formatDuration = (seconds: number) => {
@@ -49,7 +49,7 @@ const SongRow: React.FC<SongRowProps> = ({ song, onSongSelect, isCurrentSong, is
             className='absolute inset-0 flex items-center justify-center'
           >
             <div className='w-12 h-12 flex items-center justify-center bg-black bg-opacity-50 rounded-full'>
-              {isLoading && isCurrentSong ? (
+              {isAudioLoading && isCurrentSong ? (
                 <FaSpinner className="animate-spin text-white" />
               ) : isCurrentSong && isPlaying && !isHovering && !isAudioEnded ? (
                 <div className="flex space-x-1 items-end h-6">

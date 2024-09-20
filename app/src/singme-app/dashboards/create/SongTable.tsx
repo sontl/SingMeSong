@@ -5,18 +5,19 @@ import SongRow from './SongRow';
 
 type SongTableProps = {
   songs: Song[];
-  isLoading: boolean;
+  isAllSongsLoading: boolean;
   onSongSelect: (song: Song) => void;
+  isAudioLoading: boolean;
 };
 
-const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect }) => {
+const SongTable: React.FC<SongTableProps> = ({ songs, isAllSongsLoading, onSongSelect, isAudioLoading }) => {
   const { currentSong, isPlaying, isAudioEnded, togglePlay } = useContext(SongContext);
 
   const sortedSongs = [...songs].sort((a, b) => 
     new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
 
-  if (isLoading) {
+  if (isAllSongsLoading) {
     return <div>Loading...</div>;
   }
 
@@ -42,7 +43,7 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
           isPlaying={isPlaying}
           isAudioEnded={isAudioEnded} // Add this line
           togglePlay={togglePlay}
-          isLoading={isLoading && currentSong?.id === song.id}
+          isAudioLoading={isAudioLoading}
         />
       ))}
     </div>

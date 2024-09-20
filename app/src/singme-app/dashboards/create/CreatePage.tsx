@@ -17,11 +17,11 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const [musicStyleValue, setMusicStyleValue] = useState('');
   const [titleValue, setTitleValue] = useState('');
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { data: songs, isLoading: isSongsLoading, refetch } = useQuery(getAllSongsByUser);
+  const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser);
   const songTableRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'list' | 'details'>('create');
 
-  const { setCurrentSong, isPlaying, togglePlay, setAllSongs, setIsAudioEnded } = useContext(SongContext);
+  const { setCurrentSong, isPlaying, togglePlay, setAllSongs, setIsAudioEnded, isAudioLoading } = useContext(SongContext);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -120,8 +120,9 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
             <div ref={songTableRef} className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 h-full overflow-y-auto'>
               <SongTable 
                 songs={songs || []} 
-                isLoading={isSongsLoading} 
+                isAllSongsLoading={isAllSongsLoading} 
                 onSongSelect={handleSongSelect} 
+                isAudioLoading={isAudioLoading}
               />
             </div>
           </div>
