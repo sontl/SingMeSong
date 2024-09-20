@@ -20,12 +20,30 @@ const FloatingMusicPlayer: React.FC = () => {
   const [volume, setVolume] = useState(100);
   const volumeSliderRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
     }
   }, [volume, audioRef]);
+
+  useEffect(() => {
+    const updateTime = () => {
+      if (audioRef.current) {
+        setCurrentTime(audioRef.current.currentTime);
+      }
+    };
+
+    const audio = audioRef.current;
+    if (audio) {
+      audio.addEventListener('timeupdate', updateTime);
+      return () => {
+        audio.removeEventListener('timeupdate', updateTime);
+      };
+    }
+    return () => {};
+  }, [audioRef]);
 
   const handleVolumeClick = () => {
     setShowVolumeSlider(!showVolumeSlider);
@@ -76,13 +94,13 @@ const FloatingMusicPlayer: React.FC = () => {
   };
 
   const formatTime = (time: number) => {
-    if (isNaN(time) || time === 0) return "0:00";
+    if (!isFinite(time) || time === 0) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const currentTime = formatTime(progress * duration / 100);
+  const formattedCurrentTime = formatTime(currentTime);
   const totalDuration = formatTime(duration);
 
   useEffect(() => {
@@ -134,7 +152,7 @@ const FloatingMusicPlayer: React.FC = () => {
         </div>
         <div className="player-volume flex items-center justify-end flex-1">
           <div className="hidden md:flex items-center mr-4 text-sm text-gray-600 dark:text-gray-300">
-            <span>{currentTime}</span>
+            <span>{formattedCurrentTime}</span>
             <span className="mx-1">/</span>
             <span>{totalDuration}</span>
           </div>
