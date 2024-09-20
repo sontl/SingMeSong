@@ -21,22 +21,25 @@ const SongRow: React.FC<SongRowProps> = ({ song, onSongSelect, isCurrentSong, is
   };
 
   return (
-    <div className='rounded-md flex items-center cursor-pointer' onClick={() => onSongSelect(song)}>
+    <div 
+      className={`rounded-md flex items-center cursor-pointer transition-colors duration-200 ${isHovering ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+      onClick={() => onSongSelect(song)}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <div className='relative w-24 h-24 mr-4'>
         <img src={song.imageUrl || '/default-cover.png'} alt={song.title} className='w-full h-full object-cover rounded-md' />
         {song.status.toLowerCase() === 'pending' ? (
           <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md'>
             <FaSpinner className='animate-spin text-white text-2xl' />
           </div>
-        ) : song.status.toLowerCase() === 'completed' && (
+        ) : (isCurrentSong && isPlaying) || (song.status.toLowerCase() === 'completed' && isHovering) ? (
           <button
             onClick={(e) => {
               e.stopPropagation();
               onSongSelect(song);
               togglePlay(song);
             }}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
             className='absolute inset-0 flex items-center justify-center'
           >
             <div className='w-12 h-12 flex items-center justify-center bg-black bg-opacity-50 rounded-full'>
@@ -56,7 +59,7 @@ const SongRow: React.FC<SongRowProps> = ({ song, onSongSelect, isCurrentSong, is
               )}
             </div>
           </button>
-        )}
+        ) : null}
         <div className='absolute bottom-1 left-1 bg-black bg-opacity-60 text-gray-200 text-xs px-1 py-0.5 rounded'>
           {formatDuration(song.duration || 0)}
         </div>
