@@ -132,7 +132,7 @@ model Song {
   type                      String?
   tags                      String?
   sId                       String?         @unique // id from Suno
-  duration                  Int             @default(0) // in seconds
+  duration                  Float           @default(0) // in seconds
 
   user                      User            @relation(fields: [userId], references: [id])
   userId                    String
