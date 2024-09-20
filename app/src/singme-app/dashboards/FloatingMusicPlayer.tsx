@@ -78,7 +78,7 @@ const FloatingMusicPlayer: React.FC = () => {
     if (isNaN(time) || time === 0) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const currentTime = formatTime(progress * duration / 100);
