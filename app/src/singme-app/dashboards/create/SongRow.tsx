@@ -28,11 +28,11 @@ const SongRow: React.FC<SongRowProps> = ({ song, onSongSelect, isCurrentSong, is
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div className='relative w-24 h-24 mr-4'>
+      <div className='relative w-20 h-20 flex-shrink-0 mr-4'>
         <img 
           src={song.imageUrl || '/default-cover.png'} 
           alt={song.title} 
-          className={`w-full h-full object-cover rounded-md ${isCurrentSong && isPlaying ? 'border-2 border-blue-500' : ''}`} 
+          className={`w-20 h-20 object-cover rounded-md ${isCurrentSong && isPlaying ? 'border-2 border-blue-500' : ''}`} 
         />
         {song.status.toLowerCase() === 'pending' ? (
           <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md'>
