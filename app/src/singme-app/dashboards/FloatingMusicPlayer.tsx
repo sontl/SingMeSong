@@ -1,9 +1,44 @@
-import React, { useContext } from 'react';
-import { FaPlay, FaPause, FaStepForward, FaStepBackward } from 'react-icons/fa';
+import React, { useContext, useState, useRef, useEffect } from 'react';
+import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp } from 'react-icons/fa';
 import { SongContext } from '../context/SongContext';
 
 const FloatingMusicPlayer: React.FC = () => {
-  const { currentSong, isPlaying, togglePlay, playNextSong, playPreviousSong, progress } = useContext(SongContext);
+  const { currentSong, isPlaying, togglePlay, playNextSong, playPreviousSong, progress, audioRef } = useContext(SongContext);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [volume, setVolume] = useState(100);
+  const volumeSliderRef = useRef<HTMLDivElement>(null);
+
+  const handleVolumeClick = () => {
+    setShowVolumeSlider(!showVolumeSlider);
+  };
+
+  const handleVolumeChange = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (volumeSliderRef.current) {
+      const rect = volumeSliderRef.current.getBoundingClientRect();
+      const height = rect.height;
+      const y = e.clientY - rect.top;
+      const newVolume = Math.round(((height - y) / height) * 100);
+      setVolume(Math.max(0, Math.min(100, newVolume)));
+      
+      // Update actual audio volume
+      if (audioRef.current) {
+        audioRef.current.volume = newVolume / 100;
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (volumeSliderRef.current && !volumeSliderRef.current.contains(event.target as Node)) {
+        setShowVolumeSlider(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   if (!currentSong) return null;
 
@@ -19,7 +54,7 @@ const FloatingMusicPlayer: React.FC = () => {
             <h3 className="text-sm font-semibold truncate">{currentSong.title}</h3>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 flex-1 justify-center">
           <button onClick={playPreviousSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             <FaStepBackward />
           </button>
@@ -29,6 +64,25 @@ const FloatingMusicPlayer: React.FC = () => {
           <button onClick={playNextSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             <FaStepForward />
           </button>
+        </div>
+        <div className="flex items-center flex-1 justify-end">
+          <div className="relative">
+            <button onClick={handleVolumeClick} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+              <FaVolumeUp />
+            </button>
+            {showVolumeSlider && (
+              <div
+                ref={volumeSliderRef}
+                className="absolute bottom-full mb-2 w-6 h-24 bg-white dark:bg-gray-700 rounded-full shadow-lg cursor-pointer"
+                onClick={handleVolumeChange}
+              >
+                <div
+                  className="absolute bottom-0 left-0 right-0 bg-blue-600 rounded-full"
+                  style={{ height: `${volume}%` }}
+                ></div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
