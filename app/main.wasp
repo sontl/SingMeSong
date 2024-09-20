@@ -344,6 +344,16 @@ job checkSongStatusJob {
   entities: [Song],
 }
 
+job updateCompletedSongsJob {
+  executor: PgBoss,
+  perform: {
+    fn: import { updateCompletedSongs } from "@src/singme-app/jobs/updateCompletedSongs.ts"
+  },
+  schedule: {
+    cron: "0 * * * *" // every hour
+  },
+  entities: [Song]
+}
 //#endregion
 
 
