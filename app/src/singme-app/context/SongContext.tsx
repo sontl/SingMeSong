@@ -7,6 +7,8 @@ interface SongContextType {
   setCurrentSong: (song: Song | null) => void;
   isPlaying: boolean;
   togglePlay: (song: Song) => void;
+  setIsPlaying: (isPlaying: boolean) => void;
+  setIsAudioEnded: (isEnded: boolean) => void;
   audioRef: React.RefObject<HTMLAudioElement>;
   allSongs: Song[];
   setAllSongs: (songs: Song[]) => void;
@@ -14,6 +16,8 @@ interface SongContextType {
   playPreviousSong: () => void;
   progress: number;
   duration: number;
+  isAudioEnded: boolean;
+  handleAudioEnded: () => void;
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -21,6 +25,8 @@ export const SongContext = createContext<SongContextType>({
   setCurrentSong: () => {},
   isPlaying: false,
   togglePlay: () => {},
+  setIsPlaying: () => {},
+  setIsAudioEnded: () => {},
   audioRef: { current: null },
   allSongs: [],
   setAllSongs: () => {},
@@ -28,6 +34,8 @@ export const SongContext = createContext<SongContextType>({
   playPreviousSong: () => {},
   progress: 0,
   duration: 0,
+  isAudioEnded: false,
+  handleAudioEnded: () => {},
 });
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -36,6 +44,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [allSongs, setAllSongs] = useState<Song[]>([]);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isAudioEnded, setIsAudioEnded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(new Audio());
 
   useEffect(() => {
@@ -89,6 +98,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const nextIndex = (currentIndex + 1) % allSongs.length;
       setCurrentSong(allSongs[nextIndex]);
       togglePlay(allSongs[nextIndex]);
+      setIsAudioEnded(false);
     }
   };
 
@@ -98,8 +108,25 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const previousIndex = (currentIndex - 1 + allSongs.length) % allSongs.length;
       setCurrentSong(allSongs[previousIndex]);
       togglePlay(allSongs[previousIndex]);
+      setIsAudioEnded(false);
     }
   };
+
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+    setIsAudioEnded(true);
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.addEventListener('ended', handleAudioEnded);
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('ended', handleAudioEnded);
+      }
+    };
+  }, [audioRef]);
 
   return (
     <SongContext.Provider value={{
@@ -107,6 +134,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentSong,
       isPlaying,
       togglePlay,
+      setIsPlaying,
+      setIsAudioEnded,
       audioRef,
       allSongs,
       setAllSongs,
@@ -114,6 +143,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       playPreviousSong,
       progress,
       duration,
+      isAudioEnded,
+      handleAudioEnded,
     }}>
       {children}
     </SongContext.Provider>

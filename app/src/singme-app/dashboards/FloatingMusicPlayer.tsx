@@ -3,7 +3,19 @@ import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp } from 'reac
 import { SongContext } from '../context/SongContext';
 
 const FloatingMusicPlayer: React.FC = () => {
-  const { currentSong, isPlaying, togglePlay, playNextSong, playPreviousSong, progress, audioRef, duration } = useContext(SongContext);
+  const { 
+    currentSong, 
+    isPlaying, 
+    togglePlay, 
+    playNextSong, 
+    playPreviousSong, 
+    progress, 
+    audioRef, 
+    duration,
+    isAudioEnded,
+    setIsAudioEnded
+  } = useContext(SongContext);
+
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [volume, setVolume] = useState(100);
   const volumeSliderRef = useRef<HTMLDivElement>(null);
@@ -38,6 +50,28 @@ const FloatingMusicPlayer: React.FC = () => {
       
       audioRef.current.currentTime = newTime;
     }
+  };
+
+  const handlePlayPause = () => {
+    if (isAudioEnded) {
+      setIsAudioEnded(false);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+      }
+    }
+    if (currentSong) {
+      togglePlay(currentSong);
+    }
+  };
+
+  const handleNextSong = () => {
+    playNextSong();
+    setIsAudioEnded(false);
+  };
+
+  const handlePreviousSong = () => {
+    playPreviousSong();
+    setIsAudioEnded(false);
   };
 
   useEffect(() => {
@@ -75,13 +109,13 @@ const FloatingMusicPlayer: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center space-x-4 flex-1 justify-center">
-          <button onClick={playPreviousSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+          <button onClick={handlePreviousSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             <FaStepBackward />
           </button>
-          <button onClick={() => togglePlay(currentSong)} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
-            {isPlaying ? <FaPause /> : <FaPlay />}
+          <button onClick={handlePlayPause} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+            {isPlaying && !isAudioEnded ? <FaPause /> : <FaPlay />}
           </button>
-          <button onClick={playNextSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+          <button onClick={handleNextSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             <FaStepForward />
           </button>
         </div>

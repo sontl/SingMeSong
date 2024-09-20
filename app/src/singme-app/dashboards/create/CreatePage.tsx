@@ -21,7 +21,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const songTableRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'list' | 'details'>('create');
 
-  const { setCurrentSong, isPlaying, togglePlay, setAllSongs } = useContext(SongContext);
+  const { setCurrentSong, isPlaying, togglePlay, setAllSongs, setIsAudioEnded } = useContext(SongContext);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -57,6 +57,13 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
       setAllSongs(sortedSongs);
     }
   }, [songs, setAllSongs]);
+
+  // Add this effect to reset isAudioEnded when a new song is selected
+  useEffect(() => {
+    if (selectedSong) {
+      setIsAudioEnded(false);
+    }
+  }, [selectedSong, setIsAudioEnded]);
 
   return (
     <DefaultLayout user={user}>

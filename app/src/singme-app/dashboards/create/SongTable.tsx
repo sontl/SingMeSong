@@ -10,7 +10,7 @@ type SongTableProps = {
 };
 
 const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect }) => {
-  const { currentSong, isPlaying, togglePlay } = useContext(SongContext);
+  const { currentSong, isPlaying, isAudioEnded, togglePlay } = useContext(SongContext);
 
   const sortedSongs = [...songs].sort((a, b) => 
     new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -40,6 +40,7 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
           onSongSelect={onSongSelect}
           isCurrentSong={currentSong?.id === song.id}
           isPlaying={isPlaying}
+          isAudioEnded={isAudioEnded} // Add this line
           togglePlay={togglePlay}
         />
       ))}
