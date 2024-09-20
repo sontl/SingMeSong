@@ -84,7 +84,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 h-[calc(100vh-100px)]'>
           {/* Column 1: Song Creation */}
           <div className={`col-span-1 overflow-hidden flex flex-col ${activeTab !== 'create' ? 'hidden md:flex' : ''}`}>
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 flex-grow overflow-y-auto'>
+            <div className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 flex-grow overflow-y-auto'>
               <Lyrics
                 lyricsValue={lyricsValue}
                 handleLyricsChange={handleLyricsChange}
@@ -112,7 +112,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
           
           {/* Column 2: List of Created Songs */}
           <div className={`col-span-1 overflow-hidden ${activeTab !== 'list' ? 'hidden md:block' : ''}`}>
-            <div ref={songTableRef} className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'>
+            <div ref={songTableRef} className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 h-full overflow-y-auto'>
               <SongTable 
                 songs={songs || []} 
                 isLoading={isSongsLoading} 
@@ -123,7 +123,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
 
           {/* Column 3: Song Details */}
           <div className={`col-span-1 overflow-hidden ${activeTab !== 'details' ? 'hidden md:block' : ''}`}>
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-7 h-full overflow-y-auto'>
+            <div className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 h-full overflow-y-auto'>
               <SongDetails song={selectedSong} />
             </div>
           </div>
