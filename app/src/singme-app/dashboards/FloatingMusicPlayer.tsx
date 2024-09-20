@@ -74,6 +74,12 @@ const FloatingMusicPlayer: React.FC = () => {
     setIsAudioEnded(false);
   };
 
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (volumeSliderRef.current && !volumeSliderRef.current.contains(event.target as Node)) {
@@ -101,14 +107,14 @@ const FloatingMusicPlayer: React.FC = () => {
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-      <div className="player-content px-4 h-16">
-        <div className="player-song-info">
+      <div className="player-content px-4 h-16 flex justify-between items-center">
+        <div className="player-song-info flex items-center flex-1">
           <img src={currentSong.imageUrl || '/default-cover.jpg'} alt={currentSong.title} className="w-12 h-12 rounded-md mr-4" />
           <div className="player-song-title">
             <h3 className="text-sm font-semibold md:truncate animate-marquee">{currentSong.title}</h3>
           </div>
         </div>
-        <div className="player-controls-wrapper">
+        <div className="player-controls-wrapper flex items-center justify-center flex-1">
           <div className="player-controls space-x-4">
             <button onClick={handlePreviousSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
               <FaStepBackward />
@@ -121,7 +127,12 @@ const FloatingMusicPlayer: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="player-volume">
+        <div className="player-volume flex items-center justify-end flex-1">
+          <div className="hidden md:flex items-center mr-4 text-sm text-gray-600 dark:text-gray-300">
+            <span>{formatTime(progress * duration / 100)}</span>
+            <span className="mx-1">/</span>
+            <span>{formatTime(duration)}</span>
+          </div>
           <div className="relative">
             <button onClick={handleVolumeClick} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
               <FaVolumeUp />
