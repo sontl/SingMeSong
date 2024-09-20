@@ -1,5 +1,5 @@
 // src/singme-app/elements/forms/CustomTextarea.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CustomTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   maxLength?: number;
@@ -23,15 +23,22 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
   value,
   onChange,
 }) => {
-  const [textValue, setTextValue] = useState(defaultValue);
-  const [charCount, setCharCount] = useState(defaultValue.length);
+  const [textValue, setTextValue] = useState(value || defaultValue);
+  const [charCount, setCharCount] = useState((value || defaultValue).length);
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setTextValue(value);
+      setCharCount(value.length);
+    }
+  }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     if (newValue.length <= maxLength) {
       setTextValue(newValue);
       setCharCount(newValue.length);
-      onChange?.(e); // Call the onChange prop if it exists
+      onChange?.(e);
     }
   };
 
@@ -43,7 +50,7 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
         id={id}
         rows={rows}
         placeholder={placeholder}
-        value={value || textValue} // Use the value prop if provided, otherwise use the internal state
+        value={textValue}
         onChange={handleChange}
         maxLength={maxLength}
       />
