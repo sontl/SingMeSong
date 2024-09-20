@@ -17,7 +17,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const [musicStyleValue, setMusicStyleValue] = useState('');
   const [titleValue, setTitleValue] = useState('');
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { data: songs, isLoading: isSongsLoading } = useQuery(getAllSongsByUser);
+  const { data: songs, isLoading: isSongsLoading, refetch } = useQuery(getAllSongsByUser);
   const songTableRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'list' | 'details'>('create');
 
@@ -41,6 +41,11 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     if (songTableRef.current) {
       songTableRef.current.scrollTop = songTableRef.current.scrollHeight;
     }
+    
+    // Wait for 10 seconds, then refetch songs
+    setTimeout(() => {
+      refetch();
+    }, 10000);
   };
 
   const handleSongSelect = (song: Song) => {

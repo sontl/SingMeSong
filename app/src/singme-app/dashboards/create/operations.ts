@@ -79,20 +79,13 @@ Please follow these rules:
 6. The title have maximum of 80 characters.
 7. return in JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." } .`,
       },
+      {
+        role: 'user',
+        content: chat
+          ? `Based on the following chat: "${chat}", generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }`
+          : 'Generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
+      },
     ];
-
-    if (chat) {
-      messages.push({
-        role: 'user',
-        content: `Based on the following chat: "${chat}", generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }`,
-      });
-    } else {
-      messages.push({
-        role: 'user',
-        content:
-          'Generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
-      });
-    }
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.

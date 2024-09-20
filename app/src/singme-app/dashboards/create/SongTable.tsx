@@ -42,6 +42,7 @@ const SongTable: React.FC<SongTableProps> = ({ songs, isLoading, onSongSelect })
           isPlaying={isPlaying}
           isAudioEnded={isAudioEnded} // Add this line
           togglePlay={togglePlay}
+          isLoading={isLoading && currentSong?.id === song.id}
         />
       ))}
     </div>

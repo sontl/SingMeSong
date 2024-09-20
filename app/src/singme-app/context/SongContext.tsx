@@ -18,6 +18,8 @@ interface SongContextType {
   duration: number;
   isAudioEnded: boolean;
   handleAudioEnded: () => void;
+  isAudioLoading: boolean;
+  setIsAudioLoading: (isLoading: boolean) => void;
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -36,6 +38,8 @@ export const SongContext = createContext<SongContextType>({
   duration: 0,
   isAudioEnded: false,
   handleAudioEnded: () => {},
+  isAudioLoading: false,
+  setIsAudioLoading: () => {},
 });
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -45,6 +49,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isAudioEnded, setIsAudioEnded] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(new Audio());
 
   useEffect(() => {
@@ -171,6 +176,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       duration,
       isAudioEnded,
       handleAudioEnded,
+      isAudioLoading,
+      setIsAudioLoading,
     }}>
       {children}
     </SongContext.Provider>

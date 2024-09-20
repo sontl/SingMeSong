@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp } from 'react-icons/fa';
+import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp, FaSpinner } from 'react-icons/fa';
 import { SongContext } from '../context/SongContext';
 
 const FloatingMusicPlayer: React.FC = () => {
@@ -13,7 +13,9 @@ const FloatingMusicPlayer: React.FC = () => {
     audioRef, 
     duration,
     isAudioEnded,
-    setIsAudioEnded
+    setIsAudioEnded,
+    isAudioLoading,
+    setIsAudioLoading
   } = useContext(SongContext);
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -79,7 +81,9 @@ const FloatingMusicPlayer: React.FC = () => {
       }
     }
     if (currentSong) {
+      setIsAudioLoading(true);
       togglePlay(currentSong);
+      setIsAudioLoading(false);
     }
   };
 
@@ -143,7 +147,13 @@ const FloatingMusicPlayer: React.FC = () => {
               <FaStepBackward />
             </button>
             <button onClick={handlePlayPause} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
-              {isPlaying && !isAudioEnded ? <FaPause /> : <FaPlay />}
+              {isAudioLoading ? (
+                <FaSpinner className="animate-spin" />
+              ) : isPlaying && !isAudioEnded ? (
+                <FaPause />
+              ) : (
+                <FaPlay />
+              )}
             </button>
             <button onClick={handleNextSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
               <FaStepForward />
