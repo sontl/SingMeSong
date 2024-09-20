@@ -1,5 +1,6 @@
 import React, { createContext, useState, useRef, useEffect } from 'react';
 import { type Song } from 'wasp/entities';
+import { getAllSongsByUser } from 'wasp/client/operations';
 
 interface SongContextType {
   currentSong: Song | null;
@@ -7,6 +8,11 @@ interface SongContextType {
   isPlaying: boolean;
   togglePlay: (song: Song) => void;
   audioRef: React.RefObject<HTMLAudioElement>;
+  allSongs: Song[];
+  setAllSongs: (songs: Song[]) => void;
+  playNextSong: () => void;
+  playPreviousSong: () => void;
+  progress: number;
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -15,22 +21,36 @@ export const SongContext = createContext<SongContextType>({
   isPlaying: false,
   togglePlay: () => {},
   audioRef: { current: null },
+  allSongs: [],
+  setAllSongs: () => {},
+  playNextSong: () => {},
+  playPreviousSong: () => {},
+  progress: 0,
 });
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [allSongs, setAllSongs] = useState<Song[]>([]);
+  const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(new Audio());
 
   useEffect(() => {
-    const audio = audioRef.current;
-    
-    const handleEnded = () => setIsPlaying(false);
-    audio.addEventListener('ended', handleEnded);
-    
-    return () => {
-      audio.removeEventListener('ended', handleEnded);
+    const fetchSongs = async () => {
+      const songs = await getAllSongsByUser();
+      setAllSongs(songs.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
     };
+    fetchSongs();
+  }, []);
+
+  useEffect(() => {
+    const updateProgress = () => {
+      if (audioRef.current) {
+        setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+      }
+    };
+    audioRef.current.addEventListener('timeupdate', updateProgress);
+    return () => audioRef.current.removeEventListener('timeupdate', updateProgress);
   }, []);
 
   const togglePlay = (song: Song) => {
@@ -50,9 +70,38 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const playNextSong = () => {
+    if (currentSong && allSongs.length > 0) {
+      const currentIndex = allSongs.findIndex(song => song.id === currentSong.id);
+      const nextIndex = (currentIndex + 1) % allSongs.length;
+      setCurrentSong(allSongs[nextIndex]);
+      togglePlay(allSongs[nextIndex]);
+    }
+  };
+
+  const playPreviousSong = () => {
+    if (currentSong && allSongs.length > 0) {
+      const currentIndex = allSongs.findIndex(song => song.id === currentSong.id);
+      const previousIndex = (currentIndex - 1 + allSongs.length) % allSongs.length;
+      setCurrentSong(allSongs[previousIndex]);
+      togglePlay(allSongs[previousIndex]);
+    }
+  };
+
   return (
-    <SongContext.Provider value={{ currentSong, setCurrentSong, isPlaying, togglePlay, audioRef }}>
-      {children} 
+    <SongContext.Provider value={{
+      currentSong,
+      setCurrentSong,
+      isPlaying,
+      togglePlay,
+      audioRef,
+      allSongs,
+      setAllSongs,
+      playNextSong,
+      playPreviousSong,
+      progress,
+    }}>
+      {children}
     </SongContext.Provider>
   );
 };

@@ -1,34 +1,9 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useContext } from 'react';
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from 'react-icons/fa';
 import { SongContext } from '../context/SongContext';
 
-interface FloatingMusicPlayerProps {
-  onNext: () => void;
-  onPrevious: () => void;
-}
-
-const FloatingMusicPlayer: React.FC<FloatingMusicPlayerProps> = ({
-  onNext,
-  onPrevious
-}) => {
-  const [progress, setProgress] = useState(0);
-  const { currentSong, isPlaying, togglePlay, audioRef } = useContext(SongContext);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    const updateProgress = () => {
-      if (audio) {
-        const duration = audio.duration;
-        const currentTime = audio.currentTime;
-        setProgress((currentTime / duration) * 100);
-      }
-    };
-
-    audio?.addEventListener('timeupdate', updateProgress);
-    return () => {
-      audio?.removeEventListener('timeupdate', updateProgress);
-    };
-  }, [audioRef]);
+const FloatingMusicPlayer: React.FC = () => {
+  const { currentSong, isPlaying, togglePlay, playNextSong, playPreviousSong, progress } = useContext(SongContext);
 
   if (!currentSong) return null;
 
@@ -45,13 +20,13 @@ const FloatingMusicPlayer: React.FC<FloatingMusicPlayerProps> = ({
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <button onClick={onPrevious} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+          <button onClick={playPreviousSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             <FaStepBackward />
           </button>
           <button onClick={() => togglePlay(currentSong)} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             {isPlaying ? <FaPause /> : <FaPlay />}
           </button>
-          <button onClick={onNext} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+          <button onClick={playNextSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
             <FaStepForward />
           </button>
         </div>

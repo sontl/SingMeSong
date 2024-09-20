@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { type AuthUser } from 'wasp/auth';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
@@ -21,7 +21,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const songTableRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'list' | 'details'>('create');
 
-  const { setCurrentSong, isPlaying, togglePlay } = useContext(SongContext);
+  const { setCurrentSong, isPlaying, togglePlay, setAllSongs } = useContext(SongContext);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -48,6 +48,15 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     //setCurrentSong(song);
     //togglePlay(song); // Reset playing state when selecting a new song
   };
+
+  useEffect(() => {
+    if (songs) {
+      const sortedSongs = [...songs].sort((a, b) => 
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      setAllSongs(sortedSongs);
+    }
+  }, [songs, setAllSongs]);
 
   return (
     <DefaultLayout user={user}>
