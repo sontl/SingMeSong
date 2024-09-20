@@ -75,29 +75,46 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => audioRef.current.removeEventListener('loadedmetadata', updateDuration);
   }, []);
 
-  const togglePlay = (song: Song) => {
+  const togglePlay = async (song: Song) => {
     if (currentSong?.id === song.id) {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
-        audioRef.current.play();
-        setIsPlaying(true);
+        try {
+          await audioRef.current.play();
+          setIsPlaying(true);
+        } catch (error) {
+          console.error('Error playing audio:', error);
+        }
       }
     } else {
-
+      // Stop current song
+      audioRef.current.pause();
+      setIsPlaying(false);
       
+      // Reset the audio element
+      audioRef.current.innerHTML = '';
+      audioRef.current.removeAttribute('src');
+      audioRef.current.load();
+
       if (song.audioUrl) {
         if (song.audioUrl.includes('audiopipe')) {
+          console.log('song.audioUrl', song.audioUrl);
           audioRef.current.innerHTML = `<source src="${song.audioUrl}" type="audio/mp3">`;
         } else {
-          audioRef.current.src = song.audioUrl || '';
+          audioRef.current.src = song.audioUrl;
         }
       }
       
-      audioRef.current.play();
-      setCurrentSong(song);
-      setIsPlaying(true);
+      try {
+        await audioRef.current.play();
+        setCurrentSong(song);
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+      }
     }
   };
 
