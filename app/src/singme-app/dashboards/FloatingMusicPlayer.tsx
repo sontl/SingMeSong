@@ -21,6 +21,12 @@ const FloatingMusicPlayer: React.FC = () => {
   const volumeSliderRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
+    }
+  }, [volume, audioRef]);
+
   const handleVolumeClick = () => {
     setShowVolumeSlider(!showVolumeSlider);
   };
@@ -32,11 +38,6 @@ const FloatingMusicPlayer: React.FC = () => {
       const y = e.clientY - rect.top;
       const newVolume = Math.round(((height - y) / height) * 100);
       setVolume(Math.max(0, Math.min(100, newVolume)));
-      
-      // Update actual audio volume
-      if (audioRef.current) {
-        audioRef.current.volume = newVolume / 100;
-      }
     }
   };
 

@@ -85,7 +85,16 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsPlaying(true);
       }
     } else {
-      audioRef.current.src = song.audioUrl || '';
+
+      
+      if (song.audioUrl) {
+        if (song.audioUrl.includes('audiopipe')) {
+          audioRef.current.innerHTML = `<source src="${song.audioUrl}" type="audio/mp3">`;
+        } else {
+          audioRef.current.src = song.audioUrl || '';
+        }
+      }
+      
       audioRef.current.play();
       setCurrentSong(song);
       setIsPlaying(true);
