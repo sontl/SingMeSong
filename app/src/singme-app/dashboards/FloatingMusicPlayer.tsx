@@ -101,25 +101,27 @@ const FloatingMusicPlayer: React.FC = () => {
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-      <div className="flex items-center justify-between px-4 h-16">
-        <div className="flex items-center flex-1">
+      <div className="player-content px-4 h-16">
+        <div className="player-song-info">
           <img src={currentSong.imageUrl || '/default-cover.jpg'} alt={currentSong.title} className="w-12 h-12 rounded-md mr-4" />
-          <div className="flex-grow max-w-xs">
-            <h3 className="text-sm font-semibold truncate">{currentSong.title}</h3>
+          <div className="player-song-title">
+            <h3 className="text-sm font-semibold md:truncate animate-marquee">{currentSong.title}</h3>
           </div>
         </div>
-        <div className="flex items-center space-x-4 flex-1 justify-center">
-          <button onClick={handlePreviousSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
-            <FaStepBackward />
-          </button>
-          <button onClick={handlePlayPause} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
-            {isPlaying && !isAudioEnded ? <FaPause /> : <FaPlay />}
-          </button>
-          <button onClick={handleNextSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
-            <FaStepForward />
-          </button>
+        <div className="player-controls-wrapper">
+          <div className="player-controls space-x-4">
+            <button onClick={handlePreviousSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+              <FaStepBackward />
+            </button>
+            <button onClick={handlePlayPause} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+              {isPlaying && !isAudioEnded ? <FaPause /> : <FaPlay />}
+            </button>
+            <button onClick={handleNextSong} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
+              <FaStepForward />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center flex-1 justify-end">
+        <div className="player-volume">
           <div className="relative">
             <button onClick={handleVolumeClick} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
               <FaVolumeUp />
