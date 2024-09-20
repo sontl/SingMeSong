@@ -75,10 +75,14 @@ const FloatingMusicPlayer: React.FC = () => {
   };
 
   const formatTime = (time: number) => {
+    if (isNaN(time) || time === 0) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
+
+  const currentTime = formatTime(progress * duration / 100);
+  const totalDuration = formatTime(duration);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -129,9 +133,9 @@ const FloatingMusicPlayer: React.FC = () => {
         </div>
         <div className="player-volume flex items-center justify-end flex-1">
           <div className="hidden md:flex items-center mr-4 text-sm text-gray-600 dark:text-gray-300">
-            <span>{formatTime(progress * duration / 100)}</span>
+            <span>{currentTime}</span>
             <span className="mx-1">/</span>
-            <span>{formatTime(duration)}</span>
+            <span>{totalDuration}</span>
           </div>
           <div className="relative">
             <button onClick={handleVolumeClick} className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">
