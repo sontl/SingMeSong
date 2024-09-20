@@ -13,6 +13,7 @@ interface SongContextType {
   playNextSong: () => void;
   playPreviousSong: () => void;
   progress: number;
+  duration: number;
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -26,6 +27,7 @@ export const SongContext = createContext<SongContextType>({
   playNextSong: () => {},
   playPreviousSong: () => {},
   progress: 0,
+  duration: 0,
 });
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -33,6 +35,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isPlaying, setIsPlaying] = useState(false);
   const [allSongs, setAllSongs] = useState<Song[]>([]);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(new Audio());
 
   useEffect(() => {
@@ -51,6 +54,16 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     audioRef.current.addEventListener('timeupdate', updateProgress);
     return () => audioRef.current.removeEventListener('timeupdate', updateProgress);
+  }, []);
+
+  useEffect(() => {
+    const updateDuration = () => {
+      if (audioRef.current) {
+        setDuration(audioRef.current.duration);
+      }
+    };
+    audioRef.current.addEventListener('loadedmetadata', updateDuration);
+    return () => audioRef.current.removeEventListener('loadedmetadata', updateDuration);
   }, []);
 
   const togglePlay = (song: Song) => {
@@ -100,6 +113,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       playNextSong,
       playPreviousSong,
       progress,
+      duration,
     }}>
       {children}
     </SongContext.Provider>

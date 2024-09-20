@@ -3,10 +3,11 @@ import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp } from 'reac
 import { SongContext } from '../context/SongContext';
 
 const FloatingMusicPlayer: React.FC = () => {
-  const { currentSong, isPlaying, togglePlay, playNextSong, playPreviousSong, progress, audioRef } = useContext(SongContext);
+  const { currentSong, isPlaying, togglePlay, playNextSong, playPreviousSong, progress, audioRef, duration } = useContext(SongContext);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [volume, setVolume] = useState(100);
   const volumeSliderRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   const handleVolumeClick = () => {
     setShowVolumeSlider(!showVolumeSlider);
@@ -27,6 +28,18 @@ const FloatingMusicPlayer: React.FC = () => {
     }
   };
 
+  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (progressBarRef.current && audioRef.current) {
+      const rect = progressBarRef.current.getBoundingClientRect();
+      const clickPosition = e.clientX - rect.left;
+      const progressBarWidth = rect.width;
+      const clickPercentage = clickPosition / progressBarWidth;
+      const newTime = clickPercentage * duration;
+      
+      audioRef.current.currentTime = newTime;
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (volumeSliderRef.current && !volumeSliderRef.current.contains(event.target as Node)) {
@@ -43,11 +56,18 @@ const FloatingMusicPlayer: React.FC = () => {
   if (!currentSong) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 shadow-lg flex flex-col justify-center z-50 player-width">
-      <div className="w-full h-1 bg-gray-200">
-        <div className="h-full bg-blue-600" style={{ width: `${progress}%` }}></div>
+    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg flex flex-col justify-center z-50 player-width">
+      <div 
+        ref={progressBarRef}
+        className="w-full h-2 bg-gray-300 dark:bg-gray-600 cursor-pointer relative hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors" 
+        onClick={handleProgressBarClick}
+      >
+        <div 
+          className="absolute top-0 left-0 h-full bg-blue-600 dark:bg-blue-400 transition-all duration-100" 
+          style={{ width: `${progress}%` }}
+        ></div>
       </div>
-      <div className="flex items-center justify-between px-4 h-full">
+      <div className="flex items-center justify-between px-4 h-16">
         <div className="flex items-center flex-1">
           <img src={currentSong.imageUrl || '/default-cover.jpg'} alt={currentSong.title} className="w-12 h-12 rounded-md mr-4" />
           <div className="flex-grow max-w-xs">
