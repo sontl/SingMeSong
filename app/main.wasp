@@ -356,6 +356,12 @@ job updateCompletedSongsJob {
 }
 //#endregion
 
+//#region Lyric Video
+route LyricVideoRoute { path: "/lyric-video", to: LyricVideoPage }
+page LyricVideoPage {
+  authRequired: true,
+  component: import LyricVideoPage from "@src/singme-app/dashboards/lyricvideo/LyricVideoPage"
+}
 
 //#region Contact Form Messages
 // TODO: 

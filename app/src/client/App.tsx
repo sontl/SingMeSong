@@ -20,7 +20,8 @@ export default function App({ children }: { children: ReactNode }) {
       location.pathname !== '/' &&
       location.pathname !== '/login' &&
       location.pathname !== '/signup' &&
-      location.pathname !== '/create'
+      location.pathname !== '/create' &&
+      location.pathname !== '/lyric-video'
     );
   }, [location]);
 
@@ -29,7 +30,7 @@ export default function App({ children }: { children: ReactNode }) {
   }, [location]);
 
   const isUserDashboard = useMemo(() => {
-    return location.pathname.startsWith('/create');
+    return location.pathname.startsWith('/create') || location.pathname.startsWith('/lyric-video');
   }, [location]);
 
   useEffect(() => {

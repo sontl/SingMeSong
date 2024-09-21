@@ -51,7 +51,7 @@ const SongRow: React.FC<SongRowProps> = ({ song, onSongSelect, isCurrentSong, is
             className='absolute inset-0 flex items-center justify-center'
           >
             <div className='w-12 h-12 flex items-center justify-center bg-black bg-opacity-50 rounded-full'>
-              {!isCurrentSong && isAudioLoading ? (
+              {isCurrentSong && isAudioLoading ? (
                 <FaSpinner className="animate-spin text-white" />
               ) : isCurrentSong && isPlaying ? (
                 isHovering ? (
