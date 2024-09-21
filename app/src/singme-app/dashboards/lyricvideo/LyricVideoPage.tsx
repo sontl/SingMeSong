@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { ReactP5Wrapper } from '@p5-wrapper/react';
 import p5 from 'p5';
-import P5 from 'p5';
+import { type Song } from 'wasp/entities';
+import DefaultLayout from '../../layout/DefaultLayout';
+import { type AuthUser } from 'wasp/auth';
+import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
+import { SongContext } from '../../context/SongContext';
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
   (window as any).p5 = p5;
@@ -23,19 +27,27 @@ if (typeof window !== 'undefined') {
     console.error('Failed to load p5.sound:', err);
   });
 }
+// Custom hook to load p5.sound
+const useP5Sound = () => {
+  const [isP5SoundLoaded, setIsP5SoundLoaded] = useState(false);
 
-import { type Song } from 'wasp/entities';
-import DefaultLayout from '../../layout/DefaultLayout';
-import { type AuthUser } from 'wasp/auth';
-import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
-import { SongContext } from '../../context/SongContext';
+  useEffect(() => {
+    import('p5/lib/addons/p5.sound').then(() => {
+      setIsP5SoundLoaded(true);
+    });
+  }, []);
+
+  return isP5SoundLoaded;
+};
 
 const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { data: songs, isLoading: isAllSongsLoading } = useQuery(getAllSongsByUser);
   const { setAllSongs } = useContext(SongContext);
-  const soundRef = useRef<p5.SoundFile | null>(null);
-  const isSoundLoadedRef = useRef(false);
+  const soundRef = useRef<any>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const isP5SoundLoaded = useP5Sound();
 
   useEffect(() => {
     if (songs) {
@@ -46,50 +58,51 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     }
   }, [songs, setAllSongs]);
 
-  const handleSongClick = (song: Song) => {
+  const stopCurrentSound = () => {
     if (soundRef.current) {
-      soundRef.current.stop(); // Stop previous sound if any
+      soundRef.current.stop();
+      soundRef.current = null;
     }
-    soundRef.current = new p5.SoundFile(
+    setIsPlaying(false);
+  };
+
+  const handleSongClick = (song: Song) => {
+    if (!isP5SoundLoaded) {
+      console.error('p5.sound is not loaded yet');
+      return;
+    }
+
+    setIsLoading(true);
+    stopCurrentSound();
+    setSelectedSong(song);
+
+    p5.prototype.loadSound(
       new URL(song.audioUrl!, window.location.href).toString(),
+      (loadedSound) => {
+        soundRef.current = loadedSound;
+        loadedSound.play();
+        setIsPlaying(true);
+        setIsLoading(false);
+      },
       () => {
-        isSoundLoadedRef.current = true;
-        soundRef.current?.play(); // Play the sound once loaded
-        console.log('Sound loaded and playing');
+        setIsLoading(false);
+        console.error('Failed to load sound');
       }
     );
   };
 
-  const preload = (p: p5) => {
-    if (selectedSong) {
-      soundRef.current = p5.prototype.loadSound(
-        new URL(selectedSong.audioUrl!, window.location.href).toString(),
-        () => {
-          isSoundLoadedRef.current = true;
-        }
-      );
-    }
-  };
-
   const sketch = (p: p5) => {
-    let sound: any;
     let fft: any;
-
-    p.preload = () => preload(p);
 
     p.setup = () => {
       p.createCanvas(p.windowWidth * 0.75, p.windowHeight * 0.8);
-      fft = new P5.FFT();
-      if (sound) {
-        sound.play();
-      }
+      fft = new p5.FFT();
     };
 
     p.draw = () => {
       p.background(220);
       
-      if (isSoundLoadedRef.current && soundRef.current) {
-        // Visualizer
+      if (soundRef.current && isPlaying) {
         let spectrum = fft.analyze();
         p.noStroke();
         p.fill(255, 0, 255);
@@ -114,11 +127,13 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.mouseClicked = () => {
-      if (sound && sound.isLoaded()) {
-        if (sound.isPlaying()) {
-          sound.pause();
+      if (soundRef.current) {
+        if (isPlaying) {
+          soundRef.current.pause();
+          setIsPlaying(false);
         } else {
-          sound.play();
+          soundRef.current.play();
+          setIsPlaying(true);
         }
       }
     };
@@ -139,10 +154,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                   className={`cursor-pointer p-2 hover:bg-gray-100 ${
                     selectedSong?.id === song.id ? 'bg-blue-100' : ''
                   }`}
-                  onClick={() => {
-                    setSelectedSong(song);
-                    handleSongClick(song);
-                  }}
+                  onClick={() => handleSongClick(song)}
                 >
                   {song.title}
                 </li>
@@ -152,7 +164,13 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         </div>
         <div className="w-3/4 p-4">
           <h2 className="text-xl font-bold mb-4">Song Visualizer</h2>
-          <ReactP5Wrapper sketch={sketch} />
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-lg">Loading song...</p>
+            </div>
+          ) : (
+            <ReactP5Wrapper sketch={sketch} />
+          )}
         </div>
       </div>
     </DefaultLayout>
