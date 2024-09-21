@@ -108,11 +108,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
         currentEffect.draw(p, spectrum, energy);
 
-        // Display song title
-        p.fill(255);
-        p.textAlign(p.CENTER, p.CENTER);
-        p.textSize(24);
-        p.text(selectedSong?.title || '', p.width / 2, 50);
+        // Add debug logging
+        console.log('Drawing title:', selectedSong?.title, 'with effect:', currentEffect.name);
+        
+        // Use the custom title drawing function
+        currentEffect.drawTitle(p, selectedSong?.title || '');
       } else {
         // Display a message when no song is selected
         p.fill(255);
