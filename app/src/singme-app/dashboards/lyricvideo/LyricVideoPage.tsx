@@ -6,6 +6,7 @@ import DefaultLayout from '../../layout/DefaultLayout';
 import { type AuthUser } from 'wasp/auth';
 import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
 import { SongContext } from '../../context/SongContext';
+import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
   (window as any).p5 = p5;
@@ -40,6 +41,8 @@ const useP5Sound = () => {
   return isP5SoundLoaded;
 };
 
+type VisualizerMode = 'particles' | 'bars' | 'circles';
+
 const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +50,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const { setAllSongs } = useContext(SongContext);
   const soundRef = useRef<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const isP5SoundLoaded = useP5Sound();
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[0]);
 
   useEffect(() => {
     if (songs) {
@@ -67,11 +70,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   };
 
   const handleSongClick = (song: Song) => {
-    if (!isP5SoundLoaded) {
-      console.error('p5.sound is not loaded yet');
-      return;
-    }
-
     setIsLoading(true);
     stopCurrentSound();
     setSelectedSong(song);
@@ -92,7 +90,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   };
 
   const sketch = (p: p5) => {
-    let fft: any;
+    let fft: p5.FFT;
 
     p.setup = () => {
       p.createCanvas(p.windowWidth * 0.75, p.windowHeight * 0.8);
@@ -100,28 +98,26 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.draw = () => {
-      p.background(220);
+      p.background(0, 10);
       
       if (soundRef.current && isPlaying) {
         let spectrum = fft.analyze();
-        p.noStroke();
-        p.fill(255, 0, 255);
-        for (let i = 0; i < spectrum.length; i++) {
-          let x = p.map(i, 0, spectrum.length, 0, p.width);
-          let h = -p.height + p.map(spectrum[i], 0, 255, p.height, 0);
-          p.rect(x, p.height, p.width / spectrum.length, h);
-        }
+        let energy = fft.getEnergy("bass");
+
+        p.colorMode(p.HSB);
+
+        currentEffect.draw(p, spectrum, energy);
 
         // Display song title
-        p.fill(0);
+        p.fill(255);
         p.textAlign(p.CENTER, p.CENTER);
-        p.textSize(16);
-        p.text(selectedSong?.title || '', p.width / 2, 30);
+        p.textSize(24);
+        p.text(selectedSong?.title || '', p.width / 2, 50);
       } else {
         // Display a message when no song is selected
-        p.fill(0);
+        p.fill(255);
         p.textAlign(p.CENTER, p.CENTER);
-        p.textSize(16);
+        p.textSize(24);
         p.text("Select a song to visualize", p.width / 2, p.height / 2);
       }
     };
@@ -164,6 +160,17 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         </div>
         <div className="w-3/4 p-4">
           <h2 className="text-xl font-bold mb-4">Song Visualizer</h2>
+          <div className="mb-4">
+            {visualizerEffects.map((effect) => (
+              <button
+                key={effect.name}
+                className={`mr-2 px-4 py-2 rounded ${currentEffect.name === effect.name ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                onClick={() => setCurrentEffect(effect)}
+              >
+                {effect.name}
+              </button>
+            ))}
+          </div>
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
               <p className="text-lg">Loading song...</p>
