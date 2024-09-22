@@ -177,8 +177,8 @@ span.flatpickr-weekday,
 }
 
 .player-width {
-  width: calc(100% - 230px);
-  left: 220px;
+  width: calc(100% - 270px);
+  left: 260px;
 }
 
 @media (max-width: 1024px) {

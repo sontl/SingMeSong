@@ -14,34 +14,12 @@ if (typeof window !== 'undefined') {
   // Load p5.sound
   import('p5/lib/addons/p5.sound').then(() => {
     console.log('p5.sound loaded successfully');
-    
     // Create a dummy p5 instance to force p5.sound initialization
     new p5(() => {});
-    
-    // Check if loadSound is available and is a function
-    if (typeof p5.prototype.loadSound === 'function') {
-      console.log('loadSound is now available');
-    } else {
-      console.error('loadSound is still not available');
-    }
   }).catch(err => {
     console.error('Failed to load p5.sound:', err);
   });
 }
-// Custom hook to load p5.sound
-const useP5Sound = () => {
-  const [isP5SoundLoaded, setIsP5SoundLoaded] = useState(false);
-
-  useEffect(() => {
-    import('p5/lib/addons/p5.sound').then(() => {
-      setIsP5SoundLoaded(true);
-    });
-  }, []);
-
-  return isP5SoundLoaded;
-};
-
-type VisualizerMode = 'particles' | 'bars' | 'circles';
 
 const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
@@ -89,6 +67,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     );
   };
 
+  const handleEffectChange = (effect: VisualizerEffect) => (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the click from propagating to the canvas
+    setCurrentEffect(effect);
+  };
+
   const sketch = (p: p5) => {
     let fft: p5.FFT;
 
@@ -108,9 +91,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
         currentEffect.draw(p, spectrum, energy);
 
-        // Add debug logging
-        console.log('Drawing title:', selectedSong?.title, 'with effect:', currentEffect.name);
-        
         // Use the custom title drawing function
         currentEffect.drawTitle(p, selectedSong?.title || '');
       } else {
@@ -165,7 +145,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
               <button
                 key={effect.name}
                 className={`mr-2 px-4 py-2 rounded ${currentEffect.name === effect.name ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                onClick={() => setCurrentEffect(effect)}
+                onClick={handleEffectChange(effect)}
               >
                 {effect.name}
               </button>
