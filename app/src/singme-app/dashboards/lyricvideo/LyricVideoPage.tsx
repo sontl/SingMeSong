@@ -75,9 +75,35 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const sketch = (p: p5) => {
     let fft: p5.FFT;
 
+    const calculateCanvasSize = () => {
+      const containerWidth = p.windowWidth * 0.7 - 32;
+      const containerHeight = p.windowHeight * 0.7 - 32;
+      const aspectRatio = 4 / 3;
+
+      let width, height;
+
+      if (containerWidth / containerHeight > aspectRatio) {
+        // Container is wider than 4:3, so we'll use the height as the limiting factor
+        height = containerHeight;
+        width = height * aspectRatio;
+      } else {
+        // Container is taller than 4:3, so we'll use the width as the limiting factor
+        width = containerWidth;
+        height = width / aspectRatio;
+      }
+
+      return { width, height };
+    };
+
     p.setup = () => {
-      p.createCanvas(p.windowWidth * 0.75, p.windowHeight * 0.8);
+      const { width, height } = calculateCanvasSize();
+      p.createCanvas(width, height);
       fft = new p5.FFT();
+    };
+
+    p.windowResized = () => {
+      const { width, height } = calculateCanvasSize();
+      p.resizeCanvas(width, height);
     };
 
     p.draw = () => {
@@ -94,22 +120,27 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         // Use the custom title drawing function
         currentEffect.drawTitle(p, selectedSong?.title || '');
       } else {
-        // Display a message when no song is selected
+        // Display a message when no song is selected or playing
         p.fill(255);
         p.textAlign(p.CENTER, p.CENTER);
         p.textSize(24);
         p.text("Select a song to visualize", p.width / 2, p.height / 2);
+        p.textSize(16);
+        p.text("Click on the visualizer to play/pause", p.width / 2, p.height / 2 + 30);
       }
     };
 
-    p.mouseClicked = () => {
-      if (soundRef.current) {
-        if (isPlaying) {
-          soundRef.current.pause();
-          setIsPlaying(false);
-        } else {
-          soundRef.current.play();
-          setIsPlaying(true);
+    p.mousePressed = () => {
+      // Check if the mouse is within the canvas bounds
+      if (p.mouseX >= 0 && p.mouseX < p.width && p.mouseY >= 0 && p.mouseY < p.height) {
+        if (soundRef.current) {
+          if (isPlaying) {
+            soundRef.current.pause();
+            setIsPlaying(false);
+          } else {
+            soundRef.current.play();
+            setIsPlaying(true);
+          }
         }
       }
     };
@@ -118,16 +149,16 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   return (
     <DefaultLayout user={user}>
       <div className="flex h-full">
-        <div className="w-1/4 overflow-y-auto border-r border-gray-200 p-4">
+        <div className="w-1/4 overflow-y-auto border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
           <h2 className="text-xl font-bold mb-4">Your Songs</h2>
           {isAllSongsLoading ? (
             <p>Loading songs...</p>
           ) : (
-            <ul>
+            <ul className="space-y-2">
               {songs && songs.map((song) => (
                 <li
                   key={song.id}
-                  className={`cursor-pointer p-2 hover:bg-gray-100 ${
+                  className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
                     selectedSong?.id === song.id ? 'bg-blue-100' : ''
                   }`}
                   onClick={() => handleSongClick(song)}
@@ -156,7 +187,9 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
               <p className="text-lg">Loading song...</p>
             </div>
           ) : (
-            <ReactP5Wrapper sketch={sketch} />
+            <div className="m-0"> {/* Add margin around the ReactP5Wrapper */}
+              <ReactP5Wrapper sketch={sketch} />
+            </div>
           )}
         </div>
       </div>
