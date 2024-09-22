@@ -7,6 +7,8 @@ import { type AuthUser } from 'wasp/auth';
 import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
 import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
+import P5MusicPlayer from './P5MusicPlayer';
+
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
   (window as any).p5 = p5;
@@ -25,10 +27,9 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { data: songs, isLoading: isAllSongsLoading } = useQuery(getAllSongsByUser);
-  const { setAllSongs } = useContext(SongContext);
-  const soundRef = useRef<any>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { setAllSongs, currentSong, isPlaying, togglePlay, p5SoundRef, isAudioLoading } = useContext(SongContext);
   const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[0]);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (songs) {
@@ -39,36 +40,20 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     }
   }, [songs, setAllSongs]);
 
-  const stopCurrentSound = () => {
-    if (soundRef.current) {
-      soundRef.current.stop();
-      soundRef.current = null;
-    }
-    setIsPlaying(false);
-  };
-
-  const handleSongClick = (song: Song) => {
+  const handleSongClick = async (song: Song) => {
     setIsLoading(true);
-    stopCurrentSound();
     setSelectedSong(song);
-
-    p5.prototype.loadSound(
-      new URL(song.audioUrl!, window.location.href).toString(),
-      (loadedSound) => {
-        soundRef.current = loadedSound;
-        loadedSound.play();
-        setIsPlaying(true);
-        setIsLoading(false);
-      },
-      () => {
-        setIsLoading(false);
-        console.error('Failed to load sound');
-      }
-    );
+    try {
+      await togglePlay(song);
+    } catch (error) {
+      console.error('Error playing song:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEffectChange = (effect: VisualizerEffect) => (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the click from propagating to the canvas
+    e.stopPropagation();
     setCurrentEffect(effect);
   };
 
@@ -109,16 +94,14 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     p.draw = () => {
       p.background(0, 10);
       
-      if (soundRef.current && isPlaying) {
+      if (p5SoundRef.current && isPlaying) {
         let spectrum = fft.analyze();
         let energy = fft.getEnergy("bass");
 
         p.colorMode(p.HSB);
 
         currentEffect.draw(p, spectrum, energy);
-
-        // Use the custom title drawing function
-        currentEffect.drawTitle(p, selectedSong?.title || '');
+        currentEffect.drawTitle(p, currentSong?.title || '');
       } else {
         // Display a message when no song is selected or playing
         p.fill(255);
@@ -126,28 +109,13 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         p.textSize(24);
         p.text("Select a song to visualize", p.width / 2, p.height / 2);
         p.textSize(16);
-        p.text("Click on the visualizer to play/pause", p.width / 2, p.height / 2 + 30);
-      }
-    };
-
-    p.mousePressed = () => {
-      // Check if the mouse is within the canvas bounds
-      if (p.mouseX >= 0 && p.mouseX < p.width && p.mouseY >= 0 && p.mouseY < p.height) {
-        if (soundRef.current) {
-          if (isPlaying) {
-            soundRef.current.pause();
-            setIsPlaying(false);
-          } else {
-            soundRef.current.play();
-            setIsPlaying(true);
-          }
-        }
+        p.text("Use the floating player to control playback", p.width / 2, p.height / 2 + 30);
       }
     };
   };
 
   return (
-    <DefaultLayout user={user}>
+    <DefaultLayout user={user} hideFloatingPlayer={true}>
       <div className="flex h-full">
         <div className="w-1/4 overflow-y-auto border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
           <h2 className="text-xl font-bold mb-4">Your Songs</h2>
@@ -182,17 +150,18 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
               </button>
             ))}
           </div>
-          {isLoading ? (
+          {isLoading || isAudioLoading ? (
             <div className="flex items-center justify-center h-64">
               <p className="text-lg">Loading song...</p>
             </div>
           ) : (
-            <div className="m-0"> {/* Add margin around the ReactP5Wrapper */}
+            <div className="m-0">
               <ReactP5Wrapper sketch={sketch} />
             </div>
           )}
         </div>
       </div>
+      <P5MusicPlayer />
     </DefaultLayout>
   );
 };

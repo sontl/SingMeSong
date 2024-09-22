@@ -7,9 +7,10 @@ import FloatingMusicPlayer from '../dashboards/FloatingMusicPlayer';
 interface DefaultLayoutProps {
   user: AuthUser;
   children: React.ReactNode;
+  hideFloatingPlayer?: boolean;
 }
 
-const DefaultLayout: React.FC<DefaultLayoutProps> = ({ user, children }) => {
+const DefaultLayout: React.FC<DefaultLayoutProps> = ({ user, children, hideFloatingPlayer = false }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -23,7 +24,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ user, children }) => {
               {children}
             </div>
           </main>
-          <FloatingMusicPlayer />
+          {!hideFloatingPlayer && <FloatingMusicPlayer />}
         </div>
       </div>
     </div>

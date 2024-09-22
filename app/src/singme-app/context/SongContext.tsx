@@ -1,6 +1,7 @@
 import React, { createContext, useState, useRef, useEffect } from 'react';
 import { type Song } from 'wasp/entities';
 import { getAllSongsByUser } from 'wasp/client/operations';
+import p5 from 'p5';
 
 interface SongContextType {
   currentSong: Song | null;
@@ -20,6 +21,7 @@ interface SongContextType {
   handleAudioEnded: () => void;
   isAudioLoading: boolean;
   setIsAudioLoading: (isLoading: boolean) => void;
+  p5SoundRef: React.RefObject<any>; // Add this line
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -40,6 +42,7 @@ export const SongContext = createContext<SongContextType>({
   handleAudioEnded: () => {},
   isAudioLoading: false,
   setIsAudioLoading: () => {},
+  p5SoundRef: { current: null }, // Add this line
 });
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -51,6 +54,15 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAudioEnded, setIsAudioEnded] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(new Audio());
+  const p5SoundRef = useRef<any>(null); // Add this line
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('p5/lib/addons/p5.sound').then(() => {
+        p5SoundRef.current = new p5.SoundFile(audioRef.current.src);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -83,11 +95,11 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const togglePlay = async (song: Song) => {
     if (currentSong?.id === song.id) {
       if (isPlaying) {
-        audioRef.current.pause();
+        p5SoundRef.current?.pause();
         setIsPlaying(false);
       } else {
         try {
-          await audioRef.current.play();
+          await p5SoundRef.current?.play();
           setIsPlaying(true);
         } catch (error) {
           console.error('Error playing audio:', error);
@@ -95,33 +107,25 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else {
       // Stop current song
-      audioRef.current.pause();
+      p5SoundRef.current?.stop();
       setIsPlaying(false);
       
-      // Reset the audio element
-      audioRef.current.innerHTML = '';
-      audioRef.current.removeAttribute('src');
       setIsAudioLoading(true);
-      audioRef.current.load();
 
       if (song.audioUrl) {
-        if (song.audioUrl.includes('audiopipe')) {
-          console.log('song.audioUrl', song.audioUrl);
-          audioRef.current.innerHTML = `<source src="${song.audioUrl}" type="audio/mp3">`;
-        } else {
-          audioRef.current.src = song.audioUrl;
-        }
-      }
-      
-      try {
-        await audioRef.current.play();
-        setCurrentSong(song);
-        setIsPlaying(true);
-      } catch (error) {
-        console.error('Error playing audio:', error);
-        setIsPlaying(false);
-      } finally {
-        setIsAudioLoading(false);
+        p5SoundRef.current = new p5.SoundFile(song.audioUrl, 
+          () => {
+            p5SoundRef.current?.play();
+            setCurrentSong(song);
+            setIsPlaying(true);
+            setIsAudioLoading(false);
+          },
+          (error) => {
+            console.error('Error loading audio:', error);
+            setIsPlaying(false);
+            setIsAudioLoading(false);
+          }
+        );
       }
     }
   };
@@ -181,6 +185,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       handleAudioEnded,
       isAudioLoading,
       setIsAudioLoading,
+      p5SoundRef, // Add this line
     }}>
       {children}
     </SongContext.Provider>
