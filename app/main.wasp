@@ -329,6 +329,11 @@ query getAllSongsByUser {
   entities: [User, Song]
 }
 
+action fetchAndUpdateSongDetails {
+  fn: import { fetchAndUpdateSongDetails } from "@src/singme-app/dashboards/create/operations",
+  entities: [Song]
+}
+
 job checkSongStatusJob {
   executor: PgBoss,
   perform: {

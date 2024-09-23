@@ -34,6 +34,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     togglePlay, 
     p5SoundRef, 
     isAudioLoading, 
+    currentPage,
     setCurrentPage,
     resetContext
   } = useContext(SongContext);
@@ -41,6 +42,14 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
+
+   // Add this effect to remove the <main> element with the canvas after the page is rendered
+   useEffect(() => {
+    const mainElement = document.getElementById('defaultCanvas0');
+    if (mainElement) {
+      mainElement.remove();
+    }
+  }, []);
 
   useEffect(() => {
     console.log('Setting current page to lyricVideo');
@@ -199,7 +208,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
             </div>
           ) : (
             <div className="m-0">
-              <ReactP5Wrapper sketch={sketch} />
+                <ReactP5Wrapper sketch={sketch} />
             </div>
           )}
         </div>

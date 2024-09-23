@@ -25,7 +25,14 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
 
   useEffect(() => {
     setCurrentPage('create');
+
+    const mainElement = document.getElementById('defaultCanvas0');
+    if (mainElement) {
+      mainElement.remove();
+    }
   }, [setCurrentPage]);
+
+
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -46,10 +53,10 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
       songTableRef.current.scrollTop = songTableRef.current.scrollHeight;
     }
     
-    // Wait for 10 seconds, then refetch songs
+    // Wait for 12 seconds, then refetch songs
     setTimeout(() => {
       refetch();
-    }, 10000);
+    }, 12000);
   };
 
   const handleSongSelect = (song: Song) => {
@@ -93,7 +100,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
         <div className='grid grid-cols-1 md:grid-cols-3  h-[calc(100vh-100px)]'>
           {/* Column 1: Song Creation */}
           <div className={`col-span-1 overflow-hidden flex flex-col ${activeTab !== 'create' ? 'hidden md:flex' : ''}`}>
-            <div className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 flex-grow overflow-y-auto'>
+            <div className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 flex-grow overflow-y-auto' >
               <Lyrics
                 lyricsValue={lyricsValue}
                 handleLyricsChange={handleLyricsChange}

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useRef, useEffect } from 'react';
 import { type Song } from 'wasp/entities';
-import { getAllSongsByUser } from 'wasp/client/operations';
+import { getAllSongsByUser, fetchAndUpdateSongDetails } from 'wasp/client/operations';
 import p5 from 'p5';
 
 // Add this type
@@ -108,7 +108,6 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProgress((p5SoundRef.current.currentTime() / p5SoundRef.current.duration()) * 100);
       }
     };
-    console.log('updateProgress', updateProgress);
     audioRef.current.addEventListener('timeupdate', updateProgress);
     if (p5SoundRef.current) {
       p5SoundRef.current.addEventListener('timeupdate', updateProgress);
@@ -152,11 +151,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const togglePlay = async (song: Song) => {
     if (currentSong?.id === song.id) {
-      console.log('togglePlay', currentSong?.id, song.id);
       if (isPlaying) {
-        console.log('togglePlay', currentSong?.id, song.id);
         if (currentPage === 'lyricVideo') {
-          console.log('togglePlay 2', currentSong?.id, song.id);
           p5SoundRef.current?.pause();
         } else {
           audioRef.current.pause();
@@ -165,7 +161,6 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         try {
           if (currentPage === 'lyricVideo') {
-            console.log('togglePlay', currentSong?.id, song.id);
             await p5SoundRef.current?.play();
           } else {
             await audioRef.current.play();
@@ -219,9 +214,22 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await audioRef.current.play();
             setCurrentSong(song);
             setIsPlaying(true);
-          } catch (error) {
-            console.error('Error playing audio:', error);
-            setIsPlaying(false);
+          } catch (error: any) {
+            if (error.name === 'AbortError') {
+              console.log('AbortError occurred, fetching latest song details');
+              try {
+                const updatedSong = await fetchAndUpdateSongDetails(song.sId!);
+                setCurrentSong(updatedSong);
+                // Retry playing the audio by running tooglePlay again
+                togglePlay(updatedSong);
+                setIsPlaying(true);
+              } catch (fetchError) {
+                console.error('Error fetching and updating song details:', fetchError);
+              }
+            } else {
+              console.error('Error playing audio:', error);
+              setIsPlaying(false);
+            }
           } finally {
             setIsAudioLoading(false);
           }
