@@ -21,7 +21,11 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const songTableRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'list' | 'details'>('create');
 
-  const { setCurrentSong, isPlaying, togglePlay, setAllSongs, setIsAudioEnded, isAudioLoading } = useContext(SongContext);
+  const { setCurrentSong, isPlaying, togglePlay, setAllSongs, setIsAudioEnded, isAudioLoading, setCurrentPage } = useContext(SongContext);
+
+  useEffect(() => {
+    setCurrentPage('create');
+  }, [setCurrentPage]);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 
@@ -86,7 +90,7 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
           </select>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 h-[calc(100vh-100px)]'>
+        <div className='grid grid-cols-1 md:grid-cols-3  h-[calc(100vh-100px)]'>
           {/* Column 1: Song Creation */}
           <div className={`col-span-1 overflow-hidden flex flex-col ${activeTab !== 'create' ? 'hidden md:flex' : ''}`}>
             <div className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 flex-grow overflow-y-auto'>

@@ -9,13 +9,12 @@ const P5MusicPlayer: React.FC = () => {
     togglePlay, 
     playNextSong, 
     playPreviousSong, 
-    progress, 
     p5SoundRef,
-    duration,
     isAudioEnded,
     setIsAudioEnded,
     isAudioLoading,
-    setIsAudioLoading
+    setIsAudioLoading,
+    duration
   } = useContext(SongContext);
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -23,23 +22,28 @@ const P5MusicPlayer: React.FC = () => {
   const volumeSliderRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     if (p5SoundRef.current) {
+   
       p5SoundRef.current.setVolume(volume / 100);
     }
   }, [volume, p5SoundRef]);
 
   useEffect(() => {
+  
     const updateTime = () => {
-      if (p5SoundRef.current && p5SoundRef.current.isPlaying()) {
+      if (p5SoundRef.current && p5SoundRef.current.isLoaded()) {
         setCurrentTime(p5SoundRef.current.currentTime());
+        setProgress((p5SoundRef.current.currentTime() / p5SoundRef.current.duration()) * 100);
       }
     };
 
-    const intervalId = setInterval(updateTime, 1000);
+    const intervalId = setInterval(updateTime, 100);
     return () => clearInterval(intervalId);
   }, [p5SoundRef]);
+
 
   const handleVolumeClick = () => {
     setShowVolumeSlider(!showVolumeSlider);
@@ -68,9 +72,12 @@ const P5MusicPlayer: React.FC = () => {
   };
 
   const handlePlayPause = async () => {
+    
+    console.log('handlePlayPause called', { isAudioEnded, currentSong: currentSong?.id });
     if (isAudioEnded) {
       setIsAudioEnded(false);
       if (p5SoundRef.current) {
+        console.log('Jumping to start of song');
         p5SoundRef.current.jump(0);
       }
     }

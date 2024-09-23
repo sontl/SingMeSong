@@ -27,9 +27,51 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { data: songs, isLoading: isAllSongsLoading } = useQuery(getAllSongsByUser);
-  const { setAllSongs, currentSong, isPlaying, togglePlay, p5SoundRef, isAudioLoading } = useContext(SongContext);
+  const { 
+    setAllSongs, 
+    currentSong, 
+    isPlaying, 
+    togglePlay, 
+    p5SoundRef, 
+    isAudioLoading, 
+    setCurrentPage,
+    resetContext
+  } = useContext(SongContext);
   const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[0]);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
+  const isComponentMounted = useRef(true);
+
+  useEffect(() => {
+    console.log('Setting current page to lyricVideo');
+    setCurrentPage('lyricVideo');
+
+    // This effect runs only once when the component mounts
+    if (isComponentMounted.current) {
+      resetContext();
+      console.log('resetContext on initial mount');
+    }
+
+    // Cleanup function
+    return () => {
+      if (isComponentMounted.current) {
+        console.log('Component unmounting, resetting context');
+        resetContext();
+        isComponentMounted.current = false;
+      }
+    };
+  }, [setCurrentPage, resetContext]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      // This will only run once when the component mounts
+      resetContext();
+      setCurrentPage('lyricVideo');
+      isInitialMount.current = false;
+      console.log('resetContext on initial mount');
+    }
+  }, [setCurrentPage, resetContext]);
+
 
   useEffect(() => {
     if (songs) {
@@ -41,6 +83,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   }, [songs, setAllSongs]);
 
   const handleSongClick = async (song: Song) => {
+    console.log('handleSongClick');
     setIsLoading(true);
     setSelectedSong(song);
     try {
