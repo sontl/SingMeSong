@@ -200,17 +200,47 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       p.resizeCanvas(width, height);
     };
 
+    const lyrics = [
+      { "start": 0.00, "end": 7.56, "text": "Hư hư hư hư hư hư hư" },
+      { "start": 7.56, "end": 11.04, "text": "Bao đêm đã thức trắng rồi" },
+      { "start": 11.04, "end": 15.86, "text": "Đêm nay em lại vẫn ngồi héo hon" },
+      { "start": 15.86, "end": 19.22, "text": "Thương anh em hãy ngủ ngon" },
+      { "start": 19.22, "end": 22.78, "text": "Ngày mai bao chuyện mình còn phải lo" },
+      { "start": 22.78, "end": 25.20, "text": "Ầu ơ... ví dầu..." },
+      { "start": 25.40, "end": 29.28, "text": "Ngủ đi em, ngủ đi em" },
+      { "start": 29.28, "end": 36.96, "text": "Ầu ơ... ví dầu... bình tâm em, ngủ đi mà" },
+      { "start": 36.96, "end": 46.96, "text": "Gặp cơn sóng cả gió to, vững chèo khéo lái rồi đò sẽ qua" },
+      { "start": 46.96, "end": 51.74, "text": "Sinh, lão, bệnh, tử người ta thường tình" },
+      { "start": 51.74, "end": 54.46, "text": "Nghĩ gì những chuyện linh tinh" },
+      { "start": 55.28, "end": 59.02, "text": "Ầu ơ... ví dầu... ngủ đi em" },
+      { "start": 59.02, "end": 68.56, "text": "Ầu ơ... ví dầu... bệnh lui, anh khỏe nhà mình lại vui" },
+      { "start": 68.56, "end": 75.18, "text": "Khuya rồi em, ngủ đi thôi" },
+      { "start": 75.18, "end": 79.52, "text": "Còn bao nhiêu những mảnh đời khổ đau" },
+      { "start": 79.52, "end": 83.18, "text": "Một mình lo hết được đâu" },
+      { "start": 83.18, "end": 87.08, "text": "Đường xa gánh nặng san nhau ta cùng" },
+      { "start": 87.08, "end": 89.00, "text": "Ầu ơ... ví dầu..." },
+      { "start": 89.00, "end": 93.38, "text": "Ngủ đi em, ngủ đi em" },
+      { "start": 93.38, "end": 101.00, "text": "Ầu ơ... ví dầu... ngủ đi, trời sắp hừng đông" },
+      { "start": 101.00, "end": 107.04, "text": "Tiếng chân ai đã quẹt lòng phố xa" },
+      { "start": 107.04, "end": 110.84, "text": "Ngày mai bạn đến chơi nhà" },
+      { "start": 110.84, "end": 115.00, "text": "Em qua chợ nhớ mua hoa lúa vàng" },
+      { "start": 115.00, "end": 118.98, "text": "Đón mừng ngày mới sang trang" },
+      { "start": 119.00, "end": 131.00, "text": "Đêm khuya ru vợ, phổ thơ Nam Trần" }
+  ];
+
     p.draw = () => {
       p.background(0, 10);
       
       if (p5SoundRef.current && isPlaying) {
         let spectrum = fft.analyze();
         let energy = fft.getEnergy("bass");
+        let currentTime = p5SoundRef.current.currentTime();
 
         p.colorMode(p.HSB);
 
         currentEffect.draw(p, spectrum, energy);
         currentEffect.drawTitle(p, currentSong?.title || '');
+        currentEffect.displayLyrics(p, lyrics, isPlaying, currentTime);
       } else {
         // Display a message when no song is selected or playing
         p.fill(255);
