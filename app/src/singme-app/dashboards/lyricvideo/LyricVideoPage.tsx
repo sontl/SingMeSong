@@ -113,8 +113,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     let fft: p5.FFT;
 
     const calculateCanvasSize = () => {
-      const containerWidth = p.windowWidth * 0.7 - 32;
-      const containerHeight = p.windowHeight * 0.7 - 32;
+      const visualizerColumn = document.querySelector('.visualizer-column');
+      if (!visualizerColumn) return { width: 0, height: 0 };
+
+      const containerWidth = visualizerColumn.clientWidth * 0.96;
+      const containerHeight = visualizerColumn.clientHeight * 0.96;
       const aspectRatio = 4 / 3;
 
       let width, height;
@@ -168,8 +171,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
   return (
     <DefaultLayout user={user} hideFloatingPlayer={true}>
-      <div className="flex h-full">
-        <div className="w-1/4 overflow-y-auto border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
+      <div className="flex flex-col md:flex-row h-full">
+        <div className="w-full md:w-1/4 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
           <h2 className="text-xl font-bold mb-4">Your Songs</h2>
           {isAllSongsLoading ? (
             <p>Loading songs...</p>
@@ -189,13 +192,13 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
             </ul>
           )}
         </div>
-        <div className="w-3/4 p-4">
+        <div className="w-full md:w-3/4 p-4 visualizer-column">
           <h2 className="text-xl font-bold mb-4">Song Visualizer</h2>
-          <div className="mb-4">
+          <div className="mb-4 flex flex-wrap">
             {visualizerEffects.map((effect) => (
               <button
                 key={effect.name}
-                className={`mr-2 px-4 py-2 rounded ${currentEffect.name === effect.name ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                className={`mr-2 mb-2 px-4 py-2 rounded ${currentEffect.name === effect.name ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                 onClick={handleEffectChange(effect)}
               >
                 {effect.name}
@@ -207,8 +210,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
               <p className="text-lg">Loading song...</p>
             </div>
           ) : (
-            <div className="m-0">
-                <ReactP5Wrapper sketch={sketch} />
+            <div className="m-0 flex justify-center items-center">
+              <ReactP5Wrapper sketch={sketch} />
             </div>
           )}
         </div>
