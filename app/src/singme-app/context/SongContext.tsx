@@ -72,6 +72,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (p5SoundRef.current && p5SoundRef.current.isPlaying()) {
       p5SoundRef.current.stop();
       setIsPlaying(false);
+      // reset the current song
+      setCurrentSong(null);
     }
   };
 
@@ -277,18 +279,15 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (audioRef.current) {
       audioRef.current.addEventListener('ended', handleAudioEnded);
     }
-    if (p5SoundRef.current) {
+    if (p5SoundRef.current && p5SoundRef.current.addEventListener) {
       p5SoundRef.current.addEventListener('ended', handleAudioEnded);
     }
     return () => {
       if (audioRef.current) {
         audioRef.current.removeEventListener('ended', handleAudioEnded);
       }
-      if (p5SoundRef.current) {
-        // check if p5SoundRef.current.removeEventListener is not null and is a function
-        if (p5SoundRef.current.removeEventListener && typeof p5SoundRef.current.removeEventListener === 'function') {
+      if (p5SoundRef.current && p5SoundRef.current.removeEventListener && typeof p5SoundRef.current.removeEventListener === 'function') {
           p5SoundRef.current.removeEventListener('ended', handleAudioEnded);
-        }
       }
     };
   }, [audioRef]);
