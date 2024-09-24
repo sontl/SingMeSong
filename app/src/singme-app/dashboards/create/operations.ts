@@ -74,7 +74,7 @@ export const generateRandomLyrics: GenerateRandomLyrics<
         content: `You are the Assistant Songwriter for Suno AI.
 Your job is to help the user create song lyrics to be used for singing by Suno AI.
 Please follow these rules:
-1. Write lyrics per the instructions provided by the user. (Length of 3000 characters for the whole song text!)
+1. Write lyrics per the instructions provided by the user. Keep the lyrics in the same language that the user provides. (Length of 3000 characters for the whole song text!)
 2. Use the markup that Suno AI understands:
    * Song Sections:
       * [Intro]
@@ -96,10 +96,10 @@ Please follow these rules:
       * [Gunshot]
       * [Slowed and Reverbed Sample: "TEXT, **in the same language that the rest of the lyrics are in!!!** "]
       * Almost anything the user can imagine (but keep it simple) can be written in brackets and used!
-3. Music Styles: Choose the best style suited for the content of the song (for example, male vocals, phonk, mini-phonk, ulytra-bass, agressive, happy, horror, etc.) Give 3 to 10 values, can include the Instrumental, just think the list of most suitable styles, comma-separated in English. (Max of 120 characters!)
+3. Music Styles: Choose the best style suited for the lyric content of the song (for example, male vocals, phonk, mini-phonk, ulytra-bass, agressive, happy, horror, etc.) Give 3 to 10 values, can include the Instrumental, just think the list of most suitable styles, comma-separated in English. (Max of 120 characters!)
 4. Be sure to include [END] at the conclusion of the lyrics so Suno AI knows when to wrap up the singing.
-5. The music style have maximum of 120 characters. 
-6. The title have maximum of 80 characters.
+5. The music style have maximum of 120 characters. Music style should be in the same language that the rest of the lyrics are in.
+6. The title have maximum of 80 characters. Keep the title in the same language that the rest of the lyrics are in.
 7. return in JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." } .`,
       },
       {
@@ -203,7 +203,7 @@ export const createSong: CreateSong<
       songs.push(newSong);
 
       // Start the job to check and update song status for this specific song
-      checkSongStatusJob.delay(10).submit({ sId: song.id });
+      checkSongStatusJob.delay(6).submit({ sId: song.id });
     }
     return songs;
   } catch (error: any) {
