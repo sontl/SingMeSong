@@ -181,6 +181,7 @@ export const createSong: CreateSong<
     console.log('data: ', data);
     // data is array of songs. Loop through each song and create a new song entity in the database.
     const songs = [];
+    let delay = 5;
     for (const song of data) {
       const newSong = await context.entities.Song.create({
         data: {
@@ -203,7 +204,8 @@ export const createSong: CreateSong<
       songs.push(newSong);
 
       // Start the job to check and update song status for this specific song
-      checkSongStatusJob.delay(6).submit({ sId: song.id });
+      checkSongStatusJob.delay(delay).submit({ sId: song.id });
+      delay += 6; // Increase delay by 6 seconds after each loop
     }
     return songs;
   } catch (error: any) {

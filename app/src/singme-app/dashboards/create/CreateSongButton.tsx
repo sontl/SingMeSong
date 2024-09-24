@@ -28,7 +28,7 @@ const CreateSongButton: React.FC<CreateSongButtonProps> = ({
         title: titleValue,
       } as SunoPayload);
       console.log('songs: ', songs);
-      toast.success('Song created successfully');
+      toast.success('Your melody is getting a spa treatment and makeover');
       onSongCreated(); // Call this function after successful creation
     } catch (error) {
       console.error('Error creating song:', error);
