@@ -28,6 +28,7 @@ interface SongContextType {
   currentPage: CurrentPage;
   setCurrentPage: (page: CurrentPage) => void;
   resetContext: () => void; // Add this new function
+  stopP5Sound: () => void; // Add this new function
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -52,6 +53,7 @@ export const SongContext = createContext<SongContextType>({
   currentPage: 'other',
   setCurrentPage: () => {},
   resetContext: () => {}, // Add this new function
+  stopP5Sound: () => {}, // Add this new function
 });
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -65,6 +67,13 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentPage, setCurrentPage] = useState<CurrentPage>('other');
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const p5SoundRef = useRef<any>(null); // Add this line
+
+  const stopP5Sound = () => {
+    if (p5SoundRef.current && p5SoundRef.current.isPlaying()) {
+      p5SoundRef.current.stop();
+      setIsPlaying(false);
+    }
+  };
 
   const resetContext = () => {
     setCurrentSong(null);
@@ -82,6 +91,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (p5SoundRef.current) {
       p5SoundRef.current.stop();
     }
+    stopP5Sound();
   };
 
   useEffect(() => {
@@ -109,7 +119,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
     audioRef.current.addEventListener('timeupdate', updateProgress);
-    if (p5SoundRef.current) {
+    if (p5SoundRef.current && p5SoundRef.current.addEventListener) {
       p5SoundRef.current.addEventListener('timeupdate', updateProgress);
     }
     return () => audioRef.current.removeEventListener('timeupdate', updateProgress);
@@ -275,7 +285,10 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
         audioRef.current.removeEventListener('ended', handleAudioEnded);
       }
       if (p5SoundRef.current) {
-        p5SoundRef.current.removeEventListener('ended', handleAudioEnded);
+        // check if p5SoundRef.current.removeEventListener is not null and is a function
+        if (p5SoundRef.current.removeEventListener && typeof p5SoundRef.current.removeEventListener === 'function') {
+          p5SoundRef.current.removeEventListener('ended', handleAudioEnded);
+        }
       }
     };
   }, [audioRef]);
@@ -304,6 +317,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       currentPage,
       setCurrentPage,
       resetContext, // Add this new function
+      stopP5Sound, // Add this new function
     }}>
       {children}
     </SongContext.Provider>

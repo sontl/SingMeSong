@@ -21,18 +21,17 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const songTableRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'list' | 'details'>('create');
 
-  const { setCurrentSong, isPlaying, togglePlay, setAllSongs, setIsAudioEnded, isAudioLoading, setCurrentPage } = useContext(SongContext);
+  const { setCurrentPage, stopP5Sound, setAllSongs, setIsAudioEnded, isAudioLoading } = useContext(SongContext);
 
   useEffect(() => {
     setCurrentPage('create');
+    stopP5Sound(); // Stop P5 sound when CreatePage mounts
 
     const mainElement = document.getElementById('defaultCanvas0');
     if (mainElement) {
       mainElement.remove();
     }
-  }, [setCurrentPage]);
-
-
+  }, [setCurrentPage, stopP5Sound]);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
 

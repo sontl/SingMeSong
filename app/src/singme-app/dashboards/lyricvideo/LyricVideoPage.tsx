@@ -8,6 +8,8 @@ import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
 import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import P5MusicPlayer from './P5MusicPlayer';
+// Add this import
+import { FaSpinner } from 'react-icons/fa';
 
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
@@ -36,7 +38,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     isAudioLoading, 
     currentPage,
     setCurrentPage,
-    resetContext
+    resetContext,
+    stopP5Sound
   } = useContext(SongContext);
   const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[0]);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -66,10 +69,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       if (isComponentMounted.current) {
         console.log('Component unmounting, resetting context');
         resetContext();
+        stopP5Sound();
         isComponentMounted.current = false;
       }
     };
-  }, [setCurrentPage, resetContext]);
+  }, [setCurrentPage, resetContext, stopP5Sound]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -80,7 +84,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       console.log('resetContext on initial mount');
     }
   }, [setCurrentPage, resetContext]);
-
 
   useEffect(() => {
     if (songs) {
@@ -118,16 +121,16 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
       const containerWidth = visualizerColumn.clientWidth * 0.96;
       const containerHeight = visualizerColumn.clientHeight * 0.96;
-      const aspectRatio = 4 / 3;
+      const aspectRatio = 16 / 9;
 
       let width, height;
 
       if (containerWidth / containerHeight > aspectRatio) {
-        // Container is wider than 4:3, so we'll use the height as the limiting factor
+        // Container is wider than 16:9, so we'll use the height as the limiting factor
         height = containerHeight;
         width = height * aspectRatio;
       } else {
-        // Container is taller than 4:3, so we'll use the width as the limiting factor
+        // Container is taller than 16:9, so we'll use the width as the limiting factor
         width = containerWidth;
         height = width / aspectRatio;
       }
@@ -207,6 +210,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
           </div>
           {isLoading || isAudioLoading ? (
             <div className="flex items-center justify-center h-64">
+              <FaSpinner className="animate-spin mr-2" size={24} />
               <p className="text-lg">Loading song...</p>
             </div>
           ) : (
