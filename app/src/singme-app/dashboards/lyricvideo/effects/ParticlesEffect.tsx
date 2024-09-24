@@ -57,7 +57,7 @@ export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
 export const ParticlesTitleStyle = (p: p5, title: string) => {
   p.fill(255);
   p.textAlign(p.CENTER, p.CENTER);
-  p.textSize(32);
+  p.textSize(p.height * 0.06);
   p.textStyle(p.BOLD);
   
   // Create a glowing effect

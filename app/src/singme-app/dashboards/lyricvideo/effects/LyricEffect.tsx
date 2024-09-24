@@ -12,7 +12,8 @@ export const LyricEffect = (p: p5, lyrics: Array<{ start: number; end: number; t
         p.noFill();
         p.rect(0, p.height - 80, p.width, 80);
         p.fill(255);
-        p.textSize(20);
+        const textSize = p.height * 0.05; // Calculate text size based on canvas height
+        p.textSize(textSize);
         p.textAlign(p.CENTER, p.CENTER);
         p.text(currentLyric.text, p.width / 2, p.height - 40);
     }
