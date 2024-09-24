@@ -105,13 +105,13 @@ Please follow these rules:
       {
         role: 'user',
         content: chat
-          ? `Based on the following chat: "${chat}", generate random lyrics, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }`
+          ? `Based on the following chat: "${chat}", generate lyrics that suitable for a song, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }`
           : 'Generate random lyrics with random subject, a music style, and a title for a new song in the following JSON format: { "lyrics": "...", "title": "...", "musicStyle": "..." }',
       },
     ];
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.
+      model: 'gpt-4o', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.
       messages,
       temperature: 0.8, // adjust this value to control the randomness of the output
     });

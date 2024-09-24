@@ -48,9 +48,11 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   };
 
   const handleSongCreated = () => {
-    if (songTableRef.current) {
-      songTableRef.current.scrollTop = 0;
-    }
+    setTimeout(() => {
+      if (songTableRef.current) {
+        songTableRef.current.scrollTop = songTableRef.current.scrollHeight + 100;
+      }
+    }, 2000);
     
     // Refetch songs 3 times, after 8, 12, 20 seconds
     setTimeout(() => {

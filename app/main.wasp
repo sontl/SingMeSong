@@ -355,7 +355,7 @@ job updateCompletedSongsJob {
     fn: import { updateCompletedSongs } from "@src/singme-app/jobs/updateCompletedSongs.ts"
   },
   schedule: {
-    cron: "0 * * * *" // every hour
+    cron: "*/15 * * * *" // every 15 minutes
   },
   entities: [Song]
 }

@@ -50,6 +50,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   };
   const { 
     setAllSongs, 
+    allSongs,
     currentSong, 
     isPlaying, 
     togglePlay, 
@@ -249,7 +250,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
               <p>Loading songs...</p>
             ) : (
               <ul className="space-y-2">
-                {songs && songs.map((song) => (
+                {allSongs && allSongs.map((song) => (
                   <li
                     key={song.id}
                     className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
