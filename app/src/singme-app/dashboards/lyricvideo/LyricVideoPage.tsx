@@ -32,6 +32,15 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenDimensions, setFullscreenDimensions] = useState({ width: 0, height: 0 });
   const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(`Error attempting to enable full-screen mode: ${e.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
     setIsFullscreen(!isFullscreen);
     if (!isFullscreen) {
       setFullscreenDimensions({ width: window.innerWidth, height: window.innerHeight });
@@ -103,6 +112,30 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       setAllSongs(sortedSongs);
     }
   }, [songs, setAllSongs]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFullscreenNow = 
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+      
+      setIsFullscreen(!!isFullscreenNow);
+    };
+  
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+  
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
 
   const handleSongClick = async (song: Song) => {
     console.log('handleSongClick');
@@ -193,12 +226,17 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
       {isFullscreen ? (
         <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-          <button
-            onClick={toggleFullscreen}
-            className="absolute top-4 right-4 p-2 text-white hover:bg-gray-800 rounded-full transition-colors duration-200"
-          >
-            <FaCompress size={20} />
-          </button>
+          <div className="absolute top-4 right-4 group">
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 text-white hover:bg-gray-800 rounded-full transition-colors duration-200"
+            >
+              <FaCompress size={20} />
+            </button>
+            <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-white text-gray-800 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              Exit Fullscreen
+            </span>
+          </div>
           <div className="w-full h-full">
             <ReactP5Wrapper sketch={sketch} isFullscreen={isFullscreen} />
           </div>
@@ -228,13 +266,17 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
           <div className="w-full md:w-3/4 p-4 visualizer-column">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Song Visualizer</h2>
-              <button
-                onClick={toggleFullscreen}
-                className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
-              >
-                {isFullscreen ? <FaCompress size={20} /> : <FaExpand size={20} />}
-              </button>
-              
+              <div className="relative group">
+                <button
+                  onClick={toggleFullscreen}
+                  className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
+                >
+                  {isFullscreen ? <FaCompress size={20} /> : <FaExpand size={20} />}
+                </button>
+                <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+                </span>
+              </div>
             </div>
             <div className="mb-4 flex flex-wrap">
               {visualizerEffects.map((effect) => (
