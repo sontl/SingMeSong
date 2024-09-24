@@ -8,10 +8,15 @@ interface DefaultLayoutProps {
   user: AuthUser;
   children: React.ReactNode;
   hideFloatingPlayer?: boolean;
+  isFullscreen?: boolean;
 }
 
-const DefaultLayout: React.FC<DefaultLayoutProps> = ({ user, children, hideFloatingPlayer = false }) => {
+const DefaultLayout: React.FC<DefaultLayoutProps> = ({ user, children, hideFloatingPlayer = false, isFullscreen = false }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (isFullscreen) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">

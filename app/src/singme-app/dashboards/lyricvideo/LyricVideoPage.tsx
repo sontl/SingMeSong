@@ -9,7 +9,7 @@ import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import P5MusicPlayer from './P5MusicPlayer';
 // Add this import
-import { FaSpinner } from 'react-icons/fa';
+import { FaSpinner, FaExpand, FaCompress  } from 'react-icons/fa';
 
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
@@ -29,6 +29,16 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { data: songs, isLoading: isAllSongsLoading } = useQuery(getAllSongsByUser);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenDimensions, setFullscreenDimensions] = useState({ width: 0, height: 0 });
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    if (!isFullscreen) {
+      setFullscreenDimensions({ width: window.innerWidth, height: window.innerHeight });
+    } else {
+      setFullscreenDimensions({ width: 0, height: 0 });
+    }
+  };
   const { 
     setAllSongs, 
     currentSong, 
@@ -116,6 +126,10 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     let fft: p5.FFT;
 
     const calculateCanvasSize = () => {
+      if (isFullscreen) {
+        return fullscreenDimensions;
+      }
+
       const visualizerColumn = document.querySelector('.visualizer-column');
       if (!visualizerColumn) return { width: 0, height: 0 };
 
@@ -145,6 +159,9 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.windowResized = () => {
+      if (isFullscreen) {
+        setFullscreenDimensions({ width: window.innerWidth, height: window.innerHeight });
+      }
       const { width, height } = calculateCanvasSize();
       p.resizeCanvas(width, height);
     };
@@ -173,54 +190,77 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   };
 
   return (
-    <DefaultLayout user={user} hideFloatingPlayer={true}>
-      <div className="flex flex-col md:flex-row h-full">
-        <div className="w-full md:w-1/4 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
-          <h2 className="text-xl font-bold mb-4">Your Songs</h2>
-          {isAllSongsLoading ? (
-            <p>Loading songs...</p>
-          ) : (
-            <ul className="space-y-2">
-              {songs && songs.map((song) => (
-                <li
-                  key={song.id}
-                  className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
-                    selectedSong?.id === song.id ? 'bg-blue-100' : ''
-                  }`}
-                  onClick={() => handleSongClick(song)}
-                >
-                  {song.title}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div className="w-full md:w-3/4 p-4 visualizer-column">
-          <h2 className="text-xl font-bold mb-4">Song Visualizer</h2>
-          <div className="mb-4 flex flex-wrap">
-            {visualizerEffects.map((effect) => (
-              <button
-                key={effect.name}
-                className={`mr-2 mb-2 px-4 py-2 rounded ${currentEffect.name === effect.name ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                onClick={handleEffectChange(effect)}
-              >
-                {effect.name}
-              </button>
-            ))}
+    <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
+      {isFullscreen ? (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+          <button
+            onClick={toggleFullscreen}
+            className="absolute top-4 right-4 p-2 text-white hover:bg-gray-800 rounded-full transition-colors duration-200"
+          >
+            <FaCompress size={20} />
+          </button>
+          <div className="w-full h-full">
+            <ReactP5Wrapper sketch={sketch} isFullscreen={isFullscreen} />
           </div>
-          {isLoading || isAudioLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <FaSpinner className="animate-spin mr-2" size={24} />
-              <p className="text-lg">Loading song...</p>
-            </div>
-          ) : (
-            <div className="m-0 flex justify-center items-center">
-              <ReactP5Wrapper sketch={sketch} />
-            </div>
-          )}
         </div>
-      </div>
-      <P5MusicPlayer />
+      ) : (
+        <div className="flex flex-col md:flex-row h-full">
+          <div className="w-full md:w-1/4 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
+            <h2 className="text-xl font-bold mb-4">Your Songs</h2>
+            {isAllSongsLoading ? (
+              <p>Loading songs...</p>
+            ) : (
+              <ul className="space-y-2">
+                {songs && songs.map((song) => (
+                  <li
+                    key={song.id}
+                    className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
+                      selectedSong?.id === song.id ? 'bg-blue-100' : ''
+                    }`}
+                    onClick={() => handleSongClick(song)}
+                  >
+                    {song.title}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="w-full md:w-3/4 p-4 visualizer-column">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Song Visualizer</h2>
+              <button
+                onClick={toggleFullscreen}
+                className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
+              >
+                {isFullscreen ? <FaCompress size={20} /> : <FaExpand size={20} />}
+              </button>
+              
+            </div>
+            <div className="mb-4 flex flex-wrap">
+              {visualizerEffects.map((effect) => (
+                <button
+                  key={effect.name}
+                  className={`mr-2 mb-2 px-4 py-2 rounded ${currentEffect.name === effect.name ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                  onClick={handleEffectChange(effect)}
+                >
+                  {effect.name}
+                </button>
+              ))}
+              </div>
+            {isLoading || isAudioLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <FaSpinner className="animate-spin mr-2" size={24} />
+                <p className="text-lg">Loading song...</p>
+              </div>
+            ) : (
+              <div className="m-0 flex justify-center items-center">
+                <ReactP5Wrapper sketch={sketch} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {!isFullscreen && <P5MusicPlayer />}
     </DefaultLayout>
   );
 };
