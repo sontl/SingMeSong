@@ -20,7 +20,7 @@ function splitIntoThreeLines(text: string): string[] {
   ];
 }
 
-function processWords(currentLyric: { start: number; end: number; text: string; words?: Array<{ text: string; start: number; end: number }> }): Word[][] {
+function processWords(currentLyric: { start: number; end: number; sentence: string; words?: Array<{ text: string; start: number; end: number }> }): Word[][] {
   if (currentLyric.words && currentLyric.words.length > 0) {
     const totalWords = currentLyric.words.length;
     const wordsPerLine = Math.ceil(totalWords / 3);
@@ -31,7 +31,7 @@ function processWords(currentLyric: { start: number; end: number; text: string; 
       currentLyric.words.slice(wordsPerLine * 2).map(w => ({ ...w, opacity: 0, startTime: w.start, endTime: w.end }))
     ];
   } else {
-    const lines = splitIntoThreeLines(currentLyric.text);
+    const lines = splitIntoThreeLines(currentLyric.sentence);
     const totalWords = lines.reduce((sum, line) => sum + line.split(' ').length, 0);
     const wordDuration = (currentLyric.end - currentLyric.start) / totalWords;
 
@@ -51,7 +51,7 @@ function processWords(currentLyric: { start: number; end: number; text: string; 
   }
 }
 
-export const GlowingLyricEffect = (p: p5, lyrics: Array<{ start: number; end: number; text: string; words?: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => {
+export const GlowingLyricEffect = (p: p5, lyrics: Array<{ start: number; end: number; sentence: string; words?: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => {
     if (!isPlaying) return;
     let currentLyric = lyrics.find(lyric => 
       currentTime >= lyric.start && currentTime <= lyric.end
@@ -65,10 +65,10 @@ export const GlowingLyricEffect = (p: p5, lyrics: Array<{ start: number; end: nu
 
         const lineHeight = p.height * 0.2;
         const totalHeight = lineHeight * 3;
-        let y = p.height / 2 - totalHeight / 2;
+        let y = (p.height / 2 - totalHeight / 2) + lineHeight * 0.5;
 
         p.textAlign(p.CENTER, p.CENTER);
-        p.textSize(lineHeight * 0.8);
+        p.textSize(lineHeight * 0.55);
 
         const sentenceDuration = currentLyric.end - currentLyric.start;
         const totalWords = words.flat().length;

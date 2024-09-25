@@ -121,6 +121,7 @@ model Song {
   updatedAt                 DateTime        @updatedAt
 
   title                     String
+  subtitle                  Json?           // New column to store JSON data
   imageUrl                  String?
   lyric                     String?         @db.Text
   audioUrl                  String?

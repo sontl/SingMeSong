@@ -12,7 +12,7 @@ export type VisualizerEffect = {
   name: string;
   draw: (p: p5, spectrum: number[], energy: number) => void;
   drawTitle: (p: p5, title: string) => void;
-  displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; text: string; words: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => void;
+  displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; sentence: string; words: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => void;
 };
 
 export const visualizerEffects: VisualizerEffect[] = [
@@ -20,13 +20,13 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Particles',
     draw: ParticlesEffect,
     drawTitle: ParticlesTitleStyle,
-    displayLyrics: LyricEffect
+    displayLyrics: GlowingLyricEffect
   },
   {
     name: 'Bars',
     draw: BarsEffect,
     drawTitle: BarsTitleStyle,
-    displayLyrics: LyricEffect
+    displayLyrics: GlowingLyricEffect
   },
   {
     name: 'Circles',
@@ -50,7 +50,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Spectrogram',
     draw: SpectrogramEffect,
     drawTitle: SpectrogramTitleStyle,
-    displayLyrics: GlowingLyricEffect
+    displayLyrics: LyricEffect
   }, 
 
 ];

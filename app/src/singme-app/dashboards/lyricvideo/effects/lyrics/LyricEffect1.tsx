@@ -1,6 +1,6 @@
 import p5 from 'p5';
 
-export const LyricEffect = (p: p5, lyrics: Array<{ start: number; end: number; text: string }>, isPlaying: boolean, currentTime: number) => {
+export const LyricEffect = (p: p5, lyrics: Array<{ start: number; end: number; sentence: string }>, isPlaying: boolean, currentTime: number) => {
     if (!isPlaying) return;
 
     let currentLyric = lyrics.find(lyric => 
@@ -15,6 +15,6 @@ export const LyricEffect = (p: p5, lyrics: Array<{ start: number; end: number; t
         const textSize = p.height * 0.05; // Calculate text size based on canvas height
         p.textSize(textSize);
         p.textAlign(p.CENTER, p.CENTER);
-        p.text(currentLyric.text, p.width / 2, p.height - 40);
+        p.text(currentLyric.sentence, p.width / 2, p.height - 40);
     }
 };
