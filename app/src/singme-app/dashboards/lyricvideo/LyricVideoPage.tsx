@@ -61,7 +61,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     resetContext,
     stopP5Sound
   } = useContext(SongContext);
-  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[0]);
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[4]);
   const canvasRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);

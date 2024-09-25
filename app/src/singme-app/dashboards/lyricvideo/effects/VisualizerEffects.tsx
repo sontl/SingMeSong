@@ -1,11 +1,12 @@
 import p5 from 'p5';
-import { ParticlesEffect, ParticlesTitleStyle } from './ParticlesEffect';
-import { BarsEffect, BarsTitleStyle } from './BarsEffect';
-import { CirclesEffect, CirclesTitleStyle } from './CirclesEffect';
-import { WaveEffect, WaveTitleStyle } from './WaveEffect';
-import { StarfieldEffect, StarfieldTitleStyle } from './StarfieldEffect';
-import { SpectrogramEffect, SpectrogramTitleStyle } from './SpectrogramEffect';
-import { LyricEffect } from './LyricEffect';
+import { ParticlesEffect, ParticlesTitleStyle } from './spectrums/ParticlesEffect';
+import { BarsEffect, BarsTitleStyle } from './spectrums/BarsEffect';
+import { CirclesEffect, CirclesTitleStyle } from './spectrums/CirclesEffect';
+import { WaveEffect, WaveTitleStyle } from './spectrums/WaveEffect';
+import { StarfieldEffect, StarfieldTitleStyle } from './spectrums/StarfieldEffect';
+import { SpectrogramEffect, SpectrogramTitleStyle } from './spectrums/SpectrogramEffect';
+import { LyricEffect } from './lyrics/LyricEffect1';
+import { GlowingLyricEffect} from './lyrics/GlowingLyricEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -31,24 +32,25 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Circles',
     draw: CirclesEffect,
     drawTitle: CirclesTitleStyle,
-    displayLyrics: LyricEffect
+    displayLyrics: GlowingLyricEffect
   },
   {
     name: 'Wave',
     draw: WaveEffect,
     drawTitle: WaveTitleStyle,
-    displayLyrics: LyricEffect
+    displayLyrics: GlowingLyricEffect
   },
   {
     name: 'Starfield',
     draw: StarfieldEffect,
     drawTitle: StarfieldTitleStyle,
-    displayLyrics: LyricEffect
+    displayLyrics: GlowingLyricEffect
   },
   {
     name: 'Spectrogram',
     draw: SpectrogramEffect,
     drawTitle: SpectrogramTitleStyle,
-    displayLyrics: LyricEffect
-  }
+    displayLyrics: GlowingLyricEffect
+  }, 
+
 ];
