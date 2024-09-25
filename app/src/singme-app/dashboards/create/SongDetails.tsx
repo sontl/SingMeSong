@@ -17,12 +17,51 @@ const SongDetails: React.FC<SongDetailsProps> = ({ song }) => {
     );
   }
 
+  const showDownloadIcon = song.audioUrl && song.audioUrl.includes('.mp3');
+
+  const handleDownload = async (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+    if (song.audioUrl) {
+      try {
+        const response = await fetch(song.audioUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${song.title}.mp3`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error downloading file:', error);
+      }
+    }
+  };
+
   return (
     <div className='space-y-4'>
       <img src={song.imageUrl || '/default-cover.jpg'} alt={song.title} className='w-full h-48 object-cover rounded-md' />
       <h2 className='text-2xl font-bold'>{song.title}</h2>
       <p className='text-sm text-gray-500'>{Array.isArray(song.tags) ? song.tags.join(', ') : song.tags}</p>
-      <p className='text-sm text-gray-500'>Created: {new Date(song.createdAt).toLocaleDateString()}</p>
+      <div className='flex items-center'>
+        <p className='text-sm text-gray-500'>Created: {new Date(song.createdAt).toLocaleDateString()}</p>
+        {showDownloadIcon && (
+          <a 
+            href={song.audioUrl || ''} 
+            onClick={handleDownload}
+            className='ml-2 relative group'
+            aria-label="Download MP3"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Download MP3
+            </span>
+          </a>
+        )}
+      </div>
       <div>
         <h3 className='font-semibold mb-2'>Lyrics:</h3>
         <p className='whitespace-pre-wrap'>{song.lyric}</p>
