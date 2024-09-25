@@ -12,7 +12,7 @@ export type VisualizerEffect = {
   name: string;
   draw: (p: p5, spectrum: number[], energy: number) => void;
   drawTitle: (p: p5, title: string) => void;
-  displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; text: string }>, isPlaying: boolean, currentTime: number) => void;
+  displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; text: string; words: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => void;
 };
 
 export const visualizerEffects: VisualizerEffect[] = [
