@@ -32,7 +32,10 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenDimensions, setFullscreenDimensions] = useState({ width: 0, height: 0 });
   const [showFullscreenButton, setShowFullscreenButton] = useState(false);
+  const [showCursor, setShowCursor] = useState(true);
   const fullscreenButtonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((e) => {
@@ -46,8 +49,12 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     setIsFullscreen(!isFullscreen);
     if (!isFullscreen) {
       setFullscreenDimensions({ width: window.innerWidth, height: window.innerHeight });
+      setShowFullscreenButton(false);
+      setShowCursor(false);
     } else {
       setFullscreenDimensions({ width: 0, height: 0 });
+      setShowFullscreenButton(true);
+      setShowCursor(true);
     }
   };
   const { 
@@ -71,31 +78,44 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const handleMouseMove = useCallback(() => {
     if (isFullscreen) {
       setShowFullscreenButton(true);
+      setShowCursor(true);
       
       if (fullscreenButtonTimeoutRef.current) {
         clearTimeout(fullscreenButtonTimeoutRef.current);
       }
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
       
       fullscreenButtonTimeoutRef.current = setTimeout(() => {
         setShowFullscreenButton(false);
-      }, 3000); // Hide after 3 seconds of inactivity
+      }, 3000);
+
+      cursorTimeoutRef.current = setTimeout(() => {
+        setShowCursor(false);
+      }, 3000);
     }
   }, [isFullscreen]);
 
   useEffect(() => {
     if (isFullscreen) {
       window.addEventListener('mousemove', handleMouseMove);
-    } else {
+      // Hide cursor and button immediately when entering fullscreen
       setShowFullscreenButton(false);
-      if (fullscreenButtonTimeoutRef.current) {
-        clearTimeout(fullscreenButtonTimeoutRef.current);
-      }
+      setShowCursor(false);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      setShowFullscreenButton(false);
+      setShowCursor(true);
     }
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       if (fullscreenButtonTimeoutRef.current) {
         clearTimeout(fullscreenButtonTimeoutRef.current);
+      }
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
       }
     };
   }, [isFullscreen, handleMouseMove]);
@@ -280,7 +300,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
       {isFullscreen ? (
         <div 
-          className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+          className={`fixed inset-0 z-50 bg-black flex items-center justify-center ${showCursor ? '' : 'cursor-none'}`}
           onMouseMove={handleMouseMove}
         >
           {showFullscreenButton && (
