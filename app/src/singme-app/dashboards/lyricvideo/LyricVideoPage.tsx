@@ -31,10 +31,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const { data: songs, isLoading: isAllSongsLoading } = useQuery(getAllSongsByUser);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenDimensions, setFullscreenDimensions] = useState({ width: 0, height: 0 });
-  const [showFullscreenButton, setShowFullscreenButton] = useState(false);
-  const [showCursor, setShowCursor] = useState(true);
-  const fullscreenButtonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showCustomMenu, setShowCustomMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -49,14 +47,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     setIsFullscreen(!isFullscreen);
     if (!isFullscreen) {
       setFullscreenDimensions({ width: window.innerWidth, height: window.innerHeight });
-      setShowFullscreenButton(false);
-      setShowCursor(false);
     } else {
       setFullscreenDimensions({ width: 0, height: 0 });
-      setShowFullscreenButton(true);
-      setShowCursor(true);
     }
   };
+
   const { 
     setAllSongs, 
     allSongs,
@@ -75,50 +70,14 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
 
-  const handleMouseMove = useCallback(() => {
-    if (isFullscreen) {
-      setShowFullscreenButton(true);
-      setShowCursor(true);
-      
-      if (fullscreenButtonTimeoutRef.current) {
-        clearTimeout(fullscreenButtonTimeoutRef.current);
-      }
-      if (cursorTimeoutRef.current) {
-        clearTimeout(cursorTimeoutRef.current);
-      }
-      
-      fullscreenButtonTimeoutRef.current = setTimeout(() => {
-        setShowFullscreenButton(false);
-      }, 3000);
-
-      cursorTimeoutRef.current = setTimeout(() => {
-        setShowCursor(false);
-      }, 3000);
-    }
-  }, [isFullscreen]);
-
   useEffect(() => {
     if (isFullscreen) {
-      window.addEventListener('mousemove', handleMouseMove);
       // Hide cursor and button immediately when entering fullscreen
-      setShowFullscreenButton(false);
-      setShowCursor(false);
+      setFullscreenDimensions({ width: window.innerWidth, height: window.innerHeight });
     } else {
-      window.removeEventListener('mousemove', handleMouseMove);
-      setShowFullscreenButton(false);
-      setShowCursor(true);
+      setFullscreenDimensions({ width: 0, height: 0 });
     }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (fullscreenButtonTimeoutRef.current) {
-        clearTimeout(fullscreenButtonTimeoutRef.current);
-      }
-      if (cursorTimeoutRef.current) {
-        clearTimeout(cursorTimeoutRef.current);
-      }
-    };
-  }, [isFullscreen, handleMouseMove]);
+  }, [isFullscreen]);
 
    // Add this effect to remove the <main> element with the canvas after the page is rendered
    useEffect(() => {
@@ -210,13 +169,35 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     setCurrentEffect(effect);
   };
 
-  
+  const handleRightClick = (e: React.MouseEvent) => {
+    if (isFullscreen) {
+      e.preventDefault();
+      setShowCustomMenu(true);
+      setMenuPosition({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleCloseMenu = () => {
+    setShowCustomMenu(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowCustomMenu(false);
+    };
+
+    if (showCustomMenu) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showCustomMenu]);
 
   const sketch = (p: p5) => {
     let fft: p5.FFT;
     let lyrics: any;
-
-    
 
     const calculateCanvasSize = () => {
       if (isFullscreen) {
@@ -259,7 +240,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       p.resizeCanvas(width, height);
     };
 
-
     p.draw = () => {
       p.background(0, 10);
       
@@ -272,7 +252,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
         currentEffect.draw(p, spectrum, energy);
         currentEffect.drawTitle(p, currentSong.title || '');
-        
         
         if (currentSong.subtitle) {
           currentEffect.displayLyrics(p, currentSong.subtitle as any, isPlaying, currentTime);
@@ -300,25 +279,29 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
       {isFullscreen ? (
         <div 
-          className={`fixed inset-0 z-50 bg-black flex items-center justify-center ${showCursor ? '' : 'cursor-none'}`}
-          onMouseMove={handleMouseMove}
+          className="fixed inset-0 z-50 bg-black flex items-center justify-center cursor-none"
+          onContextMenu={handleRightClick}
         >
-          {showFullscreenButton && (
-            <div className="absolute top-4 right-4 group">
-              <button
-                onClick={toggleFullscreen}
-                className="p-2 text-white hover:bg-gray-800 rounded-full transition-colors duration-200"
-              >
-                <FaCompress size={20} />
-              </button>
-              <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-white text-gray-800 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                Exit Fullscreen
-              </span>
-            </div>
-          )}
           <div className="w-full h-full">
             <ReactP5Wrapper sketch={sketch} isFullscreen={isFullscreen} />
           </div>
+          {showCustomMenu && (
+            <div 
+              className="absolute bg-white rounded shadow-lg py-2"
+              style={{ top: menuPosition.y, left: menuPosition.x }}
+            >
+              <button
+                onClick={() => {
+                  toggleFullscreen();
+                  handleCloseMenu();
+                }}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+              >
+                Exit Fullscreen
+              </button>
+              {/* Add more menu items here if needed */}
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-col md:flex-row h-full">
