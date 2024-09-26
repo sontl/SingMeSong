@@ -20,7 +20,7 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
 
   const { data: user, isLoading: isUserLoading } = useAuth();
 
-  const NavLogo = () => <img className='h-8 w-8' src={logo} alt='Your SaaS App' />;
+  const NavLogo = () => <img className='h-8 w-8' src={logo} alt='SingMeSong App' />;
 
   return (
     <header className='absolute inset-x-0 top-0 z-50 dark:bg-boxdark-2'>
@@ -31,7 +31,7 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
             className='flex items-center -m-1.5 p-1.5 text-gray-900 duration-300 ease-in-out hover:text-yellow-500'
           >
             <NavLogo />
-            <span className='ml-2 text-sm font-semibold leading-6 dark:text-white'>Your Saas</span>
+            <span className='ml-2 text-sm font-semibold leading-6 dark:text-white'>SingMeSong</span>
           </a>
         </div>
         <div className='flex lg:hidden'>
