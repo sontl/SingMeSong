@@ -7,6 +7,7 @@ import { useMemo, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { SongProvider } from '../singme-app/context/SongContext';
+
 /**
  * use this component to wrap all child components
  * this is useful for templates, themes, and context
@@ -33,6 +34,10 @@ export default function App({ children }: { children: ReactNode }) {
     return location.pathname.startsWith('/create') || location.pathname.startsWith('/lyric-video');
   }, [location]);
 
+  const isFullscreenVisualizerPage = useMemo(() => {
+    return location.pathname.startsWith('/visualizer/');
+  }, [location]);
+
   useEffect(() => {
     if (user) {
       const lastSeenAt = new Date(user.lastActiveTimestamp);
@@ -55,7 +60,6 @@ export default function App({ children }: { children: ReactNode }) {
 
   return (
     <>
-    
       <div className='min-h-screen dark:text-white dark:bg-boxdark-2'>
         {isAdminDashboard ? (
           <>{children}</>
@@ -63,13 +67,13 @@ export default function App({ children }: { children: ReactNode }) {
           <><SongProvider>{children}</SongProvider></>
         ) : (
           <>
-            {shouldDisplayAppNavBar && <AppNavBar />}
+            {shouldDisplayAppNavBar && !isFullscreenVisualizerPage && <AppNavBar />}
             <div className='mx-auto max-w-7xl sm:px-6 lg:px-8'>{children}</div>
           </>
         )}
       </div>
       <Toaster />
-      <CookieConsentBanner />
+      {!isFullscreenVisualizerPage && <CookieConsentBanner />}
     </>
   );
 }

@@ -363,9 +363,19 @@ job updateCompletedSongsJob {
 
 //#region Lyric Video
 route LyricVideoRoute { path: "/lyric-video", to: LyricVideoPage }
-page LyricVideoPage {
+page LyricVideoPage { 
   authRequired: true,
   component: import LyricVideoPage from "@src/singme-app/dashboards/lyricvideo/LyricVideoPage"
+}
+
+route FullscreenVisualizerRoute { path: "/visualizer/:songId", to: FullscreenVisualizerPage }
+page FullscreenVisualizerPage {
+  component: import FullscreenVisualizerPage from "@src/singme-app/dashboards/lyricvideo/FullscreenVisualizerPage"
+}
+
+query getSongById {
+  fn: import { getSongById } from "@src/singme-app/dashboards/create/operations",
+  entities: [Song]
 }
 
 //#region Contact Form Messages

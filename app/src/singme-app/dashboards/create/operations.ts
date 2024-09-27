@@ -5,6 +5,7 @@ import type {
   GetAllSongsByUser,
   GenerateRandomLyrics,
   CreateSong,
+  GetSongById
 } from 'wasp/server/operations';
 import { HttpError } from 'wasp/server';
 import { GeneratedSchedule } from './schedule';
@@ -226,4 +227,13 @@ export const getAllSongsByUser: GetAllSongsByUser<void, Song[]> = async (_args, 
     },
   });
 };
+
+export const getSongById: GetSongById<{ songId: string }, Song | null> = async ({ songId }, context) => {
+  return context.entities.Song.findUnique({
+    where: {
+      id: songId,
+    },
+  });
+};
+
 //#endregion
