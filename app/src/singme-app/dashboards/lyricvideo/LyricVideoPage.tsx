@@ -38,10 +38,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const isMediaRecorderSetupRef = useRef(false);
+  const [isFlashing, setIsFlashing] = useState(false);
 
   const { 
     setAllSongs, 
-    allSongs,
+    allSongs, 
     currentSong, 
     isPlaying, 
     togglePlay, 
@@ -259,6 +260,19 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
   }, [showCustomMenu]);
 
+  // Add this effect for the flashing animation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setIsFlashing((prev) => !prev);
+      }, 500); // Flash every 500ms
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording]);
+
   const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
     let lyrics: any;
@@ -407,14 +421,22 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
               <h2 className="text-xl font-bold">Song Visualizer</h2>
               <div className="flex items-center">
                 <div className="relative group">
-                <button
-                  onClick={toggleRecording}
-                  className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 mr-2"
-                  aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
-                >
-                  {isRecording ? <FaVideoSlash size={20} color="red" /> : <FaVideo size={20} />}
-                </button>
-                <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">Record visualizer</span>
+                  <button
+                    onClick={toggleRecording}
+                    className={`p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 mr-2 ${
+                      isRecording && isFlashing ? 'bg-red-500' : ''
+                    }`}
+                    aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
+                  >
+                    {isRecording ? (
+                      <FaVideoSlash size={20} color={isFlashing ? 'white' : 'red'} />
+                    ) : (
+                      <FaVideo size={20} />
+                    )}
+                  </button>
+                  <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {isRecording ? 'Stop Recording' : 'Start Recording'}
+                  </span>
                 </div>
                 <div className="relative group">
                 <button
