@@ -5,12 +5,11 @@ import p5 from 'p5';
 import { useQuery, getSongById } from 'wasp/client/operations';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import { FaSpinner } from 'react-icons/fa';
-
-
+import { type Song } from 'wasp/entities';
 
 const FullscreenVisualizerPage = () => {
   const { songId } = useParams<{ songId: string }>();
-  const [currentEffect] = useState<VisualizerEffect>(visualizerEffects[4]);
+  const [currentEffect] = useState<VisualizerEffect>(visualizerEffects[1]);
   const { data: song, isLoading: isSongLoading, error: songError } = useQuery(getSongById, { songId });
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(true);
@@ -23,7 +22,7 @@ const FullscreenVisualizerPage = () => {
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const isMediaRecorderSetupRef = useRef(false);
   const isPlayingRef = useRef(false);
-  const songRef = useRef(null);
+  const songRef = useRef<Song>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const setupMediaRecorder = useCallback(() => {
@@ -31,9 +30,7 @@ const FullscreenVisualizerPage = () => {
 
     console.log('Setting up MediaRecorder');
     const canvas = canvasRef.current;
-    console.log('canvas:', canvas);
     const stream = canvas.captureStream(30);
-    console.log('stream:', stream);
     // Add audio track to the stream if it's not already present
     if (p5SoundRef.current && p5SoundRef.current.sourceNode) {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -48,16 +45,13 @@ const FullscreenVisualizerPage = () => {
     mediaRecorderRef.current = new MediaRecorder(stream,);
     
     mediaRecorderRef.current.ondataavailable = (event) => {
-      console.log('Chunk size:', event.data.size, 'bytes');
       if (event.data.size > 0) {
         recordedChunksRef.current.push(event.data);
       }
     };
 
     mediaRecorderRef.current.onstop = () => {
-      console.log('onstop event fired');
       const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-      console.log('Recording finished. Total size:', blob.size, 'bytes');
       p5SoundRef.current.stop();
       setIsPlaying(false);
       (window as any).recordedVideoBlob = blob;
@@ -91,7 +85,7 @@ const FullscreenVisualizerPage = () => {
       p.background(0, 10);
       frameCount++;
       p.background(0, 10);
-      if (p5SoundRef.current && isPlayingRef.current && songRef.current) {
+      if (p5SoundRef.current  && songRef.current) {
         let spectrum = fft.analyze();
         let energy = fft.getEnergy("bass");
         let currentTime = p5SoundRef.current.currentTime();
@@ -119,7 +113,9 @@ const FullscreenVisualizerPage = () => {
   }, [currentEffect]);
 
   useEffect(() => {
-    songRef.current = song;
+    if (song) {
+      songRef.current = song;
+    }
   }, [song]);
 
   useEffect(() => {
@@ -169,7 +165,7 @@ const FullscreenVisualizerPage = () => {
 
 
   const startRecording = () => {
-    if (p5SoundRef.current && !isPlayingRef.current && isAudioLoaded) {
+    if (p5SoundRef.current && !isPlayingRef.current && isAudioLoaded && isSketchReady) {
       console.log('Starting recording');
       recordedChunksRef.current = [];
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'inactive') {
@@ -188,15 +184,10 @@ const FullscreenVisualizerPage = () => {
 
   const stopRecording = () => {
     console.log('Stopping recording');
-    console.log('isPlaying:', isPlayingRef.current);
-    console.log('mediaRecorderRef.current.state:', mediaRecorderRef.current?.state);
     
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
       console.log('MediaRecorder stopped');
-      console.log('Total chunks:', recordedChunksRef.current.length);
-      console.log('Total size:', recordedChunksRef.current.reduce((acc, chunk) => acc + chunk.size, 0), 'bytes');
-      
       isPlayingRef.current = false;
       setIsPlaying(false);
     } else {

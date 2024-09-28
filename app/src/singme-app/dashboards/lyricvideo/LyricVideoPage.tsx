@@ -9,7 +9,7 @@ import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import P5MusicPlayer from './P5MusicPlayer';
 // Add this import
-import { FaSpinner, FaExpand, FaCompress  } from 'react-icons/fa';
+import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash } from 'react-icons/fa';
 
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
@@ -33,6 +33,88 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [fullscreenDimensions, setFullscreenDimensions] = useState({ width: 0, height: 0 });
   const [showCustomMenu, setShowCustomMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [isRecording, setIsRecording] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const isMediaRecorderSetupRef = useRef(false);
+
+  const { 
+    setAllSongs, 
+    allSongs,
+    currentSong, 
+    isPlaying, 
+    togglePlay, 
+    p5SoundRef, 
+    isAudioLoading, 
+    currentPage,
+    setCurrentPage,
+    resetContext,
+    stopP5Sound
+  } = useContext(SongContext);
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[4]);
+  const isInitialMount = useRef(true);
+  const isComponentMounted = useRef(true);
+
+  const setupMediaRecorder = useCallback(() => {
+    if (isMediaRecorderSetupRef.current || !canvasRef.current) return;
+
+    console.log('Setting up MediaRecorder');
+    const canvas = canvasRef.current;
+    const stream = canvas.captureStream(30);
+
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunksRef.current.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      document.body.appendChild(a);
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'lyric-video-recording.webm';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    };
+
+    mediaRecorderRef.current = mediaRecorder;
+    isMediaRecorderSetupRef.current = true;
+    console.log('MediaRecorder set up');
+  }, []);
+
+
+  const startRecording = useCallback(() => {
+    setupMediaRecorder();
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'inactive') return;
+    console.log('Starting recording');
+    recordedChunksRef.current = [];
+    mediaRecorderRef.current.start();
+    setIsRecording(true);
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') return;
+
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+  }, []);
+
+  const toggleRecording = useCallback(() => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      // Slight delay to ensure recording has started before playing the song
+      p5SoundRef.current.jump(0);
+      // Start recording
+      startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording, currentSong, isPlaying, togglePlay]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -51,24 +133,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       setFullscreenDimensions({ width: 0, height: 0 });
     }
   };
-
-  const { 
-    setAllSongs, 
-    allSongs,
-    currentSong, 
-    isPlaying, 
-    togglePlay, 
-    p5SoundRef, 
-    isAudioLoading, 
-    currentPage,
-    setCurrentPage,
-    resetContext,
-    stopP5Sound
-  } = useContext(SongContext);
-  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[4]);
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const isInitialMount = useRef(true);
-  const isComponentMounted = useRef(true);
 
   useEffect(() => {
     if (isFullscreen) {
@@ -195,7 +259,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
   }, [showCustomMenu]);
 
-  const sketch = (p: p5) => {
+  const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
     let lyrics: any;
 
@@ -226,9 +290,18 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       return { width, height };
     };
 
+    // Properly set up the onended event
+    p5SoundRef.current.onended(() => {
+      console.log('Song ended naturally');
+      if (isRecording) {
+        stopRecording();
+      }
+    });
+
     p.setup = () => {
       const { width, height } = calculateCanvasSize();
-      p.createCanvas(width, height);
+      const canvas = p.createCanvas(width, height);
+      canvasRef.current = canvas.elt;
       fft = new p5.FFT();
     };
 
@@ -268,12 +341,16 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         p.fill(255);
         p.textAlign(p.CENTER, p.CENTER);
         p.textSize(24);
-        p.text("Select a song to visualize", p.width / 2, p.height / 2);
-        p.textSize(16);
-        p.text("Use the floating player to control playback", p.width / 2, p.height / 2 + 30);
+        if (isFullscreen) {
+          p.text("Right click or press ESC to exit fullscreen", p.width / 2, p.height / 2);
+        } else {
+          p.text("Select a song to visualize", p.width / 2, p.height / 2);
+          p.textSize(16);
+          p.text("Use the floating player to control playback", p.width / 2, p.height / 2 + 30);
+        }
       }
     };
-  };
+  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef]);
 
   return (
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
@@ -328,16 +405,29 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
           <div className="w-full md:w-3/4 p-4 visualizer-column">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Song Visualizer</h2>
-              <div className="relative group">
+              <div className="flex items-center">
+                <div className="relative group">
+                <button
+                  onClick={toggleRecording}
+                  className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 mr-2"
+                  aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
+                >
+                  {isRecording ? <FaVideoSlash size={20} color="red" /> : <FaVideo size={20} />}
+                </button>
+                <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">Record visualizer</span>
+                </div>
+                <div className="relative group">
                 <button
                   onClick={toggleFullscreen}
                   className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
+                  aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
                 >
                   {isFullscreen ? <FaCompress size={20} /> : <FaExpand size={20} />}
                 </button>
                 <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
                 </span>
+                </div>
               </div>
             </div>
             <div className="mb-4 flex flex-wrap">
@@ -351,16 +441,16 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                 </button>
               ))}
               </div>
-            {isLoading || isAudioLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <FaSpinner className="animate-spin mr-2" size={24} />
-                <p className="text-lg">Loading song...</p>
-              </div>
-            ) : (
-              <div className="m-0 flex justify-center items-center">
-                <ReactP5Wrapper sketch={sketch} />
-              </div>
-            )}
+              {isLoading || isAudioLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <FaSpinner className="animate-spin mr-2" size={24} />
+                    <p className="text-lg">Loading song...</p>
+                  </div>
+                ) : (
+                  <div className={`m-0 flex justify-center items-center ${isRecording ? 'border-4 border-red-500' : ''}`}>
+                    <ReactP5Wrapper sketch={sketch} />
+                  </div>
+                )}
           </div>
         </div>
       )}
