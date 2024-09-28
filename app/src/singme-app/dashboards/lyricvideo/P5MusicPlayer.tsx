@@ -14,7 +14,9 @@ const P5MusicPlayer: React.FC = () => {
     setIsAudioEnded,
     isAudioLoading,
     setIsAudioLoading,
-    duration
+    duration,
+    isSeeking,
+    setIsSeeking
   } = useContext(SongContext);
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -34,7 +36,7 @@ const P5MusicPlayer: React.FC = () => {
   useEffect(() => {
   
     const updateTime = () => {
-      if (p5SoundRef.current && p5SoundRef.current.isLoaded()) {
+      if (p5SoundRef.current && p5SoundRef.current.isLoaded() && !isSeeking) {
         setCurrentTime(p5SoundRef.current.currentTime());
         setProgress((p5SoundRef.current.currentTime() / p5SoundRef.current.duration()) * 100);
       }
@@ -42,8 +44,7 @@ const P5MusicPlayer: React.FC = () => {
 
     const intervalId = setInterval(updateTime, 100);
     return () => clearInterval(intervalId);
-  }, [p5SoundRef]);
-
+  }, [p5SoundRef, isSeeking]);
 
   const handleVolumeClick = () => {
     setShowVolumeSlider(!showVolumeSlider);
@@ -67,7 +68,9 @@ const P5MusicPlayer: React.FC = () => {
       const clickPercentage = clickPosition / progressBarWidth;
       const newTime = clickPercentage * duration;
       
+      setIsSeeking(true);
       p5SoundRef.current.jump(newTime);
+      setTimeout(() => setIsSeeking(false), 100);
     }
   };
 

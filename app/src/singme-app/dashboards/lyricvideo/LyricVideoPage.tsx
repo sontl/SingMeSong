@@ -33,35 +33,43 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [fullscreenDimensions, setFullscreenDimensions] = useState({ width: 0, height: 0 });
   const [showCustomMenu, setShowCustomMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  const [isRecording, setIsRecording] = useState(false);
+  const isRecordingRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const isMediaRecorderSetupRef = useRef(false);
-  const [isFlashing, setIsFlashing] = useState(false);
+  const isFlashingRef = useRef(false);
+  const flashingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { 
     setAllSongs, 
     allSongs, 
     currentSong, 
     isPlaying, 
+    setIsPlaying,
     togglePlay, 
     p5SoundRef, 
     isAudioLoading, 
     currentPage,
     setCurrentPage,
     resetContext,
-    stopP5Sound
+    stopP5Sound,
+    isSeeking,
+    setIsSeeking
   } = useContext(SongContext);
   const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[4]);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
 
   const setupMediaRecorder = useCallback(() => {
-    if (isMediaRecorderSetupRef.current || !canvasRef.current) return;
+    // if (isMediaRecorderSetupRef.current || !canvasRef.current) return;
 
     console.log('Setting up MediaRecorder');
     const canvas = canvasRef.current;
+    if (!canvas) {
+      console.error('Canvas not found');
+      return;
+    }
     const stream = canvas.captureStream(30);
 
     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
@@ -89,33 +97,62 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     console.log('MediaRecorder set up');
   }, []);
 
-
   const startRecording = useCallback(() => {
     setupMediaRecorder();
     if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'inactive') return;
     console.log('Starting recording');
     recordedChunksRef.current = [];
     mediaRecorderRef.current.start();
-    setIsRecording(true);
+    isRecordingRef.current = true;
+    startFlashing();
   }, []);
 
   const stopRecording = useCallback(() => {
     if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') return;
-
+    console.log('Stopping recording');
     mediaRecorderRef.current.stop();
-    setIsRecording(false);
+    isRecordingRef.current = false;
+    stopFlashing();
   }, []);
 
+  const startFlashing = useCallback(() => {
+    if (flashingIntervalRef.current) return;
+    isFlashingRef.current = true;
+    flashingIntervalRef.current = setInterval(() => {
+      isFlashingRef.current = !isFlashingRef.current;
+      forceUpdate(); // We'll define this function to trigger a re-render
+    }, 500);
+  }, []);
+
+  const stopFlashing = useCallback(() => {
+    if (flashingIntervalRef.current) {
+      clearInterval(flashingIntervalRef.current);
+      flashingIntervalRef.current = null;
+    }
+    isFlashingRef.current = false;
+    forceUpdate(); // Trigger a re-render to update the UI
+  }, []);
+
+  // Force update function to trigger re-renders when needed
+  const [, updateState] = useState({});
+  const forceUpdate = useCallback(() => updateState({}), []);
+
   const toggleRecording = useCallback(() => {
-    if (isRecording) {
+    if (isRecordingRef.current) {
       stopRecording();
     } else {
-      // Slight delay to ensure recording has started before playing the song
+      setIsSeeking(true);
       p5SoundRef.current.jump(0);
-      // Start recording
-      startRecording();
+      
+      setTimeout(() => {
+        setIsSeeking(false);
+        //wait for 100ms to make sure the seek is complete
+        setTimeout(() => {
+          startRecording();
+        }, 100);
+      }, 100);
     }
-  }, [isRecording, startRecording, stopRecording, currentSong, isPlaying, togglePlay]);
+  }, [startRecording, stopRecording, setIsSeeking]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -153,7 +190,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   }, []);
 
   useEffect(() => {
-    console.log('Setting current page to lyricVideo');
+   
     setCurrentPage('lyricVideo');
 
     // This effect runs only once when the component mounts
@@ -260,18 +297,14 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
   }, [showCustomMenu]);
 
-  // Add this effect for the flashing animation
+  // Clean up interval on component unmount
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setIsFlashing((prev) => !prev);
-      }, 500); // Flash every 500ms
-    }
     return () => {
-      if (interval) clearInterval(interval);
+      if (flashingIntervalRef.current) {
+        clearInterval(flashingIntervalRef.current);
+      }
     };
-  }, [isRecording]);
+  }, []);
 
   const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
@@ -304,19 +337,29 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       return { width, height };
     };
 
-    // Properly set up the onended event
-    p5SoundRef.current.onended(() => {
-      console.log('Song ended naturally');
-      if (isRecording) {
-        stopRecording();
-      }
-    });
-
     p.setup = () => {
       const { width, height } = calculateCanvasSize();
       const canvas = p.createCanvas(width, height);
       canvasRef.current = canvas.elt;
       fft = new p5.FFT();
+      console.log('setup p5');
+      // Set up the onended event
+      p5SoundRef.current.onended(() => {
+        if (!isSeeking) {
+          console.log('Song ended naturally');
+          if (isRecordingRef.current) {
+            stopRecording();
+          }
+          if (isPlaying) {
+            setIsPlaying(false);
+          }
+          p.noLoop();
+          return;
+          
+        } else {
+          console.log('Seek operation detected, not ending recording');
+        }
+      });
     };
 
     p.windowResized = () => {
@@ -364,7 +407,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         }
       }
     };
-  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef]);
+  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking]);
 
   return (
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
@@ -424,18 +467,18 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                   <button
                     onClick={toggleRecording}
                     className={`p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 mr-2 ${
-                      isRecording && isFlashing ? 'bg-red-500' : ''
+                      isRecordingRef.current && isFlashingRef.current ? 'bg-red-500' : ''
                     }`}
-                    aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
+                    aria-label={isRecordingRef.current ? 'Stop Recording' : 'Start Recording'}
                   >
-                    {isRecording ? (
-                      <FaVideoSlash size={20} color={isFlashing ? 'white' : 'red'} />
+                    {isRecordingRef.current ? (
+                      <FaVideoSlash size={20} color={isFlashingRef.current ? 'white' : 'red'} />
                     ) : (
                       <FaVideo size={20} />
                     )}
                   </button>
                   <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {isRecording ? 'Stop Recording' : 'Start Recording'}
+                    {isRecordingRef.current ? 'Stop Recording' : 'Start Recording'}
                   </span>
                 </div>
                 <div className="relative group">
@@ -469,7 +512,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                     <p className="text-lg">Loading song...</p>
                   </div>
                 ) : (
-                  <div className={`m-0 flex justify-center items-center ${isRecording ? 'border-4 border-red-500' : ''}`}>
+                  <div className={`m-0 flex justify-center items-center ${isRecordingRef.current ? 'border-4 border-red-500' : ''}`}>
                     <ReactP5Wrapper sketch={sketch} />
                   </div>
                 )}

@@ -29,6 +29,8 @@ interface SongContextType {
   setCurrentPage: (page: CurrentPage) => void;
   resetContext: () => void; // Add this new function
   stopP5Sound: () => void; // Add this new function
+  isSeeking: boolean;
+  setIsSeeking: (isSeeking: boolean) => void;
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -54,6 +56,8 @@ export const SongContext = createContext<SongContextType>({
   setCurrentPage: () => {},
   resetContext: () => {}, // Add this new function
   stopP5Sound: () => {}, // Add this new function
+  isSeeking: false,
+  setIsSeeking: () => {},
 });
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -65,6 +69,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAudioEnded, setIsAudioEnded] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState<CurrentPage>('other');
+  const [isSeeking, setIsSeeking] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const p5SoundRef = useRef<any>(null); // Add this line
 
@@ -317,6 +322,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentPage,
       resetContext, // Add this new function
       stopP5Sound, // Add this new function
+      isSeeking,
+      setIsSeeking,
     }}>
       {children}
     </SongContext.Provider>
