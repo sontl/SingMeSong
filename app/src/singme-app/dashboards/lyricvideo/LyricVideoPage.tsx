@@ -59,7 +59,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     isSeeking,
     setIsSeeking
   } = useContext(SongContext);
-  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[6]);
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[7]);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
@@ -371,7 +371,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       });
 
       // Load the image if available
-      if (currentImageUrl) {
+      if (currentImageUrl && currentEffect.loadImage) {
         currentEffect.loadImage?.(p, currentImageUrl);
       }
     };
