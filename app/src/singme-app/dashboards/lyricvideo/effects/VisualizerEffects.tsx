@@ -9,6 +9,7 @@ import { LyricEffect } from './lyrics/LyricEffect1';
 import { GlowingLyricEffect} from './lyrics/GlowingLyricEffect';
 import { ImageWaveEffect, ImageWaveTitleStyle, loadSongImage } from './spectrums/ImageWaveEffect';
 import { ShadowLyricEffect, loadJosefinSansFont } from './lyrics/ShadowLyricEffect';
+import { RandomHighlightLyricEffect } from './lyrics/RandomHighlightLyricEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -88,7 +89,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'ImageWave',
     draw: ImageWaveEffect,
     drawTitle: ImageWaveTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => ShadowLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04, fontSize: 0.5 }),
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => RandomHighlightLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04, fontSize: 0.66 }),
     loadImage: loadSongImage,
     initConfig: (p: p5) => {
       p.colorMode(p.RGB);

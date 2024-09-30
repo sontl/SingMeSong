@@ -1,14 +1,28 @@
 import p5 from 'p5';
 
 let songImage: p5.Image | null = null;
+let lastShakeTime = 0;
+const shakeInterval = 500; // Minimum time between shakes in milliseconds
+const energyThreshold = 200; // Minimum energy to trigger a shake (0-255)
 
 export const ImageWaveEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]) => {
-  // Draw the song image on the right side
+  let shakeX = 0;
+  let shakeY = 0;
+
+  // Only shake if energy is above threshold and enough time has passed since last shake
+  if (energy > energyThreshold && p.millis() - lastShakeTime > shakeInterval) {
+    const maxShake = 10; // Increased maximum shake amount
+    shakeX = p.map(energy, energyThreshold, 255, 0, maxShake) * (Math.random() * 2 - 1);
+    shakeY = p.map(energy, energyThreshold, 255, 0, maxShake) * (Math.random() * 2 - 1);
+    lastShakeTime = p.millis();
+  }
+
+  // Draw the song image on the right side with shake effect
   if (songImage) {
     const targetWidth = p.width * 0.36; // Target width is 1/4 of canvas width
     const targetHeight = p.height; // Target height is full canvas height
-    const imageX = p.width - targetWidth;
-    const imageY = 0;
+    const imageX = p.width - targetWidth + shakeX; // Apply shake to X position
+    const imageY = 0 + shakeY; // Apply shake to Y position
 
     // Calculate scaling factor to fit the image height
     const scale = targetHeight / songImage.height;
@@ -53,10 +67,12 @@ export const ImageWaveEffect = (p: p5, spectrum: number[], energy: number, wavef
 };
 
 export const ImageWaveTitleStyle = (p: p5, title: string) => {
-  p.fill(255);
-  p.textSize(32);
+  p.fill(0);
+  p.textSize(26);
+  //make text bold
+  p.textStyle(p.BOLD);
   p.textAlign(p.LEFT, p.TOP);
-  p.text(title, 20, 20);
+  p.text(title, 34, 34);
 };
 
 // Modify the loadSongImage function
