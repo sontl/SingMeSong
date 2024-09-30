@@ -18,7 +18,8 @@ export type VisualizerEffect = {
   loadImage?: (p: p5, imageUrl: string) => void;
   initConfig: (p: p5) => void;
   config?: {
-    leftMargin: number;
+    leftMargin?: number;
+    fontSize?: number;
   };
 };
 
@@ -87,7 +88,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'ImageWave',
     draw: ImageWaveEffect,
     drawTitle: ImageWaveTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => ShadowLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04 }),
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => ShadowLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04, fontSize: 0.5 }),
     loadImage: loadSongImage,
     initConfig: (p: p5) => {
       p.colorMode(p.RGB);

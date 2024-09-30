@@ -67,11 +67,10 @@ export const ShadowLyricEffect = (
   lyrics: Array<{ start: number; end: number; sentence: string; words?: Array<{ text: string; start: number; end: number }> }>,
   isPlaying: boolean,
   currentTime: number,
-  config: { leftMargin: number }
+  config: { leftMargin: number | null; fontSize: number }
 ) => {
   if (!isPlaying) return;
 
-  // Use the font if it's loaded
   if (josefinSans) {
       p.textFont(josefinSans);
   }
@@ -86,24 +85,24 @@ export const ShadowLyricEffect = (
           words = processWords(currentLyric);
       }
 
-      // Reduce line height and adjust font size
-      const lineHeight = p.height * 0.15; // Reduced from 0.2
+      const lineHeight = p.height * 0.15;
       const totalHeight = lineHeight * 3;
       let y = (p.height / 2 - totalHeight / 2) + lineHeight * 0.5;
 
-      p.textAlign(p.LEFT, p.CENTER);
-      p.textSize(lineHeight * 0.50); // Reduced from 0.55
+      p.textAlign(config.leftMargin !== null ? p.LEFT : p.CENTER, p.CENTER);
+      p.textSize(config.fontSize ? config.fontSize * lineHeight : lineHeight * 0.50);
 
       const sentenceDuration = currentLyric.end - currentLyric.start;
       const totalWords = words.flat().length;
       const fadeOutDuration = sentenceDuration / totalWords * 3;
 
-      // Use the configurable left margin
-      const leftMargin = p.width * config.leftMargin;
-
       words.forEach((line, lineIndex) => {
-          // Start x position from the left margin
-          let x = leftMargin;
+          let x = config.leftMargin !== null ? p.width * config.leftMargin : p.width / 2;
+          
+          if (config.leftMargin === null) {
+              const lineWidth = line.reduce((sum, word) => sum + p.textWidth(word.text + ' '), 0);
+              x -= lineWidth / 2;
+          }
           
           line.forEach((word, wordIndex) => {
               const fadeInDuration = (word.endTime - word.startTime) * 0.4;
@@ -115,19 +114,15 @@ export const ShadowLyricEffect = (
                       word.opacity = p.map(currentTime, word.endTime, word.endTime + fadeOutDuration, 255, 0);
                   }
 
-                  // Apply shadow effect
                   p.drawingContext.shadowBlur = 10;
                   p.drawingContext.shadowColor = 'rgba(0, 0, 0, 0.5)';
                   
-                  // Switch to RGB color mode before setting the fill color
                   p.colorMode(p.RGB);
-                  p.fill(0, 0, 0, word.opacity); // Black color with opacity
+                  p.fill(0, 0, 0, word.opacity);
                   p.text(word.text, x, y + lineHeight * lineIndex);
                   
-                  // Switch back to HSB color mode for consistency with the rest of the sketch
                   p.colorMode(p.HSB);
                   
-                  // Reset shadow for next word
                   p.drawingContext.shadowBlur = 0;
               }
 
