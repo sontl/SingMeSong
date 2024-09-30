@@ -11,6 +11,7 @@ import { ImageWaveEffect, ImageWaveTitleStyle, loadSongImage } from './spectrums
 import { ShadowLyricEffect, loadJosefinSansFont } from './lyrics/ShadowLyricEffect';
 import { RandomHighlightLyricEffect } from './lyrics/RandomHighlightLyricEffect';
 import { SixLineFadeEffect } from './lyrics/SixLineFadeEffect';
+import { OceanWaveEffect, OceanWaveTitleStyle } from './spectrums/OceanWaveEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -98,5 +99,18 @@ export const visualizerEffects: VisualizerEffect[] = [
       p.background(240, 240, 240);
       loadJosefinSansFont(p);  // Load the font during initialization
     }
+  },
+  {
+    name: 'OceanWave',
+    draw: OceanWaveEffect,
+    drawTitle: OceanWaveTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => {
+      p.colorMode(p.HSB);
+      p.background(0);
+    },
+    config: {
+      leftMargin: 0.1,
+    },
   },
 ];
