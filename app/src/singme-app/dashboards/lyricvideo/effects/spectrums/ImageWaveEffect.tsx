@@ -51,19 +51,22 @@ export const ImageWaveEffect = (p: p5, spectrum: number[], energy: number, wavef
   const barGap = 5;
   const numBars = Math.floor(waveWidth / (barWidth + barGap));
   
+  // New code: Use a smaller portion of the waveform
+  const waveformSubsample = 4; // Adjust this value to control the "speed" of the waveform
+  const waveformStart = Math.floor(p.frameCount % (waveform.length / waveformSubsample)) * waveformSubsample;
+  
   for (let i = 0; i < numBars; i++) {
-    const waveformIndex = Math.floor(p.map(i, 0, numBars, 0, waveform.length));
-    const barHeight = p.map(Math.abs(waveform[waveformIndex]), 0, 1, 0, waveHeight);
+    const waveformIndex = (waveformStart + Math.floor(p.map(i, 0, numBars, 0, waveform.length / waveformSubsample))) % waveform.length;
+    const nextIndex = (waveformIndex + 1) % waveform.length;
+    const t = (i % (waveform.length / waveformSubsample)) / (waveform.length / waveformSubsample);
+    const interpolatedValue = p.lerp(Math.abs(waveform[waveformIndex]), Math.abs(waveform[nextIndex]), t);
+    
+    const barHeight = p.map(interpolatedValue, 0, 1, 0, waveHeight);
     const x = margin + i * (barWidth + barGap);
     const y = waveY + waveHeight / 2 - barHeight / 2;
     
     p.rect(x, y, barWidth, barHeight, 2); // Rounded corners with 2px radius
   }
-
-  // Draw the center line
-  p.stroke(255, 255, 255, 100); // Semi-transparent white
-  p.strokeWeight(1);
-  p.line(margin, waveY + waveHeight / 2, margin + waveWidth, waveY + waveHeight / 2);
 };
 
 export const ImageWaveTitleStyle = (p: p5, title: string) => {

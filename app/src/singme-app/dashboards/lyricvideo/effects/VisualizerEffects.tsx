@@ -10,6 +10,7 @@ import { GlowingLyricEffect} from './lyrics/GlowingLyricEffect';
 import { ImageWaveEffect, ImageWaveTitleStyle, loadSongImage } from './spectrums/ImageWaveEffect';
 import { ShadowLyricEffect, loadJosefinSansFont } from './lyrics/ShadowLyricEffect';
 import { RandomHighlightLyricEffect } from './lyrics/RandomHighlightLyricEffect';
+import { SixLineFadeEffect } from './lyrics/SixLineFadeEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -39,10 +40,11 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Bars',
     draw: BarsEffect,
     drawTitle: BarsTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.5, textColor: p.color(255, 255, 255) }),
     initConfig: (p: p5) => p.background(0),
     config: {
       leftMargin: 0.1, // 10% of screen width
+      fontSize: 0.86,
     },
   },
   {
@@ -79,7 +81,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Spectrogram',
     draw: SpectrogramEffect,
     drawTitle: SpectrogramTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => LyricEffect(p, lyrics, isPlaying, currentTime),
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.36, textColor: p.color(255, 255, 255) }),
     initConfig: (p: p5) => p.background(0),
     config: {
       leftMargin: 0.1, // 10% of screen width
