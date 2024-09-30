@@ -89,10 +89,10 @@ const FullscreenVisualizerPage = () => {
         let spectrum = fft.analyze();
         let energy = fft.getEnergy("bass");
         let currentTime = p5SoundRef.current.currentTime();
-
+        let waveform = fft.waveform();
         p.colorMode(p.HSB);
 
-        currentEffect.draw(p, spectrum, energy);
+        currentEffect.draw(p, spectrum, energy, waveform);
         currentEffect.drawTitle(p, songRef.current.title || '');
         
         if (songRef.current.subtitle) {

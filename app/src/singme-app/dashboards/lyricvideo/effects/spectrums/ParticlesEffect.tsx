@@ -19,7 +19,7 @@ class Particle {
     this.vel.add(this.acc);
     this.pos.add(this.vel);
     this.acc.mult(0);
-
+    
     if (energy > 230) {
       this.pos.y = p.random(p.height);
     }
@@ -55,6 +55,7 @@ export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
 };
 
 export const ParticlesTitleStyle = (p: p5, title: string) => {
+  p.colorMode(p.HSB);
   p.fill(255);
   p.textAlign(p.CENTER, p.CENTER);
   p.textSize(p.height * 0.06);

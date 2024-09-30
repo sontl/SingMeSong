@@ -7,12 +7,19 @@ import { StarfieldEffect, StarfieldTitleStyle } from './spectrums/StarfieldEffec
 import { SpectrogramEffect, SpectrogramTitleStyle } from './spectrums/SpectrogramEffect';
 import { LyricEffect } from './lyrics/LyricEffect1';
 import { GlowingLyricEffect} from './lyrics/GlowingLyricEffect';
+import { ImageWaveEffect, ImageWaveTitleStyle, loadSongImage } from './spectrums/ImageWaveEffect';
+import { ShadowLyricEffect, loadJosefinSansFont } from './lyrics/ShadowLyricEffect';
 
 export type VisualizerEffect = {
   name: string;
-  draw: (p: p5, spectrum: number[], energy: number) => void;
+  draw: (p: p5, spectrum: number[], energy: number, waveform: number[]) => void;
   drawTitle: (p: p5, title: string) => void;
   displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; sentence: string; words: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => void;
+  loadImage?: (p: p5, imageUrl: string) => void;
+  initConfig: (p: p5) => void;
+  config?: {
+    leftMargin: number;
+  };
 };
 
 export const visualizerEffects: VisualizerEffect[] = [
@@ -20,37 +27,72 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Particles',
     draw: ParticlesEffect,
     drawTitle: ParticlesTitleStyle,
-    displayLyrics: GlowingLyricEffect
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0, 10),
+    config: {
+      leftMargin: 0.1, // 10% of screen width
+    },  
   },
   {
     name: 'Bars',
     draw: BarsEffect,
     drawTitle: BarsTitleStyle,
-    displayLyrics: GlowingLyricEffect
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0),
+    config: {
+      leftMargin: 0.1, // 10% of screen width
+    },
   },
   {
     name: 'Circles',
     draw: CirclesEffect,
     drawTitle: CirclesTitleStyle,
-    displayLyrics: GlowingLyricEffect
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0),
+    config: {
+      leftMargin: 0.1, // 10% of screen width
+    },
   },
   {
     name: 'Wave',
     draw: WaveEffect,
     drawTitle: WaveTitleStyle,
-    displayLyrics: GlowingLyricEffect
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0),
+    config: {
+      leftMargin: 0.1, // 10% of screen width
+    },
   },
   {
     name: 'Starfield',
     draw: StarfieldEffect,
     drawTitle: StarfieldTitleStyle,
-    displayLyrics: GlowingLyricEffect
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0),
+    config: {
+      leftMargin: 0.1, // 10% of screen width
+    },
   },
   {
     name: 'Spectrogram',
     draw: SpectrogramEffect,
     drawTitle: SpectrogramTitleStyle,
-    displayLyrics: LyricEffect
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => LyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0),
+    config: {
+      leftMargin: 0.1, // 10% of screen width
+    },
   }, 
-
+  {
+    name: 'ImageWave',
+    draw: ImageWaveEffect,
+    drawTitle: ImageWaveTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => ShadowLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04 }),
+    loadImage: loadSongImage,
+    initConfig: (p: p5) => {
+      p.colorMode(p.RGB);
+      p.background(240, 240, 240);
+      loadJosefinSansFont(p);  // Load the font during initialization
+    }
+  },
 ];

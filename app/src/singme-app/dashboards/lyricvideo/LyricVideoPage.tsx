@@ -8,6 +8,8 @@ import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
 import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import P5MusicPlayer from './P5MusicPlayer';
+import { clearSongImage } from './effects/spectrums/ImageWaveEffect';
+
 // Add this import
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash } from 'react-icons/fa';
 
@@ -57,9 +59,10 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     isSeeking,
     setIsSeeking
   } = useContext(SongContext);
-  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[4]);
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[6]);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
 
   const setupMediaRecorder = useCallback(() => {
     // if (isMediaRecorderSetupRef.current || !canvasRef.current) return;
@@ -257,6 +260,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     console.log('handleSongClick');
     setIsLoading(true);
     setSelectedSong(song);
+    
+    // Clear the previous image and set the new image URL
+    clearSongImage();
+    setCurrentImageUrl(song.imageUrl || null);
+
     try {
       await togglePlay(song);
     } catch (error) {
@@ -338,6 +346,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.setup = () => {
+     
       const { width, height } = calculateCanvasSize();
       const canvas = p.createCanvas(width, height);
       canvasRef.current = canvas.elt;
@@ -360,6 +369,11 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
           console.log('Seek operation detected, not ending recording');
         }
       });
+
+      // Load the image if available
+      if (currentImageUrl) {
+        currentEffect.loadImage?.(p, currentImageUrl);
+      }
     };
 
     p.windowResized = () => {
@@ -371,16 +385,13 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.draw = () => {
-      p.background(0, 10);
-      
       if (p5SoundRef.current && isPlaying && currentSong) {
         let spectrum = fft.analyze();
         let energy = fft.getEnergy("bass");
+        let waveform = fft.waveform();
         let currentTime = p5SoundRef.current.currentTime();
-
-        p.colorMode(p.HSB);
-
-        currentEffect.draw(p, spectrum, energy);
+        currentEffect.initConfig(p);
+        currentEffect.draw(p, spectrum, energy, waveform);
         currentEffect.drawTitle(p, currentSong.title || '');
         
         if (currentSong.subtitle) {
@@ -407,7 +418,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         }
       }
     };
-  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking]);
+  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking, currentImageUrl]);
 
   return (
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
