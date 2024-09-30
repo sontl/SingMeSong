@@ -77,13 +77,18 @@ export const SixLineFadeEffect = (
   const fadeInStaggerDelay = 0.5; // 0.5 second delay between sentences for fade-in
   const fadeOutDuration = 1; // 1 second fade-out for each sentence
   const fadeOutStaggerDelay = 0.3; // 0.3 second delay between sentences for fade-out
+  const moveRightDuration = 0.5; // 0.5 second for the move right animation
+  const moveRightDistance = p.width * 0.02; // Move right by 2% of the screen width
 
   currentLines.forEach((line, index) => {
-    const x = config.leftMargin !== null ? p.width * config.leftMargin : p.width / 2;
+    const baseX = config.leftMargin !== null ? p.width * config.leftMargin : p.width / 2;
+    let x = baseX;
     let opacity = 255;
 
     const lineStartTime = line.start;
     const lineEndTime = lineStartTime + fadeInDuration;
+    const lineMoveStartTime = lineEndTime;
+    const lineMoveEndTime = lineMoveStartTime + moveRightDuration;
     const lineFadeOutStartTime = fadeOutStartTime + index * fadeOutStaggerDelay;
     const lineFadeOutEndTime = lineFadeOutStartTime + fadeOutDuration;
 
@@ -92,9 +97,16 @@ export const SixLineFadeEffect = (
     } else if (currentTime >= lineStartTime && currentTime < lineEndTime) {
       // Staggered fade-in for each sentence
       opacity = p.map(currentTime, lineStartTime, lineEndTime, 0, 255, true);
+    } else if (currentTime >= lineMoveStartTime && currentTime < lineMoveEndTime) {
+      // Move right animation
+      x = p.map(currentTime, lineMoveStartTime, lineMoveEndTime, baseX, baseX + moveRightDistance, true);
+    } else if (currentTime >= lineMoveEndTime && currentTime < lineFadeOutStartTime) {
+      // Keep the line at the right position
+      x = baseX + moveRightDistance;
     } else if (currentTime >= lineFadeOutStartTime && currentTime <= lineFadeOutEndTime) {
       // Staggered fade-out for each sentence
       opacity = p.map(currentTime, lineFadeOutStartTime, lineFadeOutEndTime, 255, 0, true);
+      x = baseX + moveRightDistance;
     } else if (currentTime > lineFadeOutEndTime) {
       opacity = 0;
     }
