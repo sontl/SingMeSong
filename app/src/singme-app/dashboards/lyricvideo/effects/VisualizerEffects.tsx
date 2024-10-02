@@ -14,7 +14,7 @@ import { SixLineFadeEffect } from './lyrics/SixLineFadeEffect';
 import { OceanWaveEffect, OceanWaveTitleStyle } from './spectrums/OceanWaveEffect';
 import { RollingLyricEffect } from './lyrics/RollingLyricEffect';
 import { PastelWaves3DEffect, PastelWaves3DTitleStyle, initPastelWaves3D } from './spectrums/PastelWaves3DEffect';
-
+import { EverglowEffect, EverglowTitleStyle, initEverglowEffect, loadEverglowImage } from './spectrums/EverglowEffect';
 export type VisualizerEffect = {
   name: string;
   draw: (p: p5, spectrum: number[], energy: number, waveform: number[]) => void;
@@ -129,5 +129,23 @@ export const visualizerEffects: VisualizerEffect[] = [
         waveSpeed: 0.03
       }),
     initConfig: initPastelWaves3D,
+  },
+  {
+    name: 'Everglow',
+    draw: EverglowEffect,
+    drawTitle: EverglowTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
+        fontSize: 0.04, 
+        bottomMargin: 0.1, 
+        fadeInDuration: 0.5, 
+        fadeOutDuration: 0.5,
+        enableWaveEffect: true,
+        waveAmplitude: 3,
+        waveFrequency: 0.05,
+        waveSpeed: 0.03
+      }),
+    initConfig: initEverglowEffect,
+    loadImage: loadEverglowImage,
   },
 ];
