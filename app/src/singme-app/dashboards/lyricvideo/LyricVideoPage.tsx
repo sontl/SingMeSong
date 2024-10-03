@@ -372,7 +372,9 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
       // Load the image if available
       if (currentImageUrl && currentEffect.loadImage) {
-        currentEffect.loadImage?.(p, currentImageUrl);
+        //load large image 
+        const largeImageUrl = currentImageUrl.replace('image', 'image_large');
+        currentEffect.loadImage?.(p, largeImageUrl);
       }
     };
 
