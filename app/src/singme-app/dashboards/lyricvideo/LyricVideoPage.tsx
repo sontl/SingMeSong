@@ -261,11 +261,21 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     setIsLoading(true);
     setSelectedSong(song);
     
+    // Stop the currently playing song, if any
+    if (currentSong && p5SoundRef.current) {
+      p5SoundRef.current.stop();
+      setIsPlaying(false);
+    }
+
     // Clear the previous image and set the new image URL
     clearSongImage();
     setCurrentImageUrl(song.imageUrl || null);
 
     try {
+      // Reset the audio context
+      resetContext();
+      
+      // Play the new song
       await togglePlay(song);
     } catch (error) {
       console.error('Error playing song:', error);
