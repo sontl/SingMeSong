@@ -22,7 +22,8 @@ export default function App({ children }: { children: ReactNode }) {
       location.pathname !== '/login' &&
       location.pathname !== '/signup' &&
       location.pathname !== '/create' &&
-      location.pathname !== '/lyric-video'
+      location.pathname !== '/lyric-video' &&
+      location.pathname !== '/transcribe'
     );
   }, [location]);
 
@@ -31,7 +32,7 @@ export default function App({ children }: { children: ReactNode }) {
   }, [location]);
 
   const isUserDashboard = useMemo(() => {
-    return location.pathname.startsWith('/create') || location.pathname.startsWith('/lyric-video');
+    return location.pathname.startsWith('/create') || location.pathname.startsWith('/lyric-video') || location.pathname.startsWith('/transcribe');
   }, [location]);
 
   const isFullscreenVisualizerPage = useMemo(() => {
