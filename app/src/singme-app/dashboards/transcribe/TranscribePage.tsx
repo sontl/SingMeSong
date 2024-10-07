@@ -14,28 +14,6 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser);
   const { setCurrentPage } = useContext(SongContext);
-  const [containerHeight, setContainerHeight] = useState('auto');
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [listHeight, setListHeight] = useState('auto');
-  const listContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const updateListHeight = () => {
-      if (listContainerRef.current) {
-        const containerHeight = listContainerRef.current.clientHeight;
-        const headerHeight = 56; // Approximate height of the header
-        const listHeight = containerHeight - headerHeight;
-        listContainerRef.current.style.height = `${listHeight}px`;
-      }
-    };
-
-    updateListHeight();
-    window.addEventListener('resize', updateListHeight);
-
-    return () => {
-      window.removeEventListener('resize', updateListHeight);
-    };
-  }, []);
 
   const isTranscribeDisabled = !selectedSong || (selectedSong && selectedSong.subtitle);
 
@@ -63,15 +41,13 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
       if (selectedSong) {
         result = await transcribeSong(selectedSong.id);
       } else if (uploadedFile) {
-        // Implement file upload and transcription logic here
-        // This might involve creating a new song entry and then transcribing it
         toast.error('File upload transcription not implemented yet');
         return;
       }
 
       if (result && result.success) {
         toast.success('Transcription completed successfully');
-        refetch();  // Refresh the song list
+        refetch();
       } else {
         toast.error('Transcription failed');
       }
@@ -94,16 +70,14 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
   return (
     <DefaultLayout user={user}>
-      <div className='mx-auto max-w-270 h-[80vh]'> {/* Changed to 90vh */}
-        <h2 className='mb-6 text-2xl font-semibold text-black dark:text-white'>Transcribe Lyrics</h2>
-        
-        <div className='grid grid-cols-1 gap-8 md:grid-cols-2 h-[calc(100%-theme(spacing.14))]'> {/* Subtracting the height of the h2 */}
-          <div className='col-span-1 flex flex-col'>
-            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex-grow'>
+      <div className='mx-auto max-w-270 h-[90vh] flex flex-col'>
+        <div className='grid grid-cols-1 gap-8 md:grid-cols-2 flex-grow overflow-hidden'>
+          <div className='col-span-1 flex flex-col overflow-hidden'>
+            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex flex-col h-full'>
               <div className='border-b border-stroke py-4 px-7 dark:border-strokedark'>
                 <h3 className='font-medium text-black dark:text-white'>Upload Audio File</h3>
               </div>
-              <div className='p-7 flex-grow'>
+              <div className='p-7 flex-grow overflow-y-auto'>
                 <form action='#'>
                   <div
                     id='FileUpload'
@@ -133,8 +107,8 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
             </div>
           </div>
           
-          <div className='col-span-1 flex flex-col'>
-            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex-grow flex flex-col'>
+          <div className='col-span-1 flex flex-col overflow-hidden'>
+            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex flex-col h-full'>
               <div className='border-b border-stroke py-4 px-7 dark:border-strokedark flex justify-between items-center'>
                 <h3 className='font-medium text-black dark:text-white'>Select Existing Song</h3>
                 <button
@@ -146,10 +120,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                   Transcribe
                 </button>
               </div>
-              <div 
-                ref={listContainerRef}
-                className='p-7 overflow-y-auto flex-grow'
-              >
+              <div className='p-7 flex-grow overflow-y-auto'>
                 {isAllSongsLoading ? (
                   <p>Loading songs...</p>
                 ) : (
@@ -172,8 +143,6 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
             </div>
           </div>
         </div>
-
-        {/* ... existing transcription display code ... */}
       </div>
     </DefaultLayout>
   );
