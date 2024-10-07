@@ -31,10 +31,10 @@ export async function fetchAndUpdateSongDetails(songId: string, context: any) {
 
     const updates: Partial<Song> = {};
     if (updatedSong.image_url) {
-      updates.imageUrl = updatedSong.image_url;
+      updates.imageUrl = updatedSong.image_url.replace('cdn2.suno.ai', 'sms2.b-cdn.net');
     }
     if (updatedSong.audio_url) {
-      updates.audioUrl = updatedSong.audio_url;
+      updates.audioUrl = updatedSong.audio_url.replace('cdn2.suno.ai', 'sms2.b-cdn.net');
     }
     if (updatedSong.duration) {
       updates.duration = updatedSong.duration;
@@ -191,10 +191,10 @@ export const createSong: CreateSong<
           title: song.title,
           tags: song.tags,
           prompt: song.prompt,
-          audioUrl: song.audio_url,
+          audioUrl: song.audio_url?.replace('cdn2.suno.ai', 'sms2.b-cdn.net'),
           lyric: song.lyric,
-          imageUrl: song.image_url,
-          videoUrl: song.video_url,
+          imageUrl: song.image_url?.replace('cdn2.suno.ai', 'sms2.b-cdn.net'),
+          videoUrl: song.video_url?.replace('cdn2.suno.ai', 'sms2.b-cdn.net'),
           modelName: song.model_name,
           type: song.type,
           gptDescriptionPrompt: song.gpt_description_prompt,
