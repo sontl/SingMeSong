@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { type AuthUser } from 'wasp/auth';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -12,6 +12,13 @@ interface DefaultLayoutProps {
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ user, children, hideFloatingPlayer = false, isFullscreen = false }) => {
+  useEffect(() => {
+    const mainElement = document.getElementById('defaultCanvas0');
+    if (mainElement) {
+      mainElement.remove();
+    }
+  }, []);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (isFullscreen) {

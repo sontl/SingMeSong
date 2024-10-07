@@ -184,14 +184,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     }
   }, [isFullscreen]);
 
-   // Add this effect to remove the <main> element with the canvas after the page is rendered
-   useEffect(() => {
-    const mainElement = document.getElementById('defaultCanvas0');
-    if (mainElement) {
-      mainElement.remove();
-    }
-  }, []);
-
   useEffect(() => {
    
     setCurrentPage('lyricVideo');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { type AuthUser } from 'wasp/auth';
 import { useQuery, getAllSongsByUser, transcribeSong } from 'wasp/client/operations';
 import { type Song } from 'wasp/entities';
@@ -14,10 +14,30 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser);
   const { setCurrentPage } = useContext(SongContext);
+  const [containerHeight, setContainerHeight] = useState('auto');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [listHeight, setListHeight] = useState('auto');
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    //setCurrentPage('transcribe');
-  }, [setCurrentPage]);
+    const updateListHeight = () => {
+      if (listContainerRef.current) {
+        const containerHeight = listContainerRef.current.clientHeight;
+        const headerHeight = 56; // Approximate height of the header
+        const listHeight = containerHeight - headerHeight;
+        listContainerRef.current.style.height = `${listHeight}px`;
+      }
+    };
+
+    updateListHeight();
+    window.addEventListener('resize', updateListHeight);
+
+    return () => {
+      window.removeEventListener('resize', updateListHeight);
+    };
+  }, []);
+
+  const isTranscribeDisabled = !selectedSong || (selectedSong && selectedSong.subtitle);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -74,16 +94,16 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
   return (
     <DefaultLayout user={user}>
-      <div className='mx-auto max-w-270'>
+      <div className='mx-auto max-w-270 h-[80vh]'> {/* Changed to 90vh */}
         <h2 className='mb-6 text-2xl font-semibold text-black dark:text-white'>Transcribe Lyrics</h2>
         
-        <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
-          <div className='col-span-1'>
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
+        <div className='grid grid-cols-1 gap-8 md:grid-cols-2 h-[calc(100%-theme(spacing.14))]'> {/* Subtracting the height of the h2 */}
+          <div className='col-span-1 flex flex-col'>
+            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex-grow'>
               <div className='border-b border-stroke py-4 px-7 dark:border-strokedark'>
                 <h3 className='font-medium text-black dark:text-white'>Upload Audio File</h3>
               </div>
-              <div className='p-7'>
+              <div className='p-7 flex-grow'>
                 <form action='#'>
                   <div
                     id='FileUpload'
@@ -113,12 +133,23 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
             </div>
           </div>
           
-          <div className='col-span-1'>
-            <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
-              <div className='border-b border-stroke py-4 px-7 dark:border-strokedark'>
+          <div className='col-span-1 flex flex-col'>
+            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex-grow flex flex-col'>
+              <div className='border-b border-stroke py-4 px-7 dark:border-strokedark flex justify-between items-center'>
                 <h3 className='font-medium text-black dark:text-white'>Select Existing Song</h3>
+                <button
+                  onClick={handleTranscribe}
+                  className='flex items-center justify-center px-4 py-2 rounded bg-primary text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                  disabled={!!isTranscribeDisabled}
+                >
+                  <FaClosedCaptioning className='mr-2' />
+                  Transcribe
+                </button>
               </div>
-              <div className='p-7'>
+              <div 
+                ref={listContainerRef}
+                className='p-7 overflow-y-auto flex-grow'
+              >
                 {isAllSongsLoading ? (
                   <p>Loading songs...</p>
                 ) : (
@@ -142,34 +173,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
           </div>
         </div>
 
-        <div className='mt-8 flex justify-center'>
-          <button
-            onClick={handleTranscribe}
-            className='rounded bg-primary py-2 px-6 font-medium text-gray hover:shadow-1'
-            disabled={!selectedSong && !uploadedFile}
-          >
-            Transcribe
-          </button>
-        </div>
-
-        {/* {selectedSong && selectedSong.subtitle && (
-          <div className='mt-8'>
-            <h3 className='mb-4 text-xl font-semibold text-black dark:text-white'>Transcription</h3>
-            <div className='rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark'>
-              {selectedSong.subtitle.map((line, index) => (
-                <p key={index} className='mb-2'>{line.text}</p>
-              ))}
-            </div>
-            <div className='mt-4 flex justify-end'>
-              <button
-                onClick={() => handleDownload(selectedSong)}
-                className='flex items-center rounded bg-primary py-2 px-4 font-medium text-gray hover:shadow-1'
-              >
-                <FaDownload className='mr-2' /> Download Transcription
-              </button>
-            </div>
-          </div>
-        )} */}
+        {/* ... existing transcription display code ... */}
       </div>
     </DefaultLayout>
   );

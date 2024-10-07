@@ -27,10 +27,11 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     setCurrentPage('create');
     stopP5Sound(); // Stop P5 sound when CreatePage mounts
 
-    const mainElement = document.getElementById('defaultCanvas0');
-    if (mainElement) {
-      mainElement.remove();
-    }
+    // Remove this effect
+    // const mainElement = document.getElementById('defaultCanvas0');
+    // if (mainElement) {
+    //   mainElement.remove();
+    // }
   }, [setCurrentPage, stopP5Sound]);
 
   useRedirectHomeUnlessUserIsAdmin({ user });
