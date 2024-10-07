@@ -314,6 +314,13 @@ page SingmeAppPage {
   component: import SingmeAppPage from "@src/singme-app/dashboards/create/CreatePage"
 }
 
+// Add this new route for the TranscribePage
+route TranscribeRoute { path: "/transcribe", to: TranscribePage }
+page TranscribePage {
+  authRequired: true,
+  component: import TranscribePage from "@src/singme-app/dashboards/transcribe/TranscribePage"
+}
+
 action generateRandomLyrics {
   fn: import { generateRandomLyrics } from "@src/singme-app/dashboards/create/operations",
   entities: [User, GptResponse]
@@ -357,6 +364,11 @@ job updateCompletedSongsJob {
   schedule: {
     cron: "*/15 * * * *" // every 15 minutes
   },
+  entities: [Song]
+}
+
+action transcribeSong {
+  fn: import { transcribeSong } from "@src/singme-app/dashboards/transcribe/operations",
   entities: [Song]
 }
 //#endregion
