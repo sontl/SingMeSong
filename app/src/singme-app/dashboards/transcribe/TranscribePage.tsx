@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useContext } from 'react';
 import { type AuthUser } from 'wasp/auth';
-import { useQuery, getAllSongsByUser, transcribeSong } from 'wasp/client/operations';
+import { useQuery, getAllSongsByUser, transcribeSong, createUploadedSong, uploadFile } from 'wasp/client/operations';
 import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { SongContext } from '../../context/SongContext';
-import { FaFileAudio, FaDownload, FaClosedCaptioning } from 'react-icons/fa';
+import { FaFileAudio, FaDownload, FaClosedCaptioning, FaUpload } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
   useRedirectHomeUnlessUserIsAdmin({ user });
@@ -17,11 +18,42 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
   const isTranscribeDisabled = !selectedSong || (selectedSong && selectedSong.subtitle);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setUploadedFile(file);
       setSelectedSong(null);
+
+      try {
+        // Get upload URL from server
+        const { uploadUrl, audioUrl } = await uploadFile({
+          fileName: file.name,
+          mimeType: file.type,
+        });
+
+        // Upload file directly to Cloudflare R2
+        const response = await axios.put(uploadUrl, file, {
+          headers: {
+            'Content-Type': file.type,
+          },
+        });
+
+        if (response.status !== 200) {
+          throw new Error('Failed to upload file to Cloudflare R2');
+        }
+
+        // Create new song record in the database
+        const newSong = await createUploadedSong({
+          title: file.name,
+          audioUrl: audioUrl,
+        });
+
+        toast.success('File uploaded successfully and song created');
+        refetch(); // Refetch the songs list
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        toast.error('An error occurred while uploading the file');
+      }
     }
   };
 
@@ -78,7 +110,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                 <h3 className='font-medium text-black dark:text-white'>Upload Audio File</h3>
               </div>
               <div className='p-7 flex-grow overflow-y-auto'>
-                <form action='#'>
+                <form onSubmit={(e) => e.preventDefault()}>
                   <div
                     id='FileUpload'
                     className='relative mb-5.5 block w-full cursor-pointer appearance-none rounded border-2 border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5'

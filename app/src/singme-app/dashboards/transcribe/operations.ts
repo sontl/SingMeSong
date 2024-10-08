@@ -1,6 +1,9 @@
 import type { Song } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import fetch from 'node-fetch';
+import { randomUUID } from 'crypto';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // Define types for API responses
 interface TranscriptionResponse {
@@ -16,6 +19,60 @@ interface TranscriptionResult {
     };
   };
 }
+
+type UploadFileArgs = {
+  fileName: string;
+  mimeType: string;
+};
+
+const s3Client = new S3Client({
+  region: 'auto',
+  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY!,
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY!,
+  },
+});
+
+export const uploadFile = async ({ fileName, mimeType }: UploadFileArgs, context: any): Promise<{ uploadUrl: string; audioUrl: string }> => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+
+  const fileExtension = fileName.split('.').pop();
+  const uniqueKey = `${randomUUID()}.${fileExtension}`;
+
+  const s3Params = {
+    Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+    Key: uniqueKey,
+    ContentType: mimeType,
+  };
+
+  const command = new PutObjectCommand(s3Params);
+  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+  const audioUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${uniqueKey}`;
+
+  return { uploadUrl, audioUrl };
+};
+
+export const createUploadedSong = async (args: { title: string, audioUrl: string }, context: any): Promise<Song> => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+
+  return context.entities.Song.create({
+    data: {
+      title: args.title,
+      audioUrl: args.audioUrl,
+      status: 'UPLOADED', // Add a default status
+      user: {
+        connect: { id: context.user.id } // Connect the song to the user
+      },
+      // Add other required fields with default values
+      duration: 0, // Set a default duration
+    },
+  });
+};
 
 export const transcribeSong = async (songId: string, context: any): Promise<{ success: boolean, subtitle?: string }> => {
   if (!context.user) {

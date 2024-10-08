@@ -87,6 +87,12 @@ app OpenSaaS {
       // When using a real provider, e.g. SendGrid, you must use the same email address that you configured your account to send out emails with!
       email: "me@example.com"
     },
+    // provider: Mailgun,
+    // defaultFrom: {
+    //   name: "Open SaaS App",
+    //   // When using SendGrid, you must use the same email address that you configured your account to send out emails with!
+    //   email: "support@mail.singmesong.com"
+    // },
   },
 }
 
@@ -314,11 +320,28 @@ page SingmeAppPage {
   component: import SingmeAppPage from "@src/singme-app/dashboards/create/CreatePage"
 }
 
-// Add this new route for the TranscribePage
+// Update the TranscribePage route and page
 route TranscribeRoute { path: "/transcribe", to: TranscribePage }
 page TranscribePage {
   authRequired: true,
   component: import TranscribePage from "@src/singme-app/dashboards/transcribe/TranscribePage"
+}
+
+// Add new actions for file upload and song creation
+action uploadFile {
+  fn: import { uploadFile } from "@src/singme-app/dashboards/transcribe/operations",
+  entities: []
+}
+
+action createUploadedSong{
+  fn: import { createUploadedSong } from "@src/singme-app/dashboards/transcribe/operations",
+  entities: [User, Song]
+}
+
+// Update the transcribeSong action
+action transcribeSong {
+  fn: import { transcribeSong } from "@src/singme-app/dashboards/transcribe/operations",
+  entities: [Song]
 }
 
 action generateRandomLyrics {
@@ -367,10 +390,6 @@ job updateCompletedSongsJob {
   entities: [Song]
 }
 
-action transcribeSong {
-  fn: import { transcribeSong } from "@src/singme-app/dashboards/transcribe/operations",
-  entities: [Song]
-}
 //#endregion
 
 //#region Lyric Video
