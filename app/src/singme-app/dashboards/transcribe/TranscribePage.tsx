@@ -5,7 +5,7 @@ import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { SongContext } from '../../context/SongContext';
-import { FaFileAudio, FaDownload, FaClosedCaptioning, FaUpload, FaSpinner } from 'react-icons/fa';
+import { FaFileAudio, FaDownload, FaClosedCaptioning, FaUpload, FaSpinner, FaCog } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
@@ -16,6 +16,8 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser);
   const { setCurrentPage } = useContext(SongContext);
 
@@ -57,11 +59,17 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
         throw new Error('Failed to upload file to Cloudflare R2');
       }
 
+      setIsProcessing(true);
+      setIsUploading(false);
+      setProcessingProgress(0);
+
       // Create new song record in the database
-      const newSong = await createUploadedSong({
+      const { song, progress } = await createUploadedSong({
         title: selectedFile.name,
         audioUrl: audioUrl,
       });
+
+      setProcessingProgress(progress);
 
       toast.success('File uploaded successfully and song created');
       refetch(); // Refetch the songs list
@@ -71,7 +79,9 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
       toast.error('An error occurred while uploading the file');
     } finally {
       setIsUploading(false);
+      setIsProcessing(false);
       setUploadProgress(0);
+      setProcessingProgress(0);
     }
   };
 
@@ -150,7 +160,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                       <p className='mt-1.5'>MP3, WAV, or OGG</p>
                     </div>
                   </div>
-                  {selectedFile && !isUploading && (
+                  {selectedFile && !isUploading && !isProcessing && (
                     <div className='mt-4'>
                       <p className='text-sm text-gray-600 dark:text-gray-400 mb-2'>
                         Selected file: {selectedFile.name}
@@ -158,34 +168,39 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                       <button
                         onClick={handleUpload}
                         className='flex items-center justify-center px-4 py-2 rounded bg-primary text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-all duration-300'
-                        disabled={isUploading}
+                        disabled={isUploading || isProcessing}
                       >
-                        {isUploading ? (
-                          <>
-                            <FaSpinner className='animate-spin mr-2' />
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <FaUpload className='mr-2' />
-                            Upload
-                          </>
-                        )}
+                        <FaUpload className='mr-2' />
+                        Upload
                       </button>
                     </div>
                   )}
-                  {isUploading && (
+                  {(isUploading || isProcessing) && (
                     <div className='mt-4'>
                       <div className='flex items-center justify-center mb-2'>
-                        <FaSpinner className='animate-spin mr-2' />
-                        <span>Uploading... {uploadProgress}%</span>
+                        {isUploading ? (
+                          <>
+                            <FaSpinner className='animate-spin mr-2' />
+                            <span>Uploading... {uploadProgress}%</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaCog className='animate-spin mr-2' />
+                            <span>Processing... {processingProgress}%</span>
+                          </>
+                        )}
                       </div>
                       <div className='w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700'>
                         <div 
                           className='bg-primary h-2.5 rounded-full' 
-                          style={{ width: `${uploadProgress}%` }}
+                          style={{ width: `${isUploading ? uploadProgress : processingProgress}%` }}
                         ></div>
                       </div>
+                      {isProcessing && (
+                        <p className='text-sm text-gray-600 dark:text-gray-400 mt-2 text-center'>
+                          We're processing your audio file and generating an image. This may take a few moments.
+                        </p>
+                      )}
                     </div>
                   )}
                 </form>

@@ -55,11 +55,14 @@ export const uploadFile = async ({ fileName, mimeType }: UploadFileArgs, context
   return { uploadUrl, audioUrl };
 };
 
-export const createUploadedSong = async (args: { title: string, audioUrl: string }, context: any): Promise<Song> => {
+export const createUploadedSong = async (args: { title: string, audioUrl: string }, context: any): Promise<{ song: Song, progress: number }> => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
 
+  let progress = 0;
+
+  // Step 1: Create song record (25% progress)
   const song = await context.entities.Song.create({
     data: {
       title: args.title,
@@ -71,15 +74,30 @@ export const createUploadedSong = async (args: { title: string, audioUrl: string
       duration: 0,
     },
   });
+  progress = 25;
 
-  // Generate image after successful upload
-  await generateImageForSong(song.id, context);
+  // Step 2: Generate image (50% progress)
+  try {
+    await generateImageForSong(song.id, context, (imageProgress) => {
+      progress = 25 + (imageProgress * 0.5); // Image generation accounts for 50% of total progress
+    });
+  } catch (error) {
+    console.error('Error generating image for song:', error);
+    // Continue even if image generation fails
+  }
 
-  return song;
+  // Step 3: Update song status (25% progress)
+  await context.entities.Song.update({
+    where: { id: song.id },
+    data: { status: 'READY' },
+  });
+  progress = 100;
+
+  return { song, progress };
 };
 
-// New function to generate image using Cloudflare Worker AI
-async function generateImageForSong(songId: string, context: any): Promise<void> {
+// Modified function to generate image using Cloudflare Worker AI
+async function generateImageForSong(songId: string, context: any, progressCallback: (progress: number) => void): Promise<void> {
   const song = await context.entities.Song.findUnique({
     where: { id: songId },
   });
@@ -96,6 +114,8 @@ async function generateImageForSong(songId: string, context: any): Promise<void>
   }
 
   try {
+    progressCallback(10); // 10% - Started image generation
+
     const response = await fetch(`${CLOUDFLARE_WORKER_URL}/run/${CLOUDFLARE_WORKER_TXT2IMG_MODEL_ID}`, {
       method: 'POST',
       headers: {
@@ -107,7 +127,7 @@ async function generateImageForSong(songId: string, context: any): Promise<void>
       }),
     });
 
-    console.log('Image generation response:', response);
+    progressCallback(50); // 50% - Image generated
 
     if (!response.ok) {
       throw new Error(`Image generation failed: ${response.statusText}`);
@@ -118,6 +138,8 @@ async function generateImageForSong(songId: string, context: any): Promise<void>
     if (!imageData.success || !imageData.result || !imageData.result.image) {
       throw new Error('Invalid response from image generation');
     }
+
+    progressCallback(60); // 60% - Image data received
 
     // Convert base64 to buffer
     const imageBuffer = Buffer.from(imageData.result.image, 'base64');
@@ -131,6 +153,8 @@ async function generateImageForSong(songId: string, context: any): Promise<void>
     // Use the same file name for the image, but with .png extension
     const uniqueKey = `${audioFileName}.png`;
 
+    progressCallback(70); // 70% - Preparing to upload image
+
     // Upload image to R2
     const s3Params = {
       Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
@@ -142,6 +166,8 @@ async function generateImageForSong(songId: string, context: any): Promise<void>
     const command = new PutObjectCommand(s3Params);
     await s3Client.send(command);
 
+    progressCallback(90); // 90% - Image uploaded
+
     const imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${uniqueKey}`;
 
     // Update the song with the generated image URL
@@ -151,6 +177,8 @@ async function generateImageForSong(songId: string, context: any): Promise<void>
         imageUrl: imageUrl,
       },
     });
+
+    progressCallback(100); // 100% - Process completed
   } catch (error) {
     console.error('Error generating image for song:', error);
     // Don't throw an error here, as we don't want to interrupt the song creation process
