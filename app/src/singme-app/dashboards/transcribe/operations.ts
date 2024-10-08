@@ -60,19 +60,95 @@ export const createUploadedSong = async (args: { title: string, audioUrl: string
     throw new HttpError(401, 'Unauthorized');
   }
 
-  return context.entities.Song.create({
+  const song = await context.entities.Song.create({
     data: {
       title: args.title,
       audioUrl: args.audioUrl,
-      status: 'UPLOADED', // Add a default status
+      status: 'UPLOADED',
       user: {
-        connect: { id: context.user.id } // Connect the song to the user
+        connect: { id: context.user.id }
       },
-      // Add other required fields with default values
-      duration: 0, // Set a default duration
+      duration: 0,
     },
   });
+
+  // Generate image after successful upload
+  await generateImageForSong(song.id, context);
+
+  return song;
 };
+
+// New function to generate image using Cloudflare Worker AI
+async function generateImageForSong(songId: string, context: any): Promise<void> {
+  const song = await context.entities.Song.findUnique({
+    where: { id: songId },
+  });
+
+  if (!song) {
+    throw new HttpError(404, 'Song not found');
+  }
+
+  const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
+  const CLOUDFLARE_WORKER_API_TOKEN = process.env.CLOUDFLARE_WORKER_API_TOKEN;
+  const CLOUDFLARE_WORKER_TXT2IMG_MODEL_ID = process.env.CLOUDFLARE_WORKER_TXT2IMG_MODEL_ID;
+  if (!CLOUDFLARE_WORKER_URL || !CLOUDFLARE_WORKER_API_TOKEN || !CLOUDFLARE_WORKER_TXT2IMG_MODEL_ID) {
+    throw new HttpError(500, 'Cloudflare Worker configuration is missing');
+  }
+
+  try {
+    const response = await fetch(`${CLOUDFLARE_WORKER_URL}/run/${CLOUDFLARE_WORKER_TXT2IMG_MODEL_ID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CLOUDFLARE_WORKER_API_TOKEN}`,
+      },
+      body: JSON.stringify({
+        prompt: `Generate an album cover image for a song titled "${song.title}"`,
+      }),
+    });
+
+    console.log('Image generation response:', response);
+
+    if (!response.ok) {
+      throw new Error(`Image generation failed: ${response.statusText}`);
+    }
+
+    const imageData = await response.json() as { success: boolean, result: { image: string } };
+
+    if (!imageData.success || !imageData.result || !imageData.result.image) {
+      throw new Error('Invalid response from image generation');
+    }
+
+    // Convert base64 to buffer
+    const imageBuffer = Buffer.from(imageData.result.image, 'base64');
+
+    // Upload image to R2
+    const uniqueKey = `${randomUUID()}.png`;
+    const s3Params = {
+      Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+      Key: uniqueKey,
+      Body: imageBuffer,
+      ContentType: 'image/png',
+    };
+
+    const command = new PutObjectCommand(s3Params);
+    await s3Client.send(command);
+
+    const imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${uniqueKey}`;
+
+    // Update the song with the generated image URL
+    await context.entities.Song.update({
+      where: { id: songId },
+      data: {
+        imageUrl: imageUrl,
+      },
+    });
+  } catch (error) {
+    console.error('Error generating image for song:', error);
+    // Don't throw an error here, as we don't want to interrupt the song creation process
+    // Instead, log the error and continue
+  }
+}
 
 export const transcribeSong = async (songId: string, context: any): Promise<{ success: boolean, subtitle?: string }> => {
   if (!context.user) {

@@ -401,7 +401,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         if (currentSong.subtitle) {
           currentEffect.displayLyrics(p, currentSong.subtitle as any, isPlaying, currentTime);
         } else {
-          console.warn('Lyrics are undefined for the current song');
           // Optionally display a message on the canvas about missing lyrics
           p.fill(255);
           p.textAlign(p.CENTER, p.CENTER);
