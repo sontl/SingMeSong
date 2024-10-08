@@ -122,8 +122,16 @@ async function generateImageForSong(songId: string, context: any): Promise<void>
     // Convert base64 to buffer
     const imageBuffer = Buffer.from(imageData.result.image, 'base64');
 
+    // Extract the file name without extension from the audioUrl
+    const audioFileName = song.audioUrl.split('/').pop()?.split('.')[0];
+    if (!audioFileName) {
+      throw new Error('Unable to extract file name from audioUrl');
+    }
+
+    // Use the same file name for the image, but with .png extension
+    const uniqueKey = `${audioFileName}.png`;
+
     // Upload image to R2
-    const uniqueKey = `${randomUUID()}.png`;
     const s3Params = {
       Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
       Key: uniqueKey,

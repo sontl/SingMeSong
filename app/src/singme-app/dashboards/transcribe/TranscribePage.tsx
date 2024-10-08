@@ -5,65 +5,83 @@ import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { SongContext } from '../../context/SongContext';
-import { FaFileAudio, FaDownload, FaClosedCaptioning, FaUpload } from 'react-icons/fa';
+import { FaFileAudio, FaDownload, FaClosedCaptioning, FaUpload, FaSpinner } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
   useRedirectHomeUnlessUserIsAdmin({ user });
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser);
   const { setCurrentPage } = useContext(SongContext);
 
   const isTranscribeDisabled = !selectedSong || (selectedSong && selectedSong.subtitle);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setUploadedFile(file);
+      setSelectedFile(file);
       setSelectedSong(null);
+    }
+  };
 
-      try {
-        // Get upload URL from server
-        const { uploadUrl, audioUrl } = await uploadFile({
-          fileName: file.name,
-          mimeType: file.type,
-        });
+  const handleUpload = async () => {
+    if (!selectedFile) return;
 
-        // Upload file directly to Cloudflare R2
-        const response = await axios.put(uploadUrl, file, {
-          headers: {
-            'Content-Type': file.type,
-          },
-        });
+    setIsUploading(true);
+    setUploadProgress(0);
 
-        if (response.status !== 200) {
-          throw new Error('Failed to upload file to Cloudflare R2');
-        }
+    try {
+      // Get upload URL from server
+      const { uploadUrl, audioUrl } = await uploadFile({
+        fileName: selectedFile.name,
+        mimeType: selectedFile.type,
+      });
 
-        // Create new song record in the database
-        const newSong = await createUploadedSong({
-          title: file.name,
-          audioUrl: audioUrl,
-        });
+      // Upload file directly to Cloudflare R2
+      const response = await axios.put(uploadUrl, selectedFile, {
+        headers: {
+          'Content-Type': selectedFile.type,
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+          setUploadProgress(percentCompleted);
+        },
+      });
 
-        toast.success('File uploaded successfully and song created');
-        refetch(); // Refetch the songs list
-      } catch (error) {
-        console.error('Error uploading file:', error);
-        toast.error('An error occurred while uploading the file');
+      if (response.status !== 200) {
+        throw new Error('Failed to upload file to Cloudflare R2');
       }
+
+      // Create new song record in the database
+      const newSong = await createUploadedSong({
+        title: selectedFile.name,
+        audioUrl: audioUrl,
+      });
+
+      toast.success('File uploaded successfully and song created');
+      refetch(); // Refetch the songs list
+      setSelectedFile(null);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('An error occurred while uploading the file');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const handleSongSelect = (song: Song) => {
     setSelectedSong(song);
-    setUploadedFile(null);
+    setSelectedFile(null);
   };
 
   const handleTranscribe = async () => {
-    if (!selectedSong && !uploadedFile) {
+    if (!selectedSong && !selectedFile) {
       toast.error('Please select a song or upload a file');
       return;
     }
@@ -72,7 +90,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
       let result;
       if (selectedSong) {
         result = await transcribeSong(selectedSong.id);
-      } else if (uploadedFile) {
+      } else if (selectedFile) {
         toast.error('File upload transcription not implemented yet');
         return;
       }
@@ -113,26 +131,62 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                 <form onSubmit={(e) => e.preventDefault()}>
                   <div
                     id='FileUpload'
-                    className='relative mb-5.5 block w-full cursor-pointer appearance-none rounded border-2 border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5'
+                    className={`relative mb-5.5 block w-full cursor-pointer appearance-none rounded border-2 border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <input
                       type='file'
                       accept='audio/*'
-                      onChange={handleFileUpload}
+                      onChange={handleFileSelect}
                       className='absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none'
+                      disabled={isUploading}
                     />
                     <div className='flex flex-col items-center justify-center space-y-3'>
                       <span className='flex h-10 w-10 items-center justify-center rounded-full border border-stroke bg-white dark:border-strokedark dark:bg-boxdark'>
                         <FaFileAudio className='text-primary' />
                       </span>
-                      <p><span className='text-primary'>Click to upload</span> or drag and drop</p>
+                      <p>
+                        <span className='text-primary'>Click to select</span> or drag and drop
+                      </p>
                       <p className='mt-1.5'>MP3, WAV, or OGG</p>
                     </div>
                   </div>
-                  {uploadedFile && (
-                    <p className='text-sm text-gray-600 dark:text-gray-400'>
-                      Selected file: {uploadedFile.name}
-                    </p>
+                  {selectedFile && !isUploading && (
+                    <div className='mt-4'>
+                      <p className='text-sm text-gray-600 dark:text-gray-400 mb-2'>
+                        Selected file: {selectedFile.name}
+                      </p>
+                      <button
+                        onClick={handleUpload}
+                        className='flex items-center justify-center px-4 py-2 rounded bg-primary text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-all duration-300'
+                        disabled={isUploading}
+                      >
+                        {isUploading ? (
+                          <>
+                            <FaSpinner className='animate-spin mr-2' />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <FaUpload className='mr-2' />
+                            Upload
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                  {isUploading && (
+                    <div className='mt-4'>
+                      <div className='flex items-center justify-center mb-2'>
+                        <FaSpinner className='animate-spin mr-2' />
+                        <span>Uploading... {uploadProgress}%</span>
+                      </div>
+                      <div className='w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700'>
+                        <div 
+                          className='bg-primary h-2.5 rounded-full' 
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                    </div>
                   )}
                 </form>
               </div>
