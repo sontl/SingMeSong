@@ -55,7 +55,12 @@ export const uploadFile = async ({ fileName, mimeType }: UploadFileArgs, context
   return { uploadUrl, audioUrl };
 };
 
-export const createUploadedSong = async (args: { title: string, audioUrl: string }, context: any): Promise<{ song: Song, progress: number }> => {
+export const createUploadedSong = async (args: { 
+  title: string, 
+  audioUrl: string, 
+  musicStyle?: string, 
+  lyrics?: string 
+}, context: any): Promise<{ song: Song, progress: number }> => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
@@ -67,6 +72,8 @@ export const createUploadedSong = async (args: { title: string, audioUrl: string
     data: {
       title: args.title,
       audioUrl: args.audioUrl,
+      tags: args.musicStyle || '',
+      lyric: args.lyrics || '',
       status: 'UPLOADED',
       user: {
         connect: { id: context.user.id }
@@ -123,7 +130,7 @@ async function generateImageForSong(songId: string, context: any, progressCallba
         'Authorization': `Bearer ${CLOUDFLARE_WORKER_API_TOKEN}`,
       },
       body: JSON.stringify({
-        prompt: `Generate an album cover image for a song titled "${song.title}"`,
+        prompt: `Generate an album cover image for a song that suits the style of "${song.title}"`,
       }),
     });
 
