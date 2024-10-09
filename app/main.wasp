@@ -364,6 +364,11 @@ action fetchAndUpdateSongDetails {
   entities: [Song]
 }
 
+action importSongFromSuno {
+  fn: import { importSongFromSuno } from "@src/singme-app/dashboards/create/operations",
+  entities: [User, Song]
+}
+
 job checkSongStatusJob {
   executor: PgBoss,
   perform: {

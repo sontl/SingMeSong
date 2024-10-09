@@ -31,10 +31,10 @@ export async function fetchAndUpdateSongDetails(songId: string, context: any) {
 
     const updates: Partial<Song> = {};
     if (updatedSong.image_url) {
-      updates.imageUrl = updatedSong.image_url.replace('cdn2.suno.ai', 'sms2.b-cdn.net');
+      updates.imageUrl = updatedSong.image_url;
     }
     if (updatedSong.audio_url) {
-      updates.audioUrl = updatedSong.audio_url.replace('cdn2.suno.ai', 'sms2.b-cdn.net');
+      updates.audioUrl = updatedSong.audio_url;
     }
     if (updatedSong.duration) {
       updates.duration = updatedSong.duration;
@@ -191,10 +191,10 @@ export const createSong: CreateSong<
           title: song.title,
           tags: song.tags,
           prompt: song.prompt,
-          audioUrl: song.audio_url?.replace('cdn2.suno.ai', 'sms2.b-cdn.net'),
+          audioUrl: song.audio_url,
           lyric: song.lyric,
-          imageUrl: song.image_url?.replace('cdn2.suno.ai', 'sms2.b-cdn.net'),
-          videoUrl: song.video_url?.replace('cdn2.suno.ai', 'sms2.b-cdn.net'),
+          imageUrl: song.image_url,
+          videoUrl: song.video_url,
           modelName: song.model_name,
           type: song.type,
           gptDescriptionPrompt: song.gpt_description_prompt,
@@ -217,6 +217,7 @@ export const createSong: CreateSong<
   }
 };
 
+
 export const getAllSongsByUser: GetAllSongsByUser<void, Song[]> = async (_args, context) => {
   if (!context.user) {
     throw new HttpError(401);
@@ -236,4 +237,120 @@ export const getSongById: GetSongById<{ songId: string }, Song | null> = async (
   });
 };
 
-//#endregion
+
+function extractLyrics(markdown: string): string {
+  // Find the start of the metadata
+  const moreActionsIndex = markdown.indexOf("More Actions]");
+  if (moreActionsIndex === -1) {
+    return ""; // Couldn't find the [More Actions] text, return empty string
+  }
+
+  // Find the start of the datetime line (after the first double newline)
+  const datetimeStartIndex = markdown.indexOf("\n\n", moreActionsIndex) + 4;
+  if (datetimeStartIndex === 1) {
+    return ""; // Couldn't find the datetime line, return empty string
+  }
+
+  // Find the start of the lyrics (after the second double newline)
+  const lyricsAlmostStartIndex = markdown.indexOf("\n\n", datetimeStartIndex) + 4;
+  if (lyricsAlmostStartIndex === 1) {
+    return ""; // Couldn't find the start of lyrics, return empty string
+  }
+
+  // Find the start of the lyrics (after the second double newline)
+  const lyricsStartIndex = markdown.indexOf("\n\n", lyricsAlmostStartIndex) ;
+  if (lyricsStartIndex === 1) {
+    return ""; // Couldn't find the start of lyrics, return empty string
+  }
+
+
+  // Find the end of the lyrics (before the repeated section or image)
+  let lyricsEndIndex = markdown.indexOf("![Cover image for", lyricsStartIndex);
+  if (lyricsEndIndex === -1) {
+    lyricsEndIndex = markdown.indexOf("\n\n@", lyricsStartIndex);
+  }
+  if (lyricsEndIndex === -1) {
+    lyricsEndIndex = markdown.length;
+  }
+
+  // Extract the lyrics
+  let lyrics = markdown.substring(lyricsStartIndex, lyricsEndIndex).trim();
+
+  return lyrics;
+}
+
+export const importSongFromSuno = async (sunoUrl: string, context: any): Promise<Song> => {
+  if (!context.user) {
+    throw new HttpError(401);
+  }
+
+  try {
+    const response = await fetch('https://scrape.singmesong.com/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: sunoUrl,
+        formats: ["markdown"],
+        waitFor: 1000,
+        onlyMainContent: false
+      }),
+    });
+
+    if (!response.ok) {
+      throw new HttpError(response.status, 'Failed to fetch song details from Suno');
+    }
+
+    const responseData = await response.json();
+
+    if (!responseData.success || !responseData.data || !responseData.data.metadata) {
+      throw new HttpError(400, 'Invalid response from scraping service');
+    }
+
+    const { metadata, markdown } = responseData.data;
+    console.log('markdown: ', markdown);
+    // Extract lyrics from markdown
+    const lyrics = extractLyrics(markdown);
+
+    let songDuration = 0;
+
+    // Extract duration from markdown
+    const durationMatch = markdown.match(/\d{2}:\d{2} \/ (\d{2}:\d{2})/);
+    if (durationMatch && durationMatch[1]) {
+      const durationString = durationMatch[1];
+      const [minutes, seconds] = durationString.split(':').map(Number);
+      //minutes is string format, so we need to convert it to number
+      songDuration = parseInt(minutes) * 60 + parseInt(seconds);
+    }
+
+    // Extract the song ID from the URL
+    const songId = sunoUrl.split('/').pop();
+
+    const newSong = await context.entities.Song.create({
+      data: {
+        user: { connect: { id: context.user.id } },
+        sId: songId,
+        title: metadata.title || 'Untitled',
+        tags: (metadata.description || '').replace('Listen and make your own with Suno.', '').trim(),
+        prompt: '', // You might want to add this if available in the metadata
+        audioUrl: metadata.ogAudio || '',
+        lyric: lyrics,
+        imageUrl: metadata.ogImage || '',
+        videoUrl: '', // You might want to add this if available in the metadata
+        modelName: '', // You might want to add this if available in the metadata
+        type: '', // You might want to add this if available in the metadata
+        gptDescriptionPrompt: '', // You might want to add this if available in the metadata
+        status: 'IMPORTED',
+        duration: songDuration,
+      },
+    });
+
+    return newSong;
+  } catch (error: any) {
+    console.error(error);
+    const statusCode = error.statusCode || 500;
+    const errorMessage = error.message || 'Internal server error';
+    throw new HttpError(statusCode, errorMessage);
+  }
+};
