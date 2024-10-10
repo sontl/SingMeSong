@@ -41,7 +41,7 @@ const SongDetails: React.FC<SongDetailsProps> = ({ song }) => {
 
   return (
     <div className='space-y-4'>
-      <img src={song.imageUrl || '/default-cover.jpg'} alt={song.title} className='w-full h-48 object-cover rounded-md' />
+      <img src={song.imageUrl || '/default-cover.png'} alt={song.title} className='w-full h-48 object-cover rounded-md' />
       <h2 className='text-2xl font-bold'>{song.title}</h2>
       <p className='text-sm text-gray-500'>{Array.isArray(song.tags) ? song.tags.join(', ') : song.tags}</p>
       <div className='flex items-center'>

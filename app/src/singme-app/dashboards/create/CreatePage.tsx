@@ -29,7 +29,6 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [processingProgress, setProcessingProgress] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [activeForm, setActiveForm] = useState<'create' | 'import' | 'upload'>('create');
@@ -165,17 +164,15 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
 
       setIsProcessing(true);
       setIsUploading(false);
-      setProcessingProgress(0);
 
       // Create new song record in the database
-      const { song, progress } = await createUploadedSong({
+      const updatedSong = await createUploadedSong({
         title: uploadTitle,
         audioUrl: audioUrl,
         musicStyle: uploadMusicStyle,
         lyrics: uploadLyrics,
       });
 
-      setProcessingProgress(progress);
 
       toast.success('File uploaded successfully and song created');
       refetch(); // Refetch the songs list
@@ -183,12 +180,15 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
       setUploadTitle('');
       setUploadMusicStyle('');
       setUploadLyrics('');
-     
       setShowImportForm(false);
-      if (songTableRef.current) {
-        songTableRef.current.scrollTop = songTableRef.current.scrollHeight;
-        setSelectedSong(song);
-      }
+      console.log('updatedSong', updatedSong);
+      setSelectedSong(updatedSong as unknown as Song );
+      // Scroll to the bottom of the Song Table after a short delay
+      setTimeout(() => {
+        if (songTableRef.current) {
+          songTableRef.current.scrollTop = songTableRef.current.scrollHeight;
+        }
+      }, 500);
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('An error occurred while uploading the file');
@@ -196,7 +196,6 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
       setIsUploading(false);
       setIsProcessing(false);
       setUploadProgress(0);
-      setProcessingProgress(0);
     }
   };
 
@@ -352,14 +351,13 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
                         ) : (
                           <>
                             <FaCog className='animate-spin mr-2' />
-                            <span>Processing... {processingProgress}%</span>
                           </>
                         )}
                       </div>
                       <div className='w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700'>
                         <div 
                           className='bg-primary h-2.5 rounded-full' 
-                          style={{ width: `${isUploading ? uploadProgress : processingProgress}%` }}
+                          style={{ width: `${isUploading ? uploadProgress : 100}%` }}
                         ></div>
                       </div>
                       {isProcessing && (

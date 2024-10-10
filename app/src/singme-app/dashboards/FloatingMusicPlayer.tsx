@@ -141,7 +141,7 @@ const FloatingMusicPlayer: React.FC = () => {
       </div>
       <div className="player-content px-4 h-16 flex justify-between items-center">
         <div className="player-song-info flex items-center flex-1">
-          <img src={currentSong.imageUrl || '/default-cover.jpg'} alt={currentSong.title} className="w-12 h-12 rounded-md mr-4" />
+          <img src={currentSong.imageUrl || '/default-cover.png'} alt={currentSong.title} className="w-12 h-12 rounded-md mr-4" />
           <div className="player-song-title">
             <h3 className="text-sm font-semibold md:truncate animate-marquee">{currentSong.title}</h3>
           </div>

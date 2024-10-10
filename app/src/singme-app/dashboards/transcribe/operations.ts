@@ -60,15 +60,14 @@ export const createUploadedSong = async (args: {
   audioUrl: string, 
   musicStyle?: string, 
   lyrics?: string 
-}, context: any): Promise<{ song: Song, progress: number }> => {
+}, context: any): Promise<{song: Song }> => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
 
-  let progress = 0;
 
-  // Step 1: Create song record (25% progress)
-  const song = await context.entities.Song.create({
+  // Step 1: Create song record 
+  let song = await context.entities.Song.create({
     data: {
       title: args.title,
       audioUrl: args.audioUrl,
@@ -81,36 +80,26 @@ export const createUploadedSong = async (args: {
       duration: 0,
     },
   });
-  progress = 25;
 
-  // Step 2: Generate image (50% progress)
+  // Step 2: Generate image
   try {
-    await generateImageForSong(song.id, context, (imageProgress) => {
-      progress = 25 + (imageProgress * 0.5); // Image generation accounts for 50% of total progress
-    });
+    song = await generateImageForSong(song.id, context);
   } catch (error) {
     console.error('Error generating image for song:', error);
     // Continue even if image generation fails
   }
-
-  // Step 3: Update song status (25% progress)
-  await context.entities.Song.update({
-    where: { id: song.id },
-    data: { status: 'READY' },
-  });
-  progress = 100;
-
-  return { song, progress };
+  console.log('song', song);
+  return song ;
 };
 
 // Modified function to generate image using Cloudflare Worker AI
-async function generateImageForSong(songId: string, context: any, progressCallback: (progress: number) => void): Promise<void> {
+async function generateImageForSong(songId: string, context: any): Promise<Song>  {
   const song = await context.entities.Song.findUnique({
     where: { id: songId },
   });
 
   if (!song) {
-    throw new HttpError(404, 'Song not found');
+    throw new Error(`Song with id ${songId} not found`);
   }
 
   const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
@@ -121,7 +110,6 @@ async function generateImageForSong(songId: string, context: any, progressCallba
   }
 
   try {
-    progressCallback(10); // 10% - Started image generation
 
     const response = await fetch(`${CLOUDFLARE_WORKER_URL}/run/${CLOUDFLARE_WORKER_TXT2IMG_MODEL_ID}`, {
       method: 'POST',
@@ -134,7 +122,6 @@ async function generateImageForSong(songId: string, context: any, progressCallba
       }),
     });
 
-    progressCallback(50); // 50% - Image generated
 
     if (!response.ok) {
       throw new Error(`Image generation failed: ${response.statusText}`);
@@ -146,7 +133,6 @@ async function generateImageForSong(songId: string, context: any, progressCallba
       throw new Error('Invalid response from image generation');
     }
 
-    progressCallback(60); // 60% - Image data received
 
     // Convert base64 to buffer
     const imageBuffer = Buffer.from(imageData.result.image, 'base64');
@@ -160,7 +146,6 @@ async function generateImageForSong(songId: string, context: any, progressCallba
     // Use the same file name for the image, but with .png extension
     const uniqueKey = `${audioFileName}.png`;
 
-    progressCallback(70); // 70% - Preparing to upload image
 
     // Upload image to R2
     const s3Params = {
@@ -173,23 +158,30 @@ async function generateImageForSong(songId: string, context: any, progressCallba
     const command = new PutObjectCommand(s3Params);
     await s3Client.send(command);
 
-    progressCallback(90); // 90% - Image uploaded
 
     const imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${uniqueKey}`;
 
     // Update the song with the generated image URL
-    await context.entities.Song.update({
+    const updatedSong = await context.entities.Song.update({
       where: { id: songId },
       data: {
         imageUrl: imageUrl,
+        status: 'READY' 
       },
     });
 
-    progressCallback(100); // 100% - Process completed
+    if (!updatedSong) {
+      throw new Error(`Song with id ${songId} not found`);
+    }
+
+    console.log('updatedSong', updatedSong);
+    return updatedSong;
+
   } catch (error) {
     console.error('Error generating image for song:', error);
     // Don't throw an error here, as we don't want to interrupt the song creation process
     // Instead, log the error and continue
+    return song;
   }
 }
 
