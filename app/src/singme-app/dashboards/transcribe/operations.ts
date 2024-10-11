@@ -185,7 +185,7 @@ async function generateImageForSong(songId: string, context: any): Promise<Song>
   }
 }
 
-export const transcribeSong = async (songId: string, context: any): Promise<{ success: boolean, subtitle?: string }> => {
+export const transcribeSong = async (songId: string, context: any): Promise<{ success: boolean, subtitle?: string, transcription?: string }> => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
@@ -198,56 +198,44 @@ export const transcribeSong = async (songId: string, context: any): Promise<{ su
     throw new HttpError(404, 'Song not found or audio URL is missing');
   }
 
-  const GLADIA_API_KEY = process.env.GLADIA_API_KEY;
-  if (!GLADIA_API_KEY) {
-    throw new HttpError(500, 'Gladia API key is not set');
+  const API_URL = process.env.HALLU_API_URL; 
+  if (!API_URL) {
+    throw new HttpError(500, 'Hallu API URL is not set');
   }
 
   try {
-    // Step 1: Request transcription
-    const transcriptionResponse = await fetch('https://api.gladia.io/v2/transcription', {
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('url', song.audioUrl);
+    formData.append('lng', 'en'); // Assuming English output, adjust if needed
+    formData.append('lng_input', 'en'); // Assuming English input, adjust if needed
+
+    // Send request to Hallu API
+    const transcriptionResponse = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-gladia-key': GLADIA_API_KEY,
-      },
-      body: JSON.stringify({
-        audio_url: song.audioUrl,
-      }),
+      body: formData,
     });
 
     if (!transcriptionResponse.ok) {
       throw new Error(`Transcription request failed: ${transcriptionResponse.statusText}`);
     }
 
-    const transcriptionData = await transcriptionResponse.json() as TranscriptionResponse;
+    const transcriptionData = await transcriptionResponse.json();
 
-    // Step 2: Fetch transcription result
-    const resultResponse = await fetch(transcriptionData.result_url, {
-      headers: {
-        'x-gladia-key': GLADIA_API_KEY,
+    // Update the song with the transcription
+    await context.entities.Song.update({
+      where: { id: songId },
+      data: {
+        subtitle: (transcriptionData as { srt: string, json: string }).json, // Store full JSON response
+        transcription: (transcriptionData as { srt: string, json: string }).srt, // Store SRT content
       },
     });
 
-    if (!resultResponse.ok) {
-      throw new Error(`Fetching transcription result failed: ${resultResponse.statusText}`);
-    }
-
-    const resultData = await resultResponse.json() as TranscriptionResult;
-
-    if (resultData.status === 'done' && resultData.result) {
-      // Update the song with the transcription
-      await context.entities.Song.update({
-        where: { id: songId },
-        data: {
-          subtitle: resultData.result.transcription.full_transcript,
-        },
-      });
-
-      return { success: true, subtitle: resultData.result.transcription.full_transcript };
-    } else {
-      return { success: false };
-    }
+    return { 
+      success: true, 
+      subtitle: (transcriptionData as { srt: string, json: string }).json, 
+      transcription: (transcriptionData as { srt: string, json: string }).srt
+    };
   } catch (error) {
     console.error('Error transcribing song:', error);
     throw new HttpError(500, 'Failed to transcribe song');
