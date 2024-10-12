@@ -12,6 +12,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   useRedirectHomeUnlessUserIsAdmin({ user });
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcribingSongId, setTranscribingSongId] = useState<string | null>(null);
   const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser);
   const { setCurrentPage } = useContext(SongContext);
 
@@ -28,6 +29,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
     }
 
     setIsTranscribing(true);
+    setTranscribingSongId(selectedSong.id);
     try {
       const result = await transcribeSong(selectedSong.id);
 
@@ -41,6 +43,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
       toast.error('An error occurred during transcription');
     } finally {
       setIsTranscribing(false);
+      setTranscribingSongId(null);
     }
   };
 
@@ -91,16 +94,28 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                       <li 
                         key={song.id} 
                         className={`flex items-center justify-between p-2 rounded cursor-pointer ${
-                          selectedSong?.id === song.id ? 'bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-meta-4'
+                          selectedSong?.id === song.id
+                            ? 'bg-primary text-white'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                         onClick={() => handleSongSelect(song)}
                       >
                         <span>{song.title}</span>
-                        {song.subtitle && (
-                          <button onClick={() => handleDownload(song)}>
-                            <FaDownload className='text-green-500' />
-                          </button>
-                        )}
+                        <div className='flex items-center'>
+                          {transcribingSongId === song.id && (
+                            <span className='mr-2 text-sm font-medium'>
+                              Transcribing...
+                            </span>
+                          )}
+                          {song.subtitle && (
+                            <button
+                              onClick={(e) => handleDownload(song)}
+                              className='text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+                            >
+                            <FaDownload  className='text-green-500'/>
+                            </button>
+                          )}
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -115,8 +130,8 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
               </div>
               <div className='p-7 flex-grow overflow-y-auto'>
                 {selectedSong ? (
-                  selectedSong.subtitle ? (
-                    <pre className='whitespace-pre-wrap'>{JSON.stringify(selectedSong.subtitle, null, 2)}</pre>
+                  selectedSong.transcription ? (
+                    <pre className='whitespace-pre-wrap'>{selectedSong.transcription  }</pre>
                   ) : (
                     <p className='text-gray-500'>No transcription available for this song. Click the "Transcribe" button to generate one.</p>
                   )
