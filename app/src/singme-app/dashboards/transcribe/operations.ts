@@ -185,7 +185,7 @@ async function generateImageForSong(songId: string, context: any): Promise<Song>
   }
 }
 
-export const transcribeSong = async (songId: string, context: any): Promise<{ success: boolean, subtitle?: string, transcription?: string }> => {
+export const transcribeSong = async ({songId, inputLang, outputLang}: {songId: string, inputLang: string, outputLang: string}, context: any): Promise<{ success: boolean, subtitle?: string, transcription?: string }> => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
@@ -207,8 +207,8 @@ export const transcribeSong = async (songId: string, context: any): Promise<{ su
     // Prepare form data
     const formData = new FormData();
     formData.append('url', song.audioUrl);
-    formData.append('lng', 'en'); // Assuming English output, adjust if needed
-    formData.append('lng_input', 'en'); // Assuming English input, adjust if needed
+    formData.append('lng', outputLang); // Use the outputLang parameter
+    formData.append('lng_input', inputLang); // Use the inputLang parameter
 
     // Send request to Hallu API
     const transcriptionResponse = await fetch(API_URL, {
@@ -222,12 +222,13 @@ export const transcribeSong = async (songId: string, context: any): Promise<{ su
 
     const transcriptionData = await transcriptionResponse.json();
 
-    // Update the song with the transcription
+    // Update the song with the transcription and check if song.lyric does not have value then also update song.lyric with transcriptionData.text
     await context.entities.Song.update({
       where: { id: songId },
       data: {
         subtitle: (transcriptionData as { srt: string, json: string }).json, // Store full JSON response
         transcription: (transcriptionData as { srt: string, json: string }).srt, // Store SRT content
+        lyric: song.lyric ? song.lyric : (transcriptionData as { text: string }).text, // Update song.lyric if it does not have a value
       },
     });
 
