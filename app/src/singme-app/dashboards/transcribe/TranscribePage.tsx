@@ -279,6 +279,12 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
     }
   };
 
+  const handleInputLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLanguage = e.target.value;
+    setInputLanguage(newLanguage);
+    setOutputLanguage(newLanguage);
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className='mx-auto max-w-270 h-[90vh] flex flex-col'>
@@ -341,7 +347,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                       <select
                         id="inputLanguage"
                         value={inputLanguage}
-                        onChange={(e) => setInputLanguage(e.target.value)}
+                        onChange={handleInputLanguageChange}
                         className='w-full p-2 border rounded'
                       >
                         {languages.map((lang) => (
