@@ -11,7 +11,7 @@ import P5MusicPlayer from './P5MusicPlayer';
 import { clearSongImage } from './effects/spectrums/ImageWaveEffect';
 
 // Add this import
-import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash } from 'react-icons/fa';
+import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
 
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
@@ -464,10 +464,16 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                     key={song.id}
                     className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
                       selectedSong?.id === song.id ? 'bg-blue-100' : ''
-                    }`}
+                    } flex justify-between items-center`}
                     onClick={() => handleSongClick(song)}
                   >
-                    {song.title}
+                    <span>{song.title}</span>
+                    {song.subtitle && (
+                      <FaClosedCaptioning 
+                        className="text-gray-500" 
+                        title="This song has lyrics"
+                      />
+                    )}
                   </li>
                 ))}
               </ul>
