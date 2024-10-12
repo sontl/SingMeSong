@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 import { randomUUID } from 'crypto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Define types for API responses
 interface TranscriptionResponse {
@@ -240,6 +241,71 @@ export const transcribeSong = async ({songId, inputLang, outputLang}: {songId: s
   } catch (error) {
     console.error('Error transcribing song:', error);
     throw new HttpError(500, 'Failed to transcribe song');
+  }
+};
+
+export const aiCorrectTranscription = async (args: { songId: string }, context: any): Promise<{ success: boolean, correctedSubtitle?: string }> => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+
+  const song = await context.entities.Song.findUnique({
+    where: { id: args.songId },
+  });
+
+  if (!song || !song.subtitle || !song.lyric) {
+    throw new HttpError(404, 'Song not found or missing subtitle/lyric');
+  }
+
+  const API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
+  if (!API_KEY) {
+    throw new HttpError(500, 'Google Gemini API key is not set');
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-exp-0827" });
+
+    const prompt = `
+You are an excellent translator specializing in transcript correction. The user will provide you with a JSON file containing transcribed text and corresponding timestamps. Some portions of the transcription may contain errors. Along with the transcribed text, the user will also provide the original corrected version of the text for reference. Your task is to:
+
+Compare the transcribed text with the original corrected text.
+Identify and correct any incorrectly transcribed words.
+Replace only the incorrect words in the transcription, leaving the rest of the text and timestamps unchanged.
+Ensure that punctuation, formatting, and spacing remain consistent with the original transcribed text.
+Do not alter the timestamps or any other metadata within the JSON file.
+Return the whole corrected JSON in the same structure and format. JSON content must be in the same line.
+Just give me the corrected JSON, do not include any other text, other messages, or explanations or questions. 
+
+Transcribed JSON:
+${JSON.stringify(song.subtitle)}
+
+Original corrected version, ignore the word in the brackets:
+${song.lyric}
+    `;
+
+    console.log('prompt', prompt);
+
+    const result = await model.generateContent(prompt);
+
+    
+    const correctedSubtitle = result.response.text();
+    // convert to json
+    const correctedSubtitleJson = JSON.parse(correctedSubtitle);
+    console.log('correctedSubtitleJson', correctedSubtitleJson);
+
+    // Update the song with the corrected subtitle
+    await context.entities.Song.update({
+      where: { id: args.songId },
+      data: {
+        subtitle: correctedSubtitleJson,
+      },
+    });
+
+    return { success: true, correctedSubtitle };
+  } catch (error) {
+    console.error('Error correcting transcription:', error);
+    throw new HttpError(500, 'Failed to correct transcription');
   }
 };
 

@@ -395,6 +395,12 @@ job updateCompletedSongsJob {
   entities: [Song]
 }
 
+// Add new action for AI correction
+action aiCorrectTranscription {
+  fn: import { aiCorrectTranscription } from "@src/singme-app/dashboards/transcribe/operations",
+  entities: [Song]
+}
+
 //#endregion
 
 //#region Lyric Video

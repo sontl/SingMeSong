@@ -1,11 +1,11 @@
 import React, { useState, useContext, useMemo } from 'react';
 import { type AuthUser } from 'wasp/auth';
-import { useQuery, getAllSongsByUser, transcribeSong } from 'wasp/client/operations';
+import { useQuery, getAllSongsByUser, transcribeSong, aiCorrectTranscription } from 'wasp/client/operations';
 import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { SongContext } from '../../context/SongContext';
-import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight } from 'react-icons/fa';
+import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight, FaRobot } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
@@ -17,6 +17,8 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const { setCurrentPage } = useContext(SongContext);
   const [inputLanguage, setInputLanguage] = useState('en');
   const [outputLanguage, setOutputLanguage] = useState('en');
+  const [isAiCorrecting, setIsAiCorrecting] = useState(false);
+  const [aiCorrectingSongId, setAiCorrectingSongId] = useState<string | null>(null);
 
   const languages = useMemo(() => [
     { value: "aa", label: "Afar" },
@@ -250,6 +252,33 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
     }
   };
 
+  const handleAiCorrect = async (song: Song) => {
+    if (!song.subtitle || !song.lyric) {
+      toast.error('Song must have both transcription and lyrics for AI correction');
+      return;
+    }
+
+    setIsAiCorrecting(true);
+    setAiCorrectingSongId(song.id);
+    try {
+      // TODO: Implement the actual API call to Google Gemini Flash 1.5
+      // This is a placeholder for the API call
+      const correctedSubtitle = await aiCorrectTranscription({songId: song.id});
+      
+      // TODO: Update the song with the corrected subtitle
+      // This is a placeholder for updating the song
+      // await updateSong({ id: song.id, subtitle: correctedSubtitle });
+
+      toast.success('AI correction completed successfully');
+      refetch();
+    } catch (error) {
+      toast.error('An error occurred during AI correction');
+    } finally {
+      setIsAiCorrecting(false);
+      setAiCorrectingSongId(null);
+    }
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className='mx-auto max-w-270 h-[90vh] flex flex-col'>
@@ -359,7 +388,28 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                 </div>
                 {selectedSong ? (
                   selectedSong.transcription ? (
-                    <pre className='whitespace-pre-wrap'>{selectedSong.transcription}</pre>
+                    <>
+                      <pre className='whitespace-pre-wrap'>{selectedSong.transcription}</pre>
+                      {selectedSong.subtitle && selectedSong.lyric && (
+                        <button
+                          onClick={() => handleAiCorrect(selectedSong)}
+                          className='mt-4 flex items-center justify-center px-4 py-2 rounded bg-secondary text-white hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-opacity-50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                          disabled={isAiCorrecting}
+                        >
+                          {isAiCorrecting && aiCorrectingSongId === selectedSong.id ? (
+                            <>
+                              <FaSpinner className='mr-2 animate-spin' />
+                              AI Correcting...
+                            </>
+                          ) : (
+                            <>
+                              <FaRobot className='mr-2' />
+                              AI Correct
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </>
                   ) : (
                     <p className='text-gray-500'>No transcription available for this song. Click the "Transcribe" button to generate one.</p>
                   )
