@@ -112,7 +112,7 @@ Please follow these rules:
     ];
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.
+      model: 'gpt-4o-mini', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.
       messages,
       temperature: 0.8, // adjust this value to control the randomness of the output
     });
@@ -121,6 +121,7 @@ Please follow these rules:
 
     if (response) {
       try {
+        console.log('response: ', response);
         const { lyrics, musicStyle, title } = JSON.parse(response);
 
         await context.entities.GptResponse.create({
