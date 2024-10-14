@@ -329,12 +329,12 @@ page TranscribePage {
 
 // Add new actions for file upload and song creation
 action uploadFile {
-  fn: import { uploadFile } from "@src/singme-app/dashboards/transcribe/operations",
+  fn: import { uploadFile } from "@src/singme-app/shared/operations",
   entities: []
 }
 
 action createUploadedSong{
-  fn: import { createUploadedSong } from "@src/singme-app/dashboards/transcribe/operations",
+  fn: import { createUploadedSong } from "@src/singme-app/shared/operations",
   entities: [User, Song]
 }
 
@@ -355,7 +355,7 @@ action createSong {
 }
 
 query getAllSongsByUser {    
-  fn: import { getAllSongsByUser } from "@src/singme-app/dashboards/create/operations",
+  fn: import { getAllSongsByUser } from "@src/singme-app/shared/operations",
   entities: [User, Song]
 }
 

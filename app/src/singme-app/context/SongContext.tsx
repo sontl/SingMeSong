@@ -111,7 +111,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const fetchSongs = async () => {
-      const songs = await getAllSongsByUser();
+      const songs = await getAllSongsByUser({ searchTerm: '' });
       setAllSongs(songs.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
     };
     fetchSongs();

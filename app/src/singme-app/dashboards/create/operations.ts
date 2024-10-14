@@ -219,17 +219,6 @@ export const createSong: CreateSong<
 };
 
 
-export const getAllSongsByUser: GetAllSongsByUser<void, Song[]> = async (_args, context) => {
-  if (!context.user) {
-    throw new HttpError(401);
-  }
-  return context.entities.Song.findMany({
-    where: {
-      user: { id: context.user.id },
-    },
-  });
-};
-
 export const getSongById: GetSongById<{ songId: string }, Song | null> = async ({ songId }, context) => {
   return context.entities.Song.findUnique({
     where: {

@@ -1,19 +1,21 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useContext, useMemo, useCallback } from 'react';
 import { type AuthUser } from 'wasp/auth';
 import { useQuery, getAllSongsByUser, transcribeSong, aiCorrectTranscription } from 'wasp/client/operations';
 import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { SongContext } from '../../context/SongContext';
-import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight, FaRobot } from 'react-icons/fa';
+import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight, FaRobot, FaSearch } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import debounce from 'lodash/debounce';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
   useRedirectHomeUnlessUserIsAdmin({ user });
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcribingSongId, setTranscribingSongId] = useState<string | null>(null);
-  const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser, { searchTerm });
   const { setCurrentPage } = useContext(SongContext);
   const [inputLanguage, setInputLanguage] = useState('en');
   const [outputLanguage, setOutputLanguage] = useState('en');
@@ -285,6 +287,18 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
     setOutputLanguage(newLanguage);
   };
 
+  // Debounce the search to avoid too many API calls
+  const debouncedSearch = useCallback(
+    debounce((term: string) => {
+      setSearchTerm(term);
+    }, 300),
+    []
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value);
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className='mx-auto max-w-270 h-[90vh] flex flex-col'>
@@ -293,6 +307,17 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
             <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex flex-col h-full'>
               <div className='border-b border-stroke py-4 px-7 dark:border-strokedark'>
                 <h3 className='font-medium text-black dark:text-white'>Select Existing Song</h3>
+              </div>
+              <div className='p-7 pb-0'>
+                <div className='relative mb-4'>
+                  <input
+                    type='text'
+                    placeholder='Search songs...'
+                    onChange={handleSearchChange}
+                    className='w-full pl-10 pr-4 py-2 border rounded-md'
+                  />
+                  <FaSearch className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
+                </div>
               </div>
               <div className='p-7 flex-grow overflow-y-auto'>
                 {isAllSongsLoading ? (
