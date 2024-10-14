@@ -9,6 +9,8 @@ import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import P5MusicPlayer from './P5MusicPlayer';
 import { clearSongImage } from './effects/spectrums/ImageWaveEffect';
+import debounce from 'lodash/debounce';
+import { FaSearch } from 'react-icons/fa';
 
 // Add this import
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
@@ -30,7 +32,8 @@ if (typeof window !== 'undefined') {
 const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { data: songs, isLoading: isAllSongsLoading } = useQuery(getAllSongsByUser);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: songs, isLoading: isAllSongsLoading, refetch } = useQuery(getAllSongsByUser, { searchTerm });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenDimensions, setFullscreenDimensions] = useState({ width: 0, height: 0 });
   const [showCustomMenu, setShowCustomMenu] = useState(false);
@@ -316,6 +319,18 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
   }, []);
 
+  // Debounce the search to avoid too many API calls
+  const debouncedSearch = useCallback(
+    debounce((term: string) => {
+      setSearchTerm(term);
+    }, 300),
+    []
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value);
+  };
+
   const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
     let lyrics: any;
@@ -455,6 +470,15 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         <div className="flex flex-col md:flex-row h-full">
           <div className="w-full md:w-1/4 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
             <h2 className="text-xl font-bold mb-4">Your Songs</h2>
+            <div className="relative mb-4">
+              <input
+                type="text"
+                placeholder="Search songs..."
+                onChange={handleSearchChange}
+                className="w-full pl-10 pr-4 py-2 border rounded-md"
+              />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
             {isAllSongsLoading ? (
               <p>Loading songs...</p>
             ) : (
