@@ -369,6 +369,17 @@ action importSongFromSuno {
   entities: [User, Song]
 }
 
+// Add the new deleteSong action
+action deleteSong {
+  fn: import { deleteSong } from "@src/singme-app/shared/operations",
+  entities: [User, Song]
+}
+
+action deleteFileFromR2 {
+  fn: import { deleteFileFromR2 } from "@src/singme-app/shared/operations",
+  entities: [User, Song]
+}
+
 job checkSongStatusJob {
   executor: PgBoss,
   perform: {
