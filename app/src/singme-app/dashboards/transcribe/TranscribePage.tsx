@@ -72,7 +72,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
       if (result && result.success) {
         toast.success('Transcription completed successfully');
-        setTranscriptionProgress('Transcription complete. Starting auto correction...');
+        setTranscriptionProgress('Transcription complete. Starting auto enhancement...');
         const updatedSong = result.updatedSong;
         if (inputLanguage !== 'en' && outputLanguage !== 'en') {
           await handleAiCorrect(updatedSong);
@@ -113,7 +113,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
     setIsAiCorrecting(true);
     setAiCorrectingSongId(song.id);
-    setTranscriptionProgress('Auto correction in progress...');
+    setTranscriptionProgress('Transcription enhancement is in progress. It may take a while...');
     try {
       const correctedSubtitle = await aiCorrectTranscription({songId: song.id});
       toast.success('AI correction completed successfully');
@@ -354,7 +354,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                         {isTranscribing ? (
                           <>
                             <FaSpinner className='mr-2 animate-spin' />
-                            {transcriptionProgress || 'Processing...'}
+                            Processing...
                           </>
                         ) : (
                           <>
