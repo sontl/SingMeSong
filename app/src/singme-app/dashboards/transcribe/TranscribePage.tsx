@@ -448,7 +448,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                 {selectedSong ? (
                   selectedSong.transcription ? (
                     isTranscribing ? (
-                      'Processing...'
+                      ''
                     ) : (
                       <p className='text-gray-500'>** End of transcription **</p>
                     )

@@ -2,6 +2,7 @@ import type { Song } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import fetch from 'node-fetch';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { repairIncompleteJson } from './jsonUtils';
 
 // Define types for API responses
 interface TranscriptionResponse {
@@ -123,20 +124,33 @@ ${song.lyric}
     
     const correctedSubtitle = result.response.text();
     console.log('correctedSubtitle', correctedSubtitle);
-    // convert to json
-    const correctedSubtitleJson = JSON.parse(correctedSubtitle);
+
+    let correctedSubtitleJson;
+    try {
+      correctedSubtitleJson = JSON.parse(correctedSubtitle);
+    } catch (parseError) {
+      console.error('Error parsing JSON:', parseError);
+      
+      // Attempt to repair the JSON
+      const repairedJson = repairIncompleteJson(correctedSubtitle, song.subtitle);
+      correctedSubtitleJson = JSON.parse(repairedJson);
+    }
+
     console.log('correctedSubtitleJson', correctedSubtitleJson);
 
-    // Update the song with the corrected subtitle
+    // Merge the corrected subtitle with the existing subtitle
+    const mergedSubtitle = mergeSubtitles(song.subtitle, correctedSubtitleJson);
+
+    // Update the song with the merged subtitle
     await context.entities.Song.update({
       where: { id: args.songId },
       data: {
-        subtitle: correctedSubtitleJson,
+        subtitle: mergedSubtitle,
         subtitleFixedByAI: true,
       },
     });
 
-    return { success: true, correctedSubtitle };
+    return { success: true, correctedSubtitle: JSON.stringify(mergedSubtitle) };
   } catch (error) {
     console.error('Error correcting transcription:', error);
     throw new HttpError(500, 'Failed to correct transcription');
@@ -207,4 +221,18 @@ export const updateSubtitleSentence = async (args: { songId: string, index: numb
   }
 };
 
-// You can add other transcribe-related functions here if needed
+// Helper function to merge subtitles
+function mergeSubtitles(originalSubtitle: any[], correctedSubtitle: any[]): any[] {
+  return originalSubtitle.map((original, index) => {
+    if (index < correctedSubtitle.length) {
+      return {
+        ...original,
+        sentence: correctedSubtitle[index].sentence,
+        words: correctedSubtitle[index].words || original.words,
+      };
+    }
+    return original;
+  });
+}
+
+export { repairIncompleteJson };
