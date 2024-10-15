@@ -488,14 +488,17 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                     key={song.id}
                     className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
                       selectedSong?.id === song.id ? 'bg-blue-100' : ''
-                    } flex justify-between items-center`}
+                    } flex items-start`}
                     onClick={() => handleSongClick(song)}
                   >
-                    <span>{song.title}</span>
+                    <div className="flex-grow pr-2 break-words">
+                      <span>{song.title}</span>
+                    </div>
                     {song.subtitle && (
                       <FaClosedCaptioning 
-                        className="text-gray-500" 
+                        className="text-gray-500 flex-shrink-0 mt-1" 
                         title="This song has lyrics"
+                        size={16}
                       />
                     )}
                   </li>

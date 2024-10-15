@@ -317,11 +317,18 @@ export const importSongFromSuno = async (sunoUrl: string, context: any): Promise
     // Extract the song ID from the URL
     const songId = sunoUrl.split('/').pop();
 
+    // Clean up the title
+    let cleanTitle = metadata.title || 'Untitled';
+    const byIndex = cleanTitle.indexOf(' by @');
+    if (byIndex !== -1) {
+      cleanTitle = cleanTitle.substring(0, byIndex).trim();
+    }
+
     const newSong = await context.entities.Song.create({
       data: {
         user: { connect: { id: context.user.id } },
         sId: songId,
-        title: metadata.title || 'Untitled',
+        title: cleanTitle,
         tags: (metadata.description || '').replace('Listen and make your own with Suno.', '').trim(),
         prompt: '', // You might want to add this if available in the metadata
         audioUrl: metadata.ogAudio || '',
