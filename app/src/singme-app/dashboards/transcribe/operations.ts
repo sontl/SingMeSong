@@ -160,7 +160,32 @@ export const updateSubtitleSentence = async (args: { songId: string, index: numb
     const subtitleData = song.subtitle;
     if (args.index >= 0 && args.index < subtitleData.length) {
       if (args.field === 'sentence') {
-        subtitleData[args.index].sentence = args.newValue;
+        const oldSentence = subtitleData[args.index].sentence;
+        const newSentence = args.newValue;
+        const oldWords = subtitleData[args.index].words;
+        const newWords = newSentence.split(' ');
+
+        if (oldWords.length === newWords.length) {
+          // Update words without changing timing
+          subtitleData[args.index].words = oldWords.map((word: any, i: any) => ({
+            ...word,
+            text: newWords[i],
+          }));
+        } else {
+          // Recalculate word timings
+          const sentenceStart = subtitleData[args.index].start;
+          const sentenceEnd = subtitleData[args.index].end;
+          const duration = sentenceEnd - sentenceStart;
+          const wordDuration = duration / newWords.length;
+
+          subtitleData[args.index].words = newWords.map((word: any, i: any) => ({
+            text: word,
+            start: sentenceStart + i * wordDuration,
+            end: sentenceStart + (i + 1) * wordDuration,
+          }));
+        }
+
+        subtitleData[args.index].sentence = newSentence;
       } else if (args.field === 'start' || args.field === 'end') {
         subtitleData[args.index][args.field] = parseFloat(args.newValue);
       }
