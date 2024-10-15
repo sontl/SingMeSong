@@ -1,9 +1,6 @@
 import type { Song } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import fetch from 'node-fetch';
-import { randomUUID } from 'crypto';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Define types for API responses
@@ -143,6 +140,45 @@ ${song.lyric}
   } catch (error) {
     console.error('Error correcting transcription:', error);
     throw new HttpError(500, 'Failed to correct transcription');
+  }
+};
+
+export const updateSubtitleSentence = async (args: { songId: string, index: number, field: 'start' | 'end' | 'sentence', newValue: string }, context: any): Promise<{ success: boolean }> => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+
+  const song = await context.entities.Song.findUnique({
+    where: { id: args.songId },
+  });
+
+  if (!song || !song.subtitle) {
+    throw new HttpError(404, 'Song not found or missing subtitle');
+  }
+
+  try {
+    const subtitleData = song.subtitle;
+    if (args.index >= 0 && args.index < subtitleData.length) {
+      if (args.field === 'sentence') {
+        subtitleData[args.index].sentence = args.newValue;
+      } else if (args.field === 'start' || args.field === 'end') {
+        subtitleData[args.index][args.field] = parseFloat(args.newValue);
+      }
+
+      await context.entities.Song.update({
+        where: { id: args.songId },
+        data: {
+          subtitle: subtitleData,
+        },
+      });
+
+      return { success: true };
+    } else {
+      throw new HttpError(400, 'Invalid index');
+    }
+  } catch (error) {
+    console.error('Error updating subtitle:', error);
+    throw new HttpError(500, 'Failed to update subtitle');
   }
 };
 

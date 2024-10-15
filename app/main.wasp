@@ -401,6 +401,12 @@ action aiCorrectTranscription {
   entities: [Song]
 }
 
+// Add the new updateSubtitleSentence action
+action updateSubtitleSentence {
+  fn: import { updateSubtitleSentence } from "@src/singme-app/dashboards/transcribe/operations",
+  entities: [Song]
+}
+
 //#endregion
 
 //#region Lyric Video
