@@ -6,12 +6,12 @@ import MusicStyle from './MusicStyle';
 import Title from './Title';
 import Lyrics from './Lyrics';
 import CreateSongButton from './CreateSongButton';
-import { useQuery, getAllSongsByUser, importSongFromSuno, uploadFile, createUploadedSong } from 'wasp/client/operations';
+import { useQuery, getAllSongsByUser, importSongFromSuno, uploadFile, createUploadedSong, deleteSong } from 'wasp/client/operations';
 import SongTable from './SongTable';
 import SongDetails from './SongDetails';
 import { type Song } from 'wasp/entities';
 import { SongContext } from '../../context/SongContext';
-import { FaFileAudio, FaUpload, FaSpinner, FaCog } from 'react-icons/fa';
+import { FaFileAudio, FaUpload, FaSpinner, FaCog, FaTrash, FaDownload } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
@@ -204,6 +204,22 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     if (formType === 'create') {
       setSunoUrl('');
       setSelectedFile(null);
+    }
+  };
+
+  const handleDeleteSong = async () => {
+    if (!selectedSong) return;
+
+    if (window.confirm('Are you sure you want to delete this song?')) {
+      try {
+        await deleteSong({ songId: selectedSong.id });
+        toast.success('Song deleted successfully');
+        setSelectedSong(null);
+        refetch();
+      } catch (error) {
+        console.error('Error deleting song:', error);
+        toast.error('Failed to delete song');
+      }
     }
   };
 
@@ -414,7 +430,10 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
           {/* Column 3: Song Details */}
           <div className={`col-span-1 overflow-hidden ${activeTab !== 'details' ? 'hidden md:block' : ''}`}>
             <div className='rounded-sm bg-white shadow-default dark:bg-boxdark p-7 h-full overflow-y-auto'>
-              <SongDetails song={selectedSong} />
+              <SongDetails 
+                song={selectedSong} 
+                onDeleteSong={handleDeleteSong}
+              />
             </div>
           </div>
         </div>

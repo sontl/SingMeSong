@@ -1,7 +1,7 @@
 import type { Song } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import { randomUUID } from 'crypto';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 type UploadFileArgs = {
@@ -201,3 +201,52 @@ export const getAllSongsByUser = async ({ searchTerm }: { searchTerm?: string },
     return songs;
   };
   
+export const deleteSong = async ({ songId }: { songId: string }, context: any): Promise<void> => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+
+  const song = await context.entities.Song.findUnique({
+    where: { id: songId },
+    include: { user: true }
+  });
+
+  if (!song) {
+    throw new HttpError(404, 'Song not found');
+  }
+
+  // Check if the song belongs to the current user
+  if (song.user.id !== context.user.id) {
+    throw new HttpError(403, 'Forbidden: You do not have permission to delete this song');
+  }
+
+  // Delete audio file from R2 if it's an R2 URL
+  if (song.audioUrl && song.audioUrl.startsWith(process.env.CLOUDFLARE_R2_PUBLIC_URL!)) {
+    await deleteFileFromR2(song.audioUrl);
+  }
+
+  // Delete image file from R2 if it's an R2 URL
+  if (song.imageUrl && song.imageUrl.startsWith(process.env.CLOUDFLARE_R2_PUBLIC_URL!)) {
+    await deleteFileFromR2(song.imageUrl);
+  }
+
+  // Delete the song from the database
+  await context.entities.Song.delete({
+    where: { id: songId },
+  });
+};
+
+export async function deleteFileFromR2(fileUrl: string) {
+  const key = fileUrl.replace(process.env.CLOUDFLARE_R2_PUBLIC_URL!, '').slice(1);
+  const command = new DeleteObjectCommand({
+    Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+    Key: key,
+  });
+
+  try {
+    await s3Client.send(command);
+  } catch (error) {
+    console.error('Error deleting file from R2:', error);
+    // Don't throw an error here, as we still want to delete the song from the database
+  }
+}

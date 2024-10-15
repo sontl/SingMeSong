@@ -450,10 +450,10 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                     isTranscribing ? (
                       'Processing...'
                     ) : (
-                      <p className='text-gray-500'>No transcription available for this song. Click the "Transcribe" button to generate one.</p>
+                      <p className='text-gray-500'>** End of transcription **</p>
                     )
                   ) : (
-                    <p className='text-gray-500'>Select a song to view its transcription.</p>
+                    <p className='text-gray-500'>No transcription available for this song. Click the "Transcribe" button to generate one.</p>
                   )
                 ) : (
                   <p className='text-gray-500'>Select a song to view its transcription.</p>
