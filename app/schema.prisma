@@ -123,6 +123,7 @@ model Song {
 
   title                String
   subtitle             Json? // New column to store JSON data
+  subtitleFixedByAI    Boolean @default(false) // New column to indicate AI fix status
   imageUrl             String?
   lyric                String? @db.Text
   transcription        String? @db.Text

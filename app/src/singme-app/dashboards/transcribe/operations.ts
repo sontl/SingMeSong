@@ -19,7 +19,7 @@ interface TranscriptionResult {
 }
 
 
-export const transcribeSong = async ({songId, inputLang, outputLang}: {songId: string, inputLang: string, outputLang: string}, context: any): Promise<{ success: boolean, subtitle?: string, transcription?: string }> => {
+export const transcribeSong = async ({songId, inputLang, outputLang}: {songId: string, inputLang: string, outputLang: string}, context: any): Promise<{ success: boolean, updatedSong: Song }> => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
@@ -56,20 +56,19 @@ export const transcribeSong = async ({songId, inputLang, outputLang}: {songId: s
 
     const transcriptionData = await transcriptionResponse.json();
 
-    // Update the song with the transcription and check if song.lyric does not have value then also update song.lyric with transcriptionData.text
-    await context.entities.Song.update({
+    // Update the song with the transcription
+    const updatedSong = await context.entities.Song.update({
       where: { id: songId },
       data: {
-        subtitle: (transcriptionData as { srt: string, json: string }).json, // Store full JSON response
-        transcription: (transcriptionData as { srt: string, json: string }).srt, // Store SRT content
-        lyric: song.lyric ? song.lyric : (transcriptionData as { text: string }).text, // Update song.lyric if it does not have a value
+        subtitle: (transcriptionData as { srt: string, json: string }).json,
+        transcription: (transcriptionData as { srt: string, json: string }).srt,
+        lyric: song.lyric ? song.lyric : (transcriptionData as { text: string }).text,
       },
     });
 
     return { 
       success: true, 
-      subtitle: (transcriptionData as { srt: string, json: string }).json, 
-      transcription: (transcriptionData as { srt: string, json: string }).srt
+      updatedSong
     };
   } catch (error) {
     console.error('Error transcribing song:', error);
@@ -133,6 +132,7 @@ ${song.lyric}
       where: { id: args.songId },
       data: {
         subtitle: correctedSubtitleJson,
+        subtitleFixedByAI: true,
       },
     });
 

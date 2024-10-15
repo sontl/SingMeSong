@@ -151,7 +151,7 @@ export const createUploadedSong = async (args: {
         where: { id: songId },
         data: {
           imageUrl: imageUrl,
-          status: 'READY' 
+          status: 'UPLOADED' 
         },
       });
   

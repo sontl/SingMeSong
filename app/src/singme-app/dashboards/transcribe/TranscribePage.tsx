@@ -9,6 +9,7 @@ import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight, FaRobot, FaSea
 import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { LANGUAGES } from '../../shared/constants';
+import { ignoreOverride } from 'openai/_vendor/zod-to-json-schema/Options.mjs';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
   useRedirectHomeUnlessUserIsAdmin({ user });
@@ -25,9 +26,10 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const [showWords, setShowWords] = useState(false);
   const [editingField, setEditingField] = useState<{ index: number; field: 'start' | 'end' | 'sentence' } | null>(null);
   const [editedValue, setEditedValue] = useState('');
+  const [showTranscribeOptions, setShowTranscribeOptions] = useState(false);
+  const [transcriptionProgress, setTranscriptionProgress] = useState('');
 
-  const isTranscribeDisabled = !selectedSong || (selectedSong && selectedSong.subtitle) || isTranscribing;
-  const showTranscribeOptions = selectedSong && !selectedSong.subtitle;
+  const isTranscribeDisabled = !selectedSong || isTranscribing;
 
 
   // Update this interface above the component
@@ -64,12 +66,17 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
     setIsTranscribing(true);
     setTranscribingSongId(selectedSong.id);
+    setTranscriptionProgress('Transcribing...');
     try {
       const result = await transcribeSong({songId: selectedSong.id, inputLang: inputLanguage, outputLang: outputLanguage});
 
       if (result && result.success) {
         toast.success('Transcription completed successfully');
-        refetch();
+        setTranscriptionProgress('Transcription complete. Starting auto correction...');
+        const updatedSong = result.updatedSong;
+        if (inputLanguage !== 'en' && outputLanguage !== 'en') {
+          await handleAiCorrect(updatedSong);
+        }
       } else {
         toast.error('Transcription failed');
       }
@@ -78,6 +85,11 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
     } finally {
       setIsTranscribing(false);
       setTranscribingSongId(null);
+      setTranscriptionProgress('');
+      refetch();
+      if (showTranscribeOptions) {
+        setShowTranscribeOptions(false);
+      }
     }
   };
 
@@ -101,13 +113,9 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
     setIsAiCorrecting(true);
     setAiCorrectingSongId(song.id);
+    setTranscriptionProgress('Auto correction in progress...');
     try {
       const correctedSubtitle = await aiCorrectTranscription({songId: song.id});
-      
-      // TODO: Update the song with the corrected subtitle
-      // This is a placeholder for updating the song
-      //await updateSong({ id: song.id, subtitle: correctedSubtitle });
-
       toast.success('AI correction completed successfully');
       refetch();
     } catch (error) {
@@ -115,6 +123,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
     } finally {
       setIsAiCorrecting(false);
       setAiCorrectingSongId(null);
+      setTranscriptionProgress('');
     }
   };
 
@@ -138,8 +147,8 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toFixed(2).padStart(5, '0')}`;
+    const remainingSeconds = (seconds % 60).toFixed(2);
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.padStart(5, '0')}`;
   };
 
   const handleEdit = (index: number, field: 'start' | 'end' | 'sentence', value: number | string) => {
@@ -179,12 +188,13 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
           // Update the local state
           setSelectedSong(prevSong => {
             if (!prevSong) return prevSong;
-            const updatedSubtitle = [...prevSong.subtitle];
+            const typedPrevSong = prevSong as SongWithSubtitle;
+            const updatedSubtitle = [...typedPrevSong.subtitle];
             updatedSubtitle[index] = {
-              ...updatedSubtitle[index],
+              ...(updatedSubtitle[index] as SubtitleItem),
               [field]: field === 'sentence' ? newValue : parseFloat(newValue)
             };
-            return { ...prevSong, subtitle: updatedSubtitle };
+            return { ...prevSong, subtitle: updatedSubtitle } as Song;
           });
           toast.success('Subtitle updated successfully');
           refetch();
@@ -199,6 +209,13 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number, field: 'start' | 'end' | 'sentence') => {
     if (e.key === 'Enter') {
       handleSave(index, field);
+    }
+  };
+
+  const handleReTranscribeToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setShowTranscribeOptions(e.target.checked);
+    if (e.target.checked) {
+      setSelectedSong(prevSong => ({...prevSong, subtitle: null} as Song));
     }
   };
 
@@ -262,12 +279,37 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
           </div>
           <div className='col-span-1 flex flex-col overflow-hidden'>
             <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex flex-col h-full'>
-              <div className='border-b border-stroke py-4 px-7 dark:border-strokedark'>
+              <div className='border-b border-stroke py-4 px-7 dark:border-strokedark flex justify-between items-center'>
                 <h3 className='font-medium text-black dark:text-white'>Song Transcription</h3>
+                <div className='flex items-center space-x-4'>
+                  {/* <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="showWords"
+                      checked={showWords}
+                      onChange={() => setShowWords(!showWords)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="showWords">Show Words</label>
+                  </div> */}
+                  
+                  {selectedSong && selectedSong.subtitle && (
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="reTranscribe"
+                        checked={showTranscribeOptions}
+                        onChange={handleReTranscribeToggle}
+                        className="mr-2"
+                      />
+                      <label htmlFor="reTranscribe">Re-transcribe</label>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className='p-7 flex-grow overflow-y-auto'>
                 <div className='mb-4 space-y-2'>
-                  {showTranscribeOptions && (
+                  {(!selectedSong?.subtitle || showTranscribeOptions) && (
                     <>
                       <div className='flex items-center space-x-4'>
                         <div className='flex-1'>
@@ -312,7 +354,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                         {isTranscribing ? (
                           <>
                             <FaSpinner className='mr-2 animate-spin' />
-                            Transcribing...
+                            {transcriptionProgress || 'Processing...'}
                           </>
                         ) : (
                           <>
@@ -321,80 +363,54 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                           </>
                         )}
                       </button>
+                      {transcriptionProgress && (
+                        <p className="text-sm text-gray-600 mt-2">{transcriptionProgress}</p>
+                      )}
                     </>
                   )}
-                  {selectedSong && selectedSong.subtitle && selectedSong.lyric && (
-                    <button
-                      onClick={() => handleAiCorrect(selectedSong)}
-                      className='w-full flex items-center justify-center px-4 py-2 rounded bg-primary text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
-                      disabled={isAiCorrecting}
-                    >
-                      {isAiCorrecting && aiCorrectingSongId === selectedSong.id ? (
-                        <>
-                          <FaSpinner className='mr-2 animate-spin' />
-                          AI Correcting...
-                        </>
-                      ) : (
-                        <>
-                          <FaRobot className='mr-2' />
-                          AI Correct
-                        </>
-                      )}
-                    </button>
-                  )}
-                  {selectedSong && selectedSong.subtitle && (
+                  {selectedSong && selectedSong.subtitle && !showTranscribeOptions && (
                     <div>
-                      <div className="flex items-center mb-4">
-                        <input
-                          type="checkbox"
-                          id="showWords"
-                          checked={showWords}
-                          onChange={() => setShowWords(!showWords)}
-                          className="mr-2"
-                        />
-                        <label htmlFor="showWords">Show Words</label>
-                      </div>
                       {Array.isArray(selectedSong.subtitle) && selectedSong.subtitle.map((item: any, index: number) => (
-                         <div key={index} className="mb-2">
-                         {editingField?.index === index && editingField.field === 'start' ? (
-                           <input
-                             type="number"
-                             step="0.01"
-                             value={editedValue}
-                             onChange={(e) => setEditedValue(e.target.value)}
-                             onBlur={() => handleSave(index, 'start')}
-                             onKeyDown={(e) => handleKeyDown(e, index, 'start')}
-                             className="w-20 p-1 border rounded"
-                             autoFocus
-                           />
-                         ) : (
-                           <span
-                             className="text-gray-500 cursor-pointer"
-                             onClick={() => handleEdit(index, 'start', item.start)}
-                           >
-                             {item.start.toFixed(2)}
-                           </span>
-                         )}
-                         {' - '}
-                         {editingField?.index === index && editingField.field === 'end' ? (
-                           <input
-                             type="number"
-                             step="0.01"
-                             value={editedValue}
-                             onChange={(e) => setEditedValue(e.target.value)}
-                             onBlur={() => handleSave(index, 'end')}
-                             onKeyDown={(e) => handleKeyDown(e, index, 'end')}
-                             className="w-20 p-1 border rounded"
-                             autoFocus
-                           />
-                         ) : (
-                           <span
-                             className="text-gray-500 cursor-pointer"
-                             onClick={() => handleEdit(index, 'end', item.end)}
-                           >
-                             {item.end.toFixed(2)}
-                           </span>
-                         )}
+                        <div key={index} className="mb-2">
+                          {editingField?.index === index && editingField.field === 'start' ? (
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editedValue}
+                              onChange={(e) => setEditedValue(e.target.value)}
+                              onBlur={() => handleSave(index, 'start')}
+                              onKeyDown={(e) => handleKeyDown(e, index, 'start')}
+                              className="w-20 p-1 border rounded"
+                              autoFocus
+                            />
+                          ) : (
+                            <span
+                              className="text-gray-500 cursor-pointer"
+                              onClick={() => handleEdit(index, 'start', item.start)}
+                            >
+                              {formatTime(item.start)}
+                            </span>
+                          )}
+                          {' - '}
+                          {editingField?.index === index && editingField.field === 'end' ? (
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editedValue}
+                              onChange={(e) => setEditedValue(e.target.value)}
+                              onBlur={() => handleSave(index, 'end')}
+                              onKeyDown={(e) => handleKeyDown(e, index, 'end')}
+                              className="w-20 p-1 border rounded"
+                              autoFocus
+                            />
+                          ) : (
+                            <span
+                              className="text-gray-500 cursor-pointer"
+                              onClick={() => handleEdit(index, 'end', item.end)}
+                            >
+                              {formatTime(item.end)}
+                            </span>
+                          )}
                           <div className="flex items-center">
                             {editingField?.index === index && editingField.field === 'sentence' ? (
                               <input
@@ -431,7 +447,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                 </div>
                 {selectedSong ? (
                   selectedSong.transcription ? (
-                    <pre className='whitespace-pre-wrap'>{selectedSong.transcription}</pre>
+                  ''
                   ) : (
                     <p className='text-gray-500'>No transcription available for this song. Click the "Transcribe" button to generate one.</p>
                   )
