@@ -1,6 +1,7 @@
 import React from 'react';
 import { type Song, User } from 'wasp/entities';
-import { FaTrash } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import { FaTrash, FaClosedCaptioning } from 'react-icons/fa';
 
 type SongDetailsProps = {
   song: Song | null;
@@ -8,6 +9,8 @@ type SongDetailsProps = {
 };
 
 const SongDetails: React.FC<SongDetailsProps> = ({ song, onDeleteSong }) => {
+  const history = useHistory();
+
   if (!song) {
     return (
       <div className='flex flex-col items-center justify-center h-full'>
@@ -41,21 +44,39 @@ const SongDetails: React.FC<SongDetailsProps> = ({ song, onDeleteSong }) => {
     }
   };
 
+  const handleTranscribe = () => {
+    if (song) {
+      history.push(`/transcribe?songId=${song.id}`);
+    }
+  };
+
   return (
     <div className='space-y-4'>
       <img src={song.imageUrl || '/default-cover.png'} alt={song.title} className='w-full h-48 object-cover rounded-md' />
       <div className='flex items-center justify-between'>
         <h2 className='text-2xl font-bold'>{song.title}</h2>
-        <button
-          onClick={onDeleteSong}
-          className='relative group'
-          aria-label="Delete Song"
-        >
-          <FaTrash className="h-5 w-5 text-red-500 hover:text-red-600" />
-          <span className="absolute bottom-full right-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            Delete Song
-          </span>
-        </button>
+        <div className='flex items-center space-x-2'>
+          <button
+            onClick={handleTranscribe}
+            className='relative group'
+            aria-label="Transcribe Song"
+          >
+            <FaClosedCaptioning className="h-5 w-5 text-blue-500 hover:text-blue-600" />
+            <span className="absolute bottom-full right-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Transcribe Song
+            </span>
+          </button>
+          <button
+            onClick={onDeleteSong}
+            className='relative group'
+            aria-label="Delete Song"
+          >
+            <FaTrash className="h-5 w-5 text-red-500 hover:text-red-600" />
+            <span className="absolute bottom-full right-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Delete Song
+            </span>
+          </button>
+        </div>
       </div>
       <p className='text-sm text-gray-500'>{Array.isArray(song.tags) ? song.tags.join(', ') : song.tags}</p>
       <div className='flex items-center'>

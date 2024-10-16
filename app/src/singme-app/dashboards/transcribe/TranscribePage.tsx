@@ -1,4 +1,4 @@
-import React, { useState, useContext, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useContext, useMemo, useCallback, useEffect, useRef } from 'react';
 import { type AuthUser } from 'wasp/auth';
 import { useQuery, getAllSongsByUser, transcribeSong, aiCorrectTranscription, updateSubtitleSentence } from 'wasp/client/operations';
 import { type Song } from 'wasp/entities';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { LANGUAGES } from '../../shared/constants';
 import { ignoreOverride } from 'openai/_vendor/zod-to-json-schema/Options.mjs';
+import { useLocation } from 'react-router-dom';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
   useRedirectHomeUnlessUserIsAdmin({ user });
@@ -28,6 +29,8 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const [editedValue, setEditedValue] = useState('');
   const [showTranscribeOptions, setShowTranscribeOptions] = useState(false);
   const [transcriptionProgress, setTranscriptionProgress] = useState('');
+  const location = useLocation();
+  const songListRef = useRef<HTMLUListElement>(null);
 
   const isTranscribeDisabled = !selectedSong || isTranscribing;
 
@@ -52,6 +55,24 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
       }
     }
   }, [songs, selectedSong]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const songId = searchParams.get('songId');
+    if (songId && songs) {
+      const song = songs.find((s: Song) => s.id === songId);
+      if (song) {
+        setSelectedSong(song);
+        // Scroll to the selected song
+        setTimeout(() => {
+          const songElement = document.getElementById(`song-${songId}`);
+          if (songElement && songListRef.current) {
+            songElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+  }, [location, songs]);
 
 
   const handleSongSelect = (song: Song) => {
@@ -243,9 +264,10 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                 {isAllSongsLoading ? (
                   <p>Loading songs...</p>
                 ) : (
-                  <ul className='space-y-2'>
+                  <ul className='space-y-2' ref={songListRef}>
                     {songs?.map((song: Song) => (
                       <li 
+                        id={`song-${song.id}`}
                         key={song.id} 
                         className={`flex items-center justify-between p-2 rounded cursor-pointer ${
                           selectedSong?.id === song.id
