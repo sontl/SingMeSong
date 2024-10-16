@@ -544,16 +544,24 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
             </div>
             <div className="mb-4 flex flex-wrap">
               {visualizerEffects.map((effect) => (
-                <button
-                  key={effect.name}
-                  className={`mr-2 mb-2 px-4 py-2 rounded ${currentEffect.name === effect.name ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  onClick={handleEffectChange(effect)}
-                >
-                  {effect.name}
-                </button>
+                <div key={effect.name} className="relative group mr-2 mb-2">
+                  <button
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs ${
+                      currentEffect.name === effect.name
+                        ? 'border-blue-500 text-blue-500'
+                        : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-700'
+                    }`}
+                    onClick={handleEffectChange(effect)}
+                  >
+                    {effect.name.charAt(0) + effect.name.charAt(1)}
+                  </button>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                    {effect.name}
+                  </div>
+                </div>
               ))}
-              </div>
-              {isLoading || isAudioLoading ? (
+            </div>
+            {isLoading || isAudioLoading ? (
                   <div className="flex items-center justify-center h-64">
                     <FaSpinner className="animate-spin mr-2" size={24} />
                     <p className="text-lg">Loading song...</p>
