@@ -353,17 +353,21 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       if (!visualizerColumn) return { width: 0, height: 0 };
 
       const containerWidth = visualizerColumn.clientWidth * 0.96;
-      const containerHeight = visualizerColumn.clientHeight * 0.96;
+      let containerHeight = visualizerColumn.clientHeight * 0.96;
+      
+      // Add a gap for mobile view
+      if (window.innerWidth < 768) {  // Assuming 768px is the breakpoint for mobile
+        containerHeight -= 80;  // Adjust this value as needed to create sufficient gap
+      }
+
       const aspectRatio = 16 / 9;
 
       let width, height;
 
       if (containerWidth / containerHeight > aspectRatio) {
-        // Container is wider than 16:9, so we'll use the height as the limiting factor
         height = containerHeight;
         width = height * aspectRatio;
       } else {
-        // Container is taller than 16:9, so we'll use the width as the limiting factor
         width = containerWidth;
         height = width / aspectRatio;
       }
@@ -609,7 +613,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                     <p className="text-lg">Loading song...</p>
                   </div>
                 ) : (
-                  <div className={`m-0 flex justify-center items-center ${isRecordingRef.current ? 'border-4 border-red-500' : ''}`}>
+                  <div className={`m-0 flex justify-center items-center ${isRecordingRef.current ? 'border-4 border-red-500' : ''} mb-20 md:mb-0`}>
                     <ReactP5Wrapper sketch={sketch} />
                   </div>
                 )}
