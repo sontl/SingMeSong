@@ -11,6 +11,7 @@ import debounce from 'lodash/debounce';
 import { LANGUAGES } from '../../shared/constants';
 import { ignoreOverride } from 'openai/_vendor/zod-to-json-schema/Options.mjs';
 import { useLocation } from 'react-router-dom';
+import JokeDisplay from '../../components/JokeDisplay';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
   useRedirectHomeUnlessUserIsAdmin({ user });
@@ -385,9 +386,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                           </>
                         )}
                       </button>
-                      {transcriptionProgress && (
-                        <p className="text-sm text-gray-600 mt-2">{transcriptionProgress}</p>
-                      )}
+                      {isTranscribing && <JokeDisplay />}
                     </>
                   )}
                   {selectedSong && selectedSong.subtitle && !showTranscribeOptions && (
