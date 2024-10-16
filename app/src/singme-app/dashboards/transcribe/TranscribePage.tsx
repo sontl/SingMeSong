@@ -118,9 +118,10 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const handleDownload = (song: Song) => {
     if (song.subtitle) {
       const element = document.createElement('a');
-      const file = new Blob([JSON.stringify(song.subtitle)], {type: 'application/json'});
+      //const file = new Blob([JSON.stringify(song.subtitle)], {type: 'application/json'});
+      const file = new Blob([song.transcription!], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
-      element.download = `${song.title}_transcription.json`;
+      element.download = `${song.title}_transcription.srt`;
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
@@ -243,11 +244,11 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
   return (
     <DefaultLayout user={user}>
-      <div className='mx-auto max-w-270 h-[90vh] flex flex-col'>
-        <div className='grid grid-cols-2 gap-8 flex-grow overflow-hidden'>
+      <div className='mx-auto w-full px-4 h-[90vh] flex flex-col'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 flex-grow overflow-hidden'>
           <div className='col-span-1 flex flex-col overflow-hidden'>
-            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex flex-col h-full'>
-              <div className='border-b border-stroke py-4 px-7 dark:border-strokedark'>
+            <div className='bg-white dark:bg-boxdark flex flex-col h-full'>
+              <div className='py-4 px-7'>
                 <h3 className='font-medium text-black dark:text-white'>Select Existing Song</h3>
               </div>
               <div className='p-7 pb-0'>
@@ -286,10 +287,19 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
                           )}
                           {song.subtitle && (
                             <button
-                              onClick={(e) => handleDownload(song)}
-                              className='text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload(song);
+                              }}
+                              className='relative group'
+                              aria-label="Download Transcription"
                             >
-                            <FaDownload  className='text-green-500'/>
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                              </svg>
+                              <span className="absolute right-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+                                SRT
+                              </span>
                             </button>
                           )}
                         </div>
@@ -300,9 +310,9 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
               </div>
             </div>
           </div>
-          <div className='col-span-1 flex flex-col overflow-hidden'>
-            <div className='rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark flex flex-col h-full'>
-              <div className='border-b border-stroke py-4 px-7 dark:border-strokedark flex justify-between items-center'>
+          <div className='col-span-1 md:col-span-2 flex flex-col overflow-hidden'>
+            <div className='bg-white dark:bg-boxdark flex flex-col h-full'>
+              <div className='py-4 px-7 flex justify-between items-center'>
                 <h3 className='font-medium text-black dark:text-white'>Song Transcription</h3>
                 <div className='flex items-center space-x-4'>
                   {/* <div className="flex items-center">
