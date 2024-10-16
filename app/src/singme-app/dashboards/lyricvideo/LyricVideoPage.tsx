@@ -496,7 +496,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         </div>
       ) : (
         <div className="flex flex-col md:flex-row h-full">
-          <div className="w-full md:w-1/4 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
+          <div className="w-full md:w-1/4 overflow-y-auto border-b md:border-b-0  border-gray-200 p-4" style={{ maxHeight: 'calc(100vh - 64px)' }}>
             <h2 className="text-xl font-bold mb-4">Your Songs</h2>
             <div className="relative mb-4">
               <input
