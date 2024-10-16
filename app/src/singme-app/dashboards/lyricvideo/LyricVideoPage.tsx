@@ -11,6 +11,7 @@ import P5MusicPlayer from './P5MusicPlayer';
 import { clearSongImage } from './effects/spectrums/ImageWaveEffect';
 import debounce from 'lodash/debounce';
 import { FaSearch } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 
 // Add this import
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
@@ -66,6 +67,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const location = useLocation();
+  const songListRef = useRef<HTMLUListElement>(null);
 
   const setupMediaRecorder = useCallback(() => {
     // if (isMediaRecorderSetupRef.current || !canvasRef.current) return;
@@ -438,6 +441,25 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
   }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking, currentImageUrl]);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const songId = searchParams.get('songId');
+    if (songId && songs) {
+      const song = songs.find((s: Song) => s.id === songId);
+      if (song) {
+        setSelectedSong(song);
+        handleSongClick(song);
+        // Scroll to the selected song
+        setTimeout(() => {
+          const songElement = document.getElementById(`song-${songId}`);
+          if (songElement && songListRef.current) {
+            songElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+  }, [location, songs]);
+
   return (
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
       {isFullscreen ? (
@@ -482,9 +504,10 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
             {isAllSongsLoading ? (
               <p>Loading songs...</p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-2" ref={songListRef}>
                 {allSongs && allSongs.map((song) => (
                   <li
+                    id={`song-${song.id}`}
                     key={song.id}
                     className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
                       selectedSong?.id === song.id ? 'bg-blue-100' : ''

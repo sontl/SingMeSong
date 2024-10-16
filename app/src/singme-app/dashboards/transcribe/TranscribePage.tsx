@@ -5,12 +5,12 @@ import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { SongContext } from '../../context/SongContext';
-import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight, FaRobot, FaSearch, FaPencilAlt, FaCheck } from 'react-icons/fa';
+import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight, FaRobot, FaSearch, FaPencilAlt, FaCheck, FaPlay } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { LANGUAGES } from '../../shared/constants';
 import { ignoreOverride } from 'openai/_vendor/zod-to-json-schema/Options.mjs';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import JokeDisplay from '../../components/JokeDisplay';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
@@ -32,6 +32,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const [transcriptionProgress, setTranscriptionProgress] = useState('');
   const location = useLocation();
   const songListRef = useRef<HTMLUListElement>(null);
+  const history = useHistory();
 
   const isTranscribeDisabled = !selectedSong || isTranscribing;
 
@@ -242,6 +243,14 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
     }
   };
 
+  const handlePreview = () => {
+    if (selectedSong) {
+      history.push(`/lyric-video?songId=${selectedSong.id}`);
+    } else {
+      toast.error('Please select a song to preview');
+    }
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className='mx-auto w-full px-4 h-[90vh] flex flex-col'>
@@ -315,17 +324,20 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
               <div className='py-4 px-7 flex justify-between items-center'>
                 <h3 className='font-medium text-black dark:text-white'>Song Transcription</h3>
                 <div className='flex items-center space-x-4'>
-                  {/* <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="showWords"
-                      checked={showWords}
-                      onChange={() => setShowWords(!showWords)}
-                      className="mr-2"
-                    />
-                    <label htmlFor="showWords">Show Words</label>
-                  </div> */}
-                  
+                  {/* Add the Preview button with tooltip */}
+                  <div className="relative group">
+                    <button
+                      onClick={handlePreview}
+                      className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 relative"
+                      disabled={!selectedSong}
+                      id="previewButton"
+                    >
+                      <FaPlay className="text-primary" />
+                    </button>
+                    <span className="absolute right-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+                      Preview in Lyric Video
+                    </span>
+                  </div>
                   {selectedSong && selectedSong.subtitle && (
                     <div className="flex items-center">
                       <input
