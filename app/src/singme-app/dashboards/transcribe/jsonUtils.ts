@@ -20,37 +20,54 @@ export function repairIncompleteJson(incompleteJson: string, originalSubtitle: a
     // Check if there's an incomplete object after the last complete one
     const remainingPart = incompleteJson.substring(lastCompleteObjectIndex + 1);
     if (remainingPart.includes('{')) {
-      // If there's an incomplete object, add it to the repaired JSON
-      repairedJson += ',{';
-      const lastPropertyIndex = remainingPart.lastIndexOf('"');
-      if (lastPropertyIndex !== -1) {
-        repairedJson += remainingPart.substring(remainingPart.indexOf('{') + 1, lastPropertyIndex + 1);
+      // Determine if we're in a "words" array or in the parent object
+      if (repairedJson.lastIndexOf('"words":[') > repairedJson.lastIndexOf('}]')) {
+        // We're in a "words" array, add a complete word object
+        repairedJson += ',{"end":"","start":"","text":""}]}';
+      } else {
+        // We're in the parent object, close the previous object if needed and add a complete parent object
+        if (!repairedJson.endsWith('}')) {
+          repairedJson += ']}';
+        }
+        repairedJson += ',{"start":"","end":"","sentence":"","words":[]}';
       }
-      repairedJson += '}';
     }
 
-    // Close the array if it's not closed
+    // Close the outer array if it's not closed
     if (!repairedJson.endsWith(']')) {
       repairedJson += ']';
     }
   } else {
-    // If no complete object found, check if there's at least one opening brace
-    const firstOpeningBrace = repairedJson.indexOf('{');
-    if (firstOpeningBrace !== -1) {
-      // Try to find the last property in the partial object
-      const lastPropertyIndex = repairedJson.lastIndexOf('"');
-      if (lastPropertyIndex > firstOpeningBrace) {
-        // Keep everything up to the last property and close the object and array
-        repairedJson = repairedJson.substring(0, lastPropertyIndex + 1) + '}]';
-      } else {
-        // If no property found, just close the object and array
-        repairedJson = repairedJson.substring(0, firstOpeningBrace + 1) + '}]';
-      }
-    } else {
-      // If no opening brace found, return an empty array
-      repairedJson = '[]';
-    }
+    // If no complete object found, return an empty array
+    repairedJson = '[]';
+  }
+
+  // Replace any incomplete word object with a complete one
+  repairedJson = repairedJson.replace(/\{(?:(?:"end"|"start"|"text")(?::"[^"]*")?,?)*\}/g, '{"end":"","start":"","text":""}');
+
+  // Replace any incomplete parent object with a complete one
+  repairedJson = repairedJson.replace(/\{(?:(?:"start"|"end"|"sentence"|"words")(?::(?:"[^"]*"|\[[^\]]*\])?)?,?)*\}/g, '{"start":"","end":"","sentence":"","words":[]}');
+
+  // Remove any trailing commas inside arrays
+  repairedJson = repairedJson.replace(/,\s*]/g, ']');
+
+  // Ensure the JSON is valid
+  try {
+    JSON.parse(repairedJson);
+  } catch (e) {
+    // If parsing fails, return an empty array
+    return '[]';
   }
 
   return repairedJson;
+}
+
+export function isValidJSON(str: string): boolean {
+  if (typeof str !== 'string') return false;
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

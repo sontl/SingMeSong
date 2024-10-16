@@ -117,26 +117,30 @@ Original corrected version, ignore the word in the brackets:
 ${song.lyric}
     `;
 
-    console.log('prompt', prompt);
-
+    console.log('Sending prompt to Gemini API');
     const result = await model.generateContent(prompt);
-
-    
     const correctedSubtitle = result.response.text();
-    console.log('correctedSubtitle', correctedSubtitle);
+    console.log('Received response from Gemini API');
 
     let correctedSubtitleJson;
     try {
       correctedSubtitleJson = JSON.parse(correctedSubtitle);
+      console.log('Successfully parsed correctedSubtitle JSON');
     } catch (parseError) {
       console.error('Error parsing JSON:', parseError);
+      console.log('Attempting to repair JSON');
       
       // Attempt to repair the JSON
       const repairedJson = repairIncompleteJson(correctedSubtitle, song.subtitle);
-      correctedSubtitleJson = JSON.parse(repairedJson);
+      console.log('Repaired JSON:', repairedJson);
+      try {
+        correctedSubtitleJson = JSON.parse(repairedJson);
+        console.log('Successfully parsed repaired JSON');
+      } catch (repairError) {
+        console.error('Error parsing repaired JSON:', repairError);
+        throw new HttpError(500, 'Failed to parse corrected subtitle');
+      }
     }
-
-    console.log('correctedSubtitleJson', correctedSubtitleJson);
 
     // Merge the corrected subtitle with the existing subtitle
     const mergedSubtitle = mergeSubtitles(song.subtitle, correctedSubtitleJson);
@@ -153,6 +157,9 @@ ${song.lyric}
     return { success: true, correctedSubtitle: JSON.stringify(mergedSubtitle) };
   } catch (error) {
     console.error('Error correcting transcription:', error);
+    if (error instanceof HttpError) {
+      throw error;
+    }
     throw new HttpError(500, 'Failed to correct transcription');
   }
 };
@@ -235,4 +242,3 @@ function mergeSubtitles(originalSubtitle: any[], correctedSubtitle: any[]): any[
   });
 }
 
-export { repairIncompleteJson };
