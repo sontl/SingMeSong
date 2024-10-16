@@ -224,7 +224,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   useEffect(() => {
     if (songs) {
       const sortedSongs = [...songs].sort((a, b) => 
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setAllSongs(sortedSongs);
     }
@@ -546,7 +546,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                     aria-label="Transcribe Song"
                     disabled={!selectedSong}
                   >
-                    <FaClosedCaptioning size={20} color="black" />
+                    <FaClosedCaptioning size={20} className="text-primary" />
                   </button>
                   <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     Transcribe Song
@@ -563,7 +563,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                     {isRecordingRef.current ? (
                       <FaVideoSlash size={20} color={isFlashingRef.current ? 'white' : 'red'} />
                     ) : (
-                      <FaVideo size={20} />
+                      <FaVideo size={20} className="text-primary" />
                     )}
                   </button>
                   <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -576,7 +576,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                   className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
                   aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
                 >
-                  {isFullscreen ? <FaCompress size={20} /> : <FaExpand size={20} />}
+                  {isFullscreen ? <FaCompress size={20} className="text-primary" /> : <FaExpand size={20} className="text-primary" />}
                 </button>
                 <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
