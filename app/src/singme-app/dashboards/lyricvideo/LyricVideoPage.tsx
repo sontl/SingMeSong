@@ -12,9 +12,8 @@ import { clearSongImage } from './effects/spectrums/ImageWaveEffect';
 import debounce from 'lodash/debounce';
 import { FaSearch } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
-
-// Add this import
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
 
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
@@ -69,6 +68,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const location = useLocation();
   const songListRef = useRef<HTMLUListElement>(null);
+  const history = useHistory();
 
   const setupMediaRecorder = useCallback(() => {
     // if (isMediaRecorderSetupRef.current || !canvasRef.current) return;
@@ -334,6 +334,12 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     debouncedSearch(e.target.value);
   };
 
+  const handleTranscribe = () => {
+    if (selectedSong) {
+      history.push(`/transcribe?songId=${selectedSong.id}`);
+    }
+  };
+
   const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
     let lyrics: any;
@@ -533,6 +539,19 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Song Visualizer</h2>
               <div className="flex items-center">
+                <div className="relative group mr-2">
+                  <button
+                    onClick={handleTranscribe}
+                    className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
+                    aria-label="Transcribe Song"
+                    disabled={!selectedSong}
+                  >
+                    <FaClosedCaptioning size={20} color="black" />
+                  </button>
+                  <span className="absolute right-0 top-full mt-2 w-32 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Transcribe Song
+                  </span>
+                </div>
                 <div className="relative group">
                   <button
                     onClick={toggleRecording}
