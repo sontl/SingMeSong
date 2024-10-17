@@ -132,7 +132,7 @@ function updateAndDrawMusicNotes(p: p5, spectrum: number[]) {
     }
 
     // Draw note
-    p.fill(255, 255, 255, 200);
+    p.fill(255, 255, 255, 150); // Lighter music notes with more transparency
     p.text(note.symbol, note.x, note.y);
   }
 }
@@ -143,7 +143,7 @@ function averageSpectrum(spectrum: number[]): number {
 }
 
 export const OceanWaveTitleStyle = (p: p5, title: string) => {
-  p.fill(255); // White text
+  p.fill(255, 255, 255, 180); // Lighter white text with some transparency
   p.textAlign(p.LEFT, p.TOP);
   p.textSize(24); // Adjust this size as needed
   p.textStyle(p.BOLD);
