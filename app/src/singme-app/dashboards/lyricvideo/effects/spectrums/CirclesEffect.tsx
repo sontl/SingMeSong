@@ -51,8 +51,8 @@ export const CirclesEffect = (p: p5, spectrum: number[], energy: number) => {
     // Draw the masked (circular) image
     p.image(maskedImg, centerX, centerY, imgSize, imgSize);
 
-    // Add dotted border with colors based on the spectrum
-    drawDottedBorder(p, centerX, centerY, imgSize, spectrum);
+    // Add glowing dotted border with colors based on the spectrum
+    drawGlowingDottedBorder(p, centerX, centerY, imgSize, spectrum);
   }
   
   p.pop(); // Restore the previous drawing state
@@ -97,10 +97,15 @@ export const CirclesTitleStyle = (p: p5, title: string) => {
 };
 
 export const loadCirclesImage = (p: p5, imageUrl: string): void => {
+  
+};
+
+export const loadCirclesBlurImage = (p: p5, imageUrl: string): void => {
   p.loadImage(imageUrl, (loadedImg) => {
+    bgImg = loadedImg.get();
+    bgImg.filter(p.BLUR, 6);
 
     originalImg = loadedImg.get();
-    
     // Create a circular mask
     const size = Math.min(loadedImg.width, loadedImg.height);
     maskImg = p.createGraphics(size, size);
@@ -108,43 +113,57 @@ export const loadCirclesImage = (p: p5, imageUrl: string): void => {
     maskImg.fill(255);
     maskImg.noStroke();
     maskImg.ellipse(size/2, size/2, size, size);
+  });   
+
+  p.loadImage(imageUrl, (loadedImg) => {
+
+  
   });
 };
 
-export const loadCirclesBlurImage = (p: p5, imageUrl: string): void => {
-  p.loadImage(imageUrl, (loadedImg) => {
-    bgImg = loadedImg.get();
-    bgImg.filter(p.BLUR, 6);
-  });   
-};
-
-// Update the drawDottedBorder function
-const drawDottedBorder = (p: p5, x: number, y: number, size: number, spectrum: number[]) => {
+// Update the drawDottedBorder function to create a glowing effect
+const drawGlowingDottedBorder = (p: p5, x: number, y: number, size: number, spectrum: number[]) => {
   const numDots = 100;
-  const dotSize = 3;
+  const baseDotSize = 3;
   const radius = size / 2 + 5; // Slightly larger than the image
+  const glowLayers = 3; // Reduced number of glow layers for less prominent glow
+
+  // Calculate bass intensity (use the first few elements of the spectrum)
+  const bassRange = 10; // Adjust this value to change how many low frequencies to consider
+  const bassIntensity = spectrum.slice(0, bassRange).reduce((sum, val) => sum + val, 0) / bassRange;
+  const bassScale = p.map(bassIntensity, 0, 255, 1, 1.5); // Max 50% increase in size
 
   p.push();
-  p.noFill();
-  p.colorMode(p.HSB, 360, 100, 100, 1); // Use HSB color mode for easier color manipulation
+  p.noStroke();
+  p.colorMode(p.HSB, 360, 100, 100, 1);
 
   for (let i = 0; i < numDots; i++) {
     const angle = p.map(i, 0, numDots, 0, p.TWO_PI);
     const dotX = x + radius * p.cos(angle);
     const dotY = y + radius * p.sin(angle);
 
-    // Map the dot index to a position in the spectrum array
     const spectrumIndex = Math.floor(p.map(i, 0, numDots, 0, spectrum.length - 1));
     const amp = spectrum[spectrumIndex];
 
-    // Create a vibrant color based on the angle and amplitude
     const hue = p.map(angle, 0, p.TWO_PI, 0, 360);
     const saturation = p.map(amp, 0, 256, 50, 100);
     const brightness = p.map(amp, 0, 256, 70, 100);
 
-    p.stroke(hue, saturation, brightness);
-    p.strokeWeight(dotSize);
-    p.point(dotX, dotY);
+    // Apply bass-reactive scaling to dot size
+    const scaledBaseDotSize = baseDotSize * bassScale;
+
+    // Draw glow effect with reduced opacity in normal mode
+    for (let j = glowLayers; j > 0; j--) {
+      const baseAlpha = p.map(j, 0, glowLayers, 0.05, 0.2); // Reduced base alpha values
+      const alpha = baseAlpha * bassScale; // Increase alpha with bass intensity
+      const dotSize = scaledBaseDotSize + (glowLayers - j) * 2 * bassScale;
+      p.fill(hue, saturation, brightness, alpha);
+      p.ellipse(dotX, dotY, dotSize, dotSize);
+    }
+
+    // Draw main dot
+    p.fill(hue, saturation, brightness);
+    p.ellipse(dotX, dotY, scaledBaseDotSize, scaledBaseDotSize);
   }
 
   p.pop();

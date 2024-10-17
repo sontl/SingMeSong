@@ -31,20 +31,24 @@ export type VisualizerEffect = {
 
 export const visualizerEffects: VisualizerEffect[] = [
   {
-    name: 'Particles',
-    draw: ParticlesEffect,
-    drawTitle: ParticlesTitleStyle,
+    name: 'Suno',
+    draw: SunoEffect,
+    drawTitle: SunoTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime),
-    initConfig: (p: p5) => p.background(0, 10),
-  
+    loadImage: loadSunoImage,
+    loadSmallImage: loadBlurImage,
+    initConfig: initSunoEffect,
   },
+
   {
-    name: 'Bars',
-    draw: BarsEffect,
-    drawTitle: BarsTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.5, textColor: p.color(255, 255, 255) }),
-    initConfig: (p: p5) => p.background(0),
-   
+    name: 'Ruvo',
+    draw: RuvoEffect,
+    drawTitle: RuvoTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+      RollingLyricEffect(p, lyrics, isPlaying, currentTime, {fontSize: 0.05, bottomMargin: 0.06}),
+    initConfig: initRuvoEffect,
+    loadImage: loadRuvoImages,
+    loadSmallImage: loadRuvoBlurImage,
   },
   {
     name: 'Circles',
@@ -63,28 +67,6 @@ export const visualizerEffects: VisualizerEffect[] = [
     loadSmallImage: loadCirclesBlurImage,
   },
   {
-    name: 'Wave',
-    draw: WaveEffect,
-    drawTitle: WaveTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
-    initConfig: (p: p5) => p.background(0),
-  },
-  {
-    name: 'Starfield',
-    draw: StarfieldEffect,
-    drawTitle: StarfieldTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
-    initConfig: (p: p5) => p.background(0),
-  },
-  {
-    name: 'Spectrogram',
-    draw: SpectrogramEffect,
-    drawTitle: SpectrogramTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.36, textColor: p.color(255, 255, 255) }),
-    initConfig: (p: p5) => p.background(0),
-    
-  }, 
-  {
     name: 'ImageWave',
     draw: ImageWaveEffect,
     drawTitle: ImageWaveTitleStyle,
@@ -97,6 +79,7 @@ export const visualizerEffects: VisualizerEffect[] = [
       loadJosefinSansFont(p);
     }
   },
+   
   {
     name: 'OceanWave',
     draw: OceanWaveEffect,
@@ -117,8 +100,47 @@ export const visualizerEffects: VisualizerEffect[] = [
       p.colorMode(p.HSB);
       p.background(0);
     },
+  },
+  {
+    name: 'Starfield',
+    draw: StarfieldEffect,
+    drawTitle: StarfieldTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0),
+  },
+  {
+    name: 'Particles',
+    draw: ParticlesEffect,
+    drawTitle: ParticlesTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0, 10),
+  
+  },
+  {
+    name: 'Bars',
+    draw: BarsEffect,
+    drawTitle: BarsTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.5, textColor: p.color(255, 255, 255) }),
+    initConfig: (p: p5) => p.background(0),
    
   },
+  
+  {
+    name: 'Wave',
+    draw: WaveEffect,
+    drawTitle: WaveTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: (p: p5) => p.background(0),
+  },
+  {
+    name: 'Spectrogram',
+    draw: SpectrogramEffect,
+    drawTitle: SpectrogramTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.36, textColor: p.color(255, 255, 255) }),
+    initConfig: (p: p5) => p.background(0),
+    
+  }, 
+ 
   {
     name: 'PastelWaves3D',
     draw: PastelWaves3DEffect,
@@ -154,23 +176,5 @@ export const visualizerEffects: VisualizerEffect[] = [
     initConfig: initEverglowEffect,
     loadImage: loadEverglowImage,
   },
-  {
-    name: 'Suno',
-    draw: SunoEffect,
-    drawTitle: SunoTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime),
-    loadImage: loadSunoImage,
-    loadSmallImage: loadBlurImage,
-    initConfig: initSunoEffect,
-  },
-  {
-    name: 'Ruvo',
-    draw: RuvoEffect,
-    drawTitle: RuvoTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
-      RollingLyricEffect(p, lyrics, isPlaying, currentTime, {fontSize: 0.05, bottomMargin: 0.06}),
-    initConfig: initRuvoEffect,
-    loadImage: loadRuvoImages,
-    loadSmallImage: loadRuvoBlurImage,
-  },
+  
 ];

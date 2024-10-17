@@ -62,7 +62,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     isSeeking,
     setIsSeeking
   } = useContext(SongContext);
-  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[11]);
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[0]);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
