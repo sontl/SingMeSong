@@ -9,13 +9,14 @@ export const SunoEffect = (p: p5, spectrum: number[], energy: number, waveform: 
   if (blurredImg) {
     // Calculate animation values
     const scaleRange = 0.05;
-    const scale = 1 + scaleRange + Math.sin(time * 0.001) * scaleRange;
+    const scale = 1.2 + scaleRange + Math.sin(time * 0.001) * scaleRange; // Increased base scale to 1.2
     const xOffset = Math.cos(time * 0.0007) * 20;
     const yOffset = Math.sin(time * 0.0005) * 20;
 
-    // Draw animated blurred background
-    const newWidth = blurredImg.width * scale;
-    const newHeight = blurredImg.height * scale;
+    // Draw animated blurred background to overfill the canvas
+    const newWidth = p.width * scale;
+    const newHeight = p.height * scale;
+
     const x = (p.width - newWidth) / 2 + xOffset;
     const y = (p.height - newHeight) / 2 + yOffset;
     p.image(blurredImg, x, y, newWidth, newHeight);
@@ -68,7 +69,13 @@ export const initSunoEffect = (p: p5): void => {
 export const loadSunoImage = (p: p5, imageUrl: string): void => {
   p.loadImage(imageUrl, (loadedImg) => {
     originalImg = loadedImg.get();
-    blurredImg = loadedImg.get();
-    blurredImg.filter(p.BLUR, 24); // Increased blur amount from 12 to 24
   });
 };
+
+export const loadBlurImage = (p: p5, imageUrl: string): void => {
+  p.loadImage(imageUrl, (loadedImg) => {
+    blurredImg = loadedImg.get();
+    blurredImg.filter(p.BLUR, 10); // Increased blur amount from 12 to 24
+  });
+};
+

@@ -66,6 +66,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [currentSmallImageUrl, setCurrentSmallImageUrl] = useState<string | null>(null);
   const location = useLocation();
   const songListRef = useRef<HTMLUListElement>(null);
   const history = useHistory();
@@ -265,9 +266,10 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       setIsPlaying(false);
     }
 
-    // Clear the previous image and set the new image URL
+    // Clear the previous image and set the new image URLs
     clearSongImage();
     setCurrentImageUrl(song.imageUrl || null);
+    setCurrentSmallImageUrl(song.imageUrl ? song.imageUrl.replace('image_large', 'image') : null);
 
     try {
       // Reset the audio context
@@ -376,12 +378,14 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.preload = () => {
-      // Load the image if available
-      if (currentImageUrl && currentEffect.loadImage) {
-        //load large image 
-        const largeImageUrl = currentImageUrl.replace('image', 'image_large');
-        currentEffect.loadImage?.(p, largeImageUrl);
+      if (currentSmallImageUrl && currentEffect.loadSmallImage) {
+        currentEffect.loadSmallImage(p, currentSmallImageUrl);
       }
+      // Load the images if available
+      if (currentImageUrl && currentEffect.loadImage) {
+        currentEffect.loadImage(p, currentImageUrl);
+      }
+
     };
 
     p.setup = () => {
@@ -453,7 +457,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         }
       }
     };
-  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking, currentImageUrl]);
+  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking, currentImageUrl, currentSmallImageUrl]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);

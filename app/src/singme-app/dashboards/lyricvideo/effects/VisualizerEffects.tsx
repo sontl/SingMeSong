@@ -16,7 +16,7 @@ import { RollingLyricEffect } from './lyrics/RollingLyricEffect';
 import { PastelWaves3DEffect, PastelWaves3DTitleStyle, initPastelWaves3D } from './spectrums/PastelWaves3DEffect';
 import { EverglowEffect, EverglowTitleStyle, initEverglowEffect, loadEverglowImage } from './spectrums/EverglowEffect';
 import { ScrollingUpLyricEffect } from './lyrics/ScrollingUpLyricEffect';
-import { SunoEffect, SunoTitleStyle, initSunoEffect, loadSunoImage } from './spectrums/SunoEffect';
+import { SunoEffect, SunoTitleStyle, initSunoEffect, loadSunoImage, loadBlurImage } from './spectrums/SunoEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -24,8 +24,8 @@ export type VisualizerEffect = {
   drawTitle: (p: p5, title: string) => void;
   displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; sentence: string; words: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => void;
   loadImage?: (p: p5, imageUrl: string) => void;
+  loadSmallImage?: (p: p5, imageUrl: string) => void;
   initConfig: (p: p5) => void;
-  
 };
 
 export const visualizerEffects: VisualizerEffect[] = [
@@ -88,10 +88,11 @@ export const visualizerEffects: VisualizerEffect[] = [
     drawTitle: ImageWaveTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => RandomHighlightLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04, fontSize: 0.66 }),
     loadImage: loadSongImage,
+    loadSmallImage: loadSongImage,
     initConfig: (p: p5) => {
       p.colorMode(p.RGB);
       p.background(240, 240, 240);
-      loadJosefinSansFont(p);  // Load the font during initialization
+      loadJosefinSansFont(p);
     }
   },
   {
@@ -157,6 +158,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     drawTitle: SunoTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime),
     loadImage: loadSunoImage,
+    loadSmallImage: loadBlurImage,
     initConfig: initSunoEffect,
   },
 ];
