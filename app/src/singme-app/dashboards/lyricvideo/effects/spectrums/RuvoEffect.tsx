@@ -12,18 +12,23 @@ export const loadRuvoImages = (p: p5, imageUrl: string) => {
 };
 
 export const loadRuvoBlurImage = (p: p5, imageUrl: string) => {
-  bgimg = p.loadImage(imageUrl);
+  p.loadImage(imageUrl, (loadedImg) => {
+    bgimg = loadedImg.get();
+    bgimg.filter(p.BLUR, 6);
+  });   
+
+
 };
 
 export const initRuvoEffect = (p: p5) => {
   p.textFont(font);
   p.textAlign(p.CENTER, p.CENTER);
   p.textSize(16);
-  bgimg.filter(p.BLUR, 12);
-
-  // Create a circular mask for the image
-  imgMask = p.createGraphics(img.width, img.height);
-  imgMask.ellipse(img.width/2, img.height/2, img.width, img.height);
+        // Create a circular mask for the image
+    if (!imgMask) {
+        imgMask = p.createGraphics(img.width, img.height);
+        imgMask.ellipse(img.width/2, img.height/2, img.width, img.height);
+    }
 };
 
 export const RuvoEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]) => {
@@ -52,8 +57,8 @@ const drawAnimatedBackground = (p: p5, energy: number) => {
   
   p.image(bgimg, x, y, newWidth, newHeight);
   
-  // Apply semi-transparent overlay
-  const alpha = p.map(energy, 0, 255, 180, 150);
+  // Apply semi-transparent overlay with reduced opacity
+  const alpha = p.map(energy, 0, 255, 150, 150);
   p.fill(0, alpha);
   p.noStroke();
   p.rect(0, 0, p.width, p.height);
@@ -64,17 +69,21 @@ const drawAnimatedBackground = (p: p5, energy: number) => {
 const drawVisualizer = (p: p5, spectrum: number[], wave: number[]) => {
   let centerX = p.width / 2;
   let centerY = p.height / 2;
-  let radius = 140;
+  let minDimension = Math.min(p.width, p.height);
+  
+  // Base radius on the smaller dimension of the canvas
+  let radius = minDimension * 0.3; // 20% of the smaller dimension
+  let maxExpansion = minDimension * 0.1; // 5% of the smaller dimension
 
   // Draw spectrum
   p.noStroke();
   for (let i = 0; i < spectrum.length; i++) {
     let angle = p.map(i, 0, spectrum.length, 0, p.TWO_PI);
-    let r = p.map(spectrum[i], 0, 255, radius, radius + 100);
+    let r = p.map(spectrum[i], 0, 255, radius, radius + maxExpansion);
     let x = centerX + r * p.cos(angle);
     let y = centerY + r * p.sin(angle);
     p.fill(spectrum[i], 255 - spectrum[i], 255);
-    p.ellipse(x, y, 4, 4);
+    p.ellipse(x, y, minDimension * 0.01, minDimension * 0.01); // Point size based on canvas size
   }
 
   // Draw waveform
@@ -83,7 +92,7 @@ const drawVisualizer = (p: p5, spectrum: number[], wave: number[]) => {
   p.beginShape();
   for (let i = 0; i < wave.length; i++) {
     let angle = p.map(i, 0, wave.length, 0, p.TWO_PI);
-    let r = p.map(wave[i], -1, 1, radius - 20, radius + 20);
+    let r = p.map(wave[i], -1, 1, radius - (minDimension * 0.1), radius + (minDimension * 0.1));
     let x = centerX + r * p.cos(angle);
     let y = centerY + r * p.sin(angle);
     p.vertex(x, y);
@@ -93,7 +102,7 @@ const drawVisualizer = (p: p5, spectrum: number[], wave: number[]) => {
 
 const createCircularImage = (p: p5, spectrum: number[], wave: number[]) => {
   // Calculate the size and position of the circular image
-  let imgSize = p.min(p.width, p.height) * 0.6;  // Increased from 0.4 to 0.7
+  let imgSize = p.min(p.width, p.height) * 0.56;  // Increased from 0.4 to 0.7
   let imgX = p.width/2 - imgSize/2;
   let imgY = p.height/2 - imgSize/2;
   
@@ -109,27 +118,6 @@ const createCircularImage = (p: p5, spectrum: number[], wave: number[]) => {
   p.noFill();
   p.strokeWeight(2);
   
-  // Draw top waveform (curved shape)
-  p.noFill();
-  p.stroke(255, 165, 0);  // orange color
-  p.strokeWeight(2);
-  p.beginShape();
-  for (let i = 0; i < wave.length; i++) {
-    let x = p.map(i, 0, wave.length, 0, p.width);
-    let y = p.map(wave[i], -1, 1, p.height * 0.01, p.height * 0.1);
-    p.curveVertex(x, y);
-  }
-  p.endShape();
-  
-  // Draw bottom waveform (angular shape)
-  p.stroke(0, 255, 255);  // Cyan color
-  p.beginShape();
-  for (let i = 0; i < wave.length; i += 20) {  // Increase step for more angular shape
-    let x = p.map(i, 0, wave.length, 0, p.width);
-    let y = p.map(wave[i], -1, 1, p.height * 0.8, p.height * 0.99);
-    p.vertex(x, y);
-  }
-  p.endShape();
 };
 
 export const RuvoTitleStyle = (p: p5, title: string) => {

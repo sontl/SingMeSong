@@ -167,7 +167,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     draw: RuvoEffect,
     drawTitle: RuvoTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => 
-      RollingLyricEffect(p, lyrics, isPlaying, currentTime),
+      RollingLyricEffect(p, lyrics, isPlaying, currentTime, {fontSize: 0.05, bottomMargin: 0.06}),
     initConfig: initRuvoEffect,
     loadImage: loadRuvoImages,
     loadSmallImage: loadRuvoBlurImage,
