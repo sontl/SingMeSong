@@ -62,7 +62,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     isSeeking,
     setIsSeeking
   } = useContext(SongContext);
-  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[7]);
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[10]);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
@@ -375,6 +375,15 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       return { width, height };
     };
 
+    p.preload = () => {
+      // Load the image if available
+      if (currentImageUrl && currentEffect.loadImage) {
+        //load large image 
+        const largeImageUrl = currentImageUrl.replace('image', 'image_large');
+        currentEffect.loadImage?.(p, largeImageUrl);
+      }
+    };
+
     p.setup = () => {
      
       const { width, height } = calculateCanvasSize();
@@ -400,12 +409,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         }
       });
 
-      // Load the image if available
-      if (currentImageUrl && currentEffect.loadImage) {
-        //load large image 
-        const largeImageUrl = currentImageUrl.replace('image', 'image_large');
-        currentEffect.loadImage?.(p, largeImageUrl);
-      }
+    
     };
 
     p.windowResized = () => {

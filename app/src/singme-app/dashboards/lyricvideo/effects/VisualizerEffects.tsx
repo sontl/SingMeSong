@@ -15,6 +15,9 @@ import { OceanWaveEffect, OceanWaveTitleStyle } from './spectrums/OceanWaveEffec
 import { RollingLyricEffect } from './lyrics/RollingLyricEffect';
 import { PastelWaves3DEffect, PastelWaves3DTitleStyle, initPastelWaves3D } from './spectrums/PastelWaves3DEffect';
 import { EverglowEffect, EverglowTitleStyle, initEverglowEffect, loadEverglowImage } from './spectrums/EverglowEffect';
+import { ScrollingUpLyricEffect } from './lyrics/ScrollingUpLyricEffect';
+import { SunoEffect, SunoTitleStyle, initSunoEffect, loadSunoImage } from './spectrums/SunoEffect';
+
 export type VisualizerEffect = {
   name: string;
   draw: (p: p5, spectrum: number[], energy: number, waveform: number[]) => void;
@@ -30,7 +33,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Particles',
     draw: ParticlesEffect,
     drawTitle: ParticlesTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime),
     initConfig: (p: p5) => p.background(0, 10),
   
   },
@@ -147,5 +150,13 @@ export const visualizerEffects: VisualizerEffect[] = [
       }),
     initConfig: initEverglowEffect,
     loadImage: loadEverglowImage,
+  },
+  {
+    name: 'Suno',
+    draw: SunoEffect,
+    drawTitle: SunoTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime),
+    loadImage: loadSunoImage,
+    initConfig: initSunoEffect,
   },
 ];
