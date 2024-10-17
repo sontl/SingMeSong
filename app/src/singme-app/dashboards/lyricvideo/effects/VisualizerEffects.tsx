@@ -1,7 +1,7 @@
 import p5 from 'p5';
 import { ParticlesEffect, ParticlesTitleStyle } from './spectrums/ParticlesEffect';
 import { BarsEffect, BarsTitleStyle } from './spectrums/BarsEffect';
-import { CirclesEffect, CirclesTitleStyle } from './spectrums/CirclesEffect';
+import { CirclesEffect, CirclesTitleStyle, loadCirclesBlurImage, loadCirclesImage } from './spectrums/CirclesEffect';
 import { WaveEffect, WaveTitleStyle } from './spectrums/WaveEffect';
 import { StarfieldEffect, StarfieldTitleStyle } from './spectrums/StarfieldEffect';
 import { SpectrogramEffect, SpectrogramTitleStyle } from './spectrums/SpectrogramEffect';
@@ -52,14 +52,15 @@ export const visualizerEffects: VisualizerEffect[] = [
     drawTitle: CirclesTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => 
       RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
-        fontSize: 0.03, 
+        fontSize: 0.06, 
         bottomMargin: 0.05, 
         fadeInDuration: 0.5, 
         fadeOutDuration: 0.5,
         enableWaveEffect: false // Wave effect disabled
       }),
     initConfig: (p: p5) => p.background(0),
-   
+    loadImage: loadCirclesImage,
+    loadSmallImage: loadCirclesBlurImage,
   },
   {
     name: 'Wave',
