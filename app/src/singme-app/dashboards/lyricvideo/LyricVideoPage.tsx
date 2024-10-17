@@ -62,7 +62,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     isSeeking,
     setIsSeeking
   } = useContext(SongContext);
-  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[10]);
+  const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[11]);
   const isInitialMount = useRef(true);
   const isComponentMounted = useRef(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
@@ -344,8 +344,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
   const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
-    let lyrics: any;
-
     const calculateCanvasSize = () => {
       if (isFullscreen) {
         return fullscreenDimensions;
@@ -430,6 +428,9 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         let energy = fft.getEnergy("bass");
         let waveform = fft.waveform();
         let currentTime = p5SoundRef.current.currentTime();
+        
+        // Use p.push() and p.pop() to isolate drawing settings
+        p.push();
         currentEffect.initConfig(p);
         currentEffect.draw(p, spectrum, energy, waveform);
         currentEffect.drawTitle(p, currentSong.title || '');
@@ -437,12 +438,12 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         if (currentSong.subtitle) {
           currentEffect.displayLyrics(p, currentSong.subtitle as any, isPlaying, currentTime);
         } else {
-          // Optionally display a message on the canvas about missing lyrics
           p.fill(255);
           p.textAlign(p.CENTER, p.CENTER);
           p.textSize(16);
           p.text("Lyrics not available for this song", p.width / 2, p.height - 30);
         }
+        p.pop();
       } else {
         // Display a message when no song is selected or playing
         p.fill(255);
@@ -455,6 +456,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
           p.textSize(16);
           p.text("Use the floating player to control playback", p.width / 2, p.height / 2 + 30);
         }
+        p.noLoop();
       }
     };
   }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking, currentImageUrl, currentSmallImageUrl]);

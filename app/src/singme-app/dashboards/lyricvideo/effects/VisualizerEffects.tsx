@@ -17,6 +17,7 @@ import { PastelWaves3DEffect, PastelWaves3DTitleStyle, initPastelWaves3D } from 
 import { EverglowEffect, EverglowTitleStyle, initEverglowEffect, loadEverglowImage } from './spectrums/EverglowEffect';
 import { ScrollingUpLyricEffect } from './lyrics/ScrollingUpLyricEffect';
 import { SunoEffect, SunoTitleStyle, initSunoEffect, loadSunoImage, loadBlurImage } from './spectrums/SunoEffect';
+import { RuvoEffect, RuvoTitleStyle, initRuvoEffect, loadRuvoImages, loadRuvoBlurImage } from './spectrums/RuvoEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -160,5 +161,15 @@ export const visualizerEffects: VisualizerEffect[] = [
     loadImage: loadSunoImage,
     loadSmallImage: loadBlurImage,
     initConfig: initSunoEffect,
+  },
+  {
+    name: 'Ruvo',
+    draw: RuvoEffect,
+    drawTitle: RuvoTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+      RollingLyricEffect(p, lyrics, isPlaying, currentTime),
+    initConfig: initRuvoEffect,
+    loadImage: loadRuvoImages,
+    loadSmallImage: loadRuvoBlurImage,
   },
 ];
