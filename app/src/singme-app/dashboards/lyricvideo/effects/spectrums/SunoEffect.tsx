@@ -3,16 +3,15 @@ import p5 from 'p5';
 let blurredImg: p5.Image | null = null;
 let originalImg: p5.Image | null = null;
 let time = 0;
-
 export const SunoEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]): void => {
   p.background(0);
   
   if (blurredImg) {
-    // Calculate animation values (reduced frequency)
-    const scaleRange = 0.03;
-    const scale = 1 + scaleRange + Math.sin(time * 0.0005) * scaleRange;
-    const xOffset = Math.cos(time * 0.0003) * 10;
-    const yOffset = Math.sin(time * 0.0002) * 10;
+    // Calculate animation values
+    const scaleRange = 0.05;
+    const scale = 1 + scaleRange + Math.sin(time * 0.001) * scaleRange;
+    const xOffset = Math.cos(time * 0.0007) * 20;
+    const yOffset = Math.sin(time * 0.0005) * 20;
 
     // Draw animated blurred background
     const newWidth = blurredImg.width * scale;
@@ -50,8 +49,8 @@ export const SunoEffect = (p: p5, spectrum: number[], energy: number, waveform: 
     p.pop();
   }
 
-  // Update time for animation
-  time += p.deltaTime * 1; // Slowed down animation
+  time += p.deltaTime * 1;
+
 };
 
 export const SunoTitleStyle = (p: p5, title: string): void => {
