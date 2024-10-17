@@ -29,6 +29,10 @@ let canvasHeight: number;
 let songImage: p5.Image | null = null;
 let rotation = 0;
 
+let isLightning = false;
+let lightningIntensity = 0;
+let lightningDuration = 0;
+
 export const OceanWaveEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]) => {
   if (!isInitialized || canvasWidth !== p.width || canvasHeight !== p.height) {
     initOceanWaveEffect(p);
@@ -38,6 +42,9 @@ export const OceanWaveEffect = (p: p5, spectrum: number[], energy: number, wavef
   }
 
   p.background(0, 0, 10, 10); // Deep blue background with slight transparency for trail effect
+
+  // Update lightning effect
+  updateLightning(p, spectrum);
 
   // Update and draw waves
   for (let i = 0; i < numWaves; i++) {
@@ -65,10 +72,18 @@ function drawWave(p: p5, wave: Wave, spectrum: number[], index: number, totalWav
   
   const baseHue = p.map(index, 0, totalWaves, 180, 240); // Blue to purple range
   const saturation = p.map(averageSpectrum(spectrum), 0, 255, 50, 100);
-  const brightness = p.map(index, 0, totalWaves, 100, 50);
+  let brightness = p.map(index, 0, totalWaves, 100, 50);
   
+  // Apply lightning effect
+  if (isLightning) {
+    brightness = p.lerp(brightness, 100, lightningIntensity);
+    p.strokeWeight(3 + lightningIntensity * 2); // Increase stroke weight during lightning
+  } else {
+    p.strokeWeight(2);
+  }
+  
+  p.stroke(baseHue, saturation, brightness, isLightning ? 80 : 50);
   p.stroke(baseHue, saturation, brightness, 50);
-  p.strokeWeight(2);
 
   for (let x = 0; x < p.width; x += 10) {
     let y = wave.y;
@@ -220,6 +235,26 @@ function updateAndDrawParticles(p: p5) {
 
 // Add this constant for minimum distance between notes
 const MIN_NOTE_DISTANCE = 50;
+
+function updateLightning(p: p5, spectrum: number[]) {
+  const bassEnergy = averageSpectrum(spectrum.slice(0, 10)); // Use first 10 elements for bass
+  const lightningThreshold = 200; // Adjust this value to change lightning sensitivity
+
+  if (!isLightning) {
+    // Trigger lightning based on bass energy
+    if (bassEnergy > lightningThreshold) {
+      isLightning = true;
+      lightningIntensity = p.map(bassEnergy, lightningThreshold, 255, 0.5, 1);
+      lightningDuration = p.map(bassEnergy, lightningThreshold, 255, 5, 15); // Duration based on bass intensity
+    }
+  } else {
+    lightningDuration -= 1;
+    if (lightningDuration <= 0) {
+      isLightning = false;
+      lightningIntensity = 0;
+    }
+  }
+}
 
 function drawRotatingSongImage(p: p5) {
   if (songImage) {
