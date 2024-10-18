@@ -1,4 +1,4 @@
-import React, { createContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useState, useRef, useEffect, useCallback } from 'react';
 import { type Song } from 'wasp/entities';
 import { getAllSongsByUser, fetchAndUpdateSongDetails } from 'wasp/client/operations';
 import p5 from 'p5';
@@ -101,9 +101,27 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     stopP5Sound();
   };
 
+  const cleanupP5Audio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current.load();
+    }
+    if (p5SoundRef.current) {
+      p5SoundRef.current.stop();
+      p5SoundRef.current.disconnect();
+      p5SoundRef.current.dispose();
+      p5SoundRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       import('p5/lib/addons/p5.sound').then(() => {
+        if (p5SoundRef.current) {
+          p5SoundRef.current.disconnect()
+          p5SoundRef.current.dispose();
+        }
         p5SoundRef.current = new p5.SoundFile(audioRef.current.src);
       });
     }
@@ -188,13 +206,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } else {
-      // Stop current song
-      if (currentPage === 'lyricVideo') {
-        console.log('togglePlay 1', currentSong?.id, song.id);
-        p5SoundRef.current?.stop();
-      } else {
-        audioRef.current.pause();
-      }
+      cleanupP5Audio();
       setIsPlaying(false);
       audioRef.current.innerHTML = '';
       audioRef.current.removeAttribute('src');
@@ -202,9 +214,14 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (song.audioUrl) {
         if (currentPage === 'lyricVideo') {
+          // clear all p5 sound
+          console.log("p5 sound " );
+          if (p5SoundRef.current) {
+            p5SoundRef.current.disconnect()
+            p5SoundRef.current.dispose();
+          }
           p5SoundRef.current = new p5.SoundFile(song.audioUrl, 
             () => {
-              console.log('togglePlay 3', currentSong?.id, song.id);
               p5SoundRef.current?.play();
               setCurrentSong(song);
               setIsPlaying(true);
@@ -220,12 +237,9 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
           audioRef.current.load();
           if (song.audioUrl.includes('audiopipe')) {
             // Reset the audio element
-            console.log('togglePlay 4', currentSong?.id, song.id);
-            console.log('song.audioUrl', song.audioUrl);
             audioRef.current.innerHTML = `<source src="${song.audioUrl}" type="audio/mp3">`;
           } else {
             audioRef.current.src = song.audioUrl;
-            
           }
           try {
             await audioRef.current.play();

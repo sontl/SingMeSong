@@ -129,6 +129,10 @@ const FullscreenVisualizerPage = () => {
       if (p5SoundRef.current) {
         p5SoundRef.current.stop();
       }
+      if (p5SoundRef.current) {
+        p5SoundRef.current.disconnect()
+        p5SoundRef.current.dispose();
+      }
       p5SoundRef.current = new (window as any).p5.SoundFile(song.audioUrl, 
         () => {
           setIsAudioLoading(false);
