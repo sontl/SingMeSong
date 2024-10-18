@@ -18,6 +18,8 @@ import { EverglowEffect, EverglowTitleStyle, initEverglowEffect, loadEverglowIma
 import { ScrollingUpLyricEffect } from './lyrics/ScrollingUpLyricEffect';
 import { SunoEffect, SunoTitleStyle, initSunoEffect, loadSunoImage, loadBlurImage } from './spectrums/SunoEffect';
 import { RuvoEffect, RuvoTitleStyle, initRuvoEffect, loadRuvoImages, loadRuvoBlurImage } from './spectrums/RuvoEffect';
+import { GlowingWaveformEffect, GlowingWaveformTitleStyle, initGlowingWaveform } from './spectrums/GlowingWaveformEffect';
+import { SymmetricWaveParticlesEffect, SymmetricWaveParticlesTitleStyle, initSymmetricWaveParticles } from './spectrums/SymmetricWaveParticlesEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -177,4 +179,35 @@ export const visualizerEffects: VisualizerEffect[] = [
     loadImage: loadEverglowImage,
   },
   
+  {
+    name: 'GlowingWaveform',
+    draw: GlowingWaveformEffect,
+    drawTitle: GlowingWaveformTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
+        fontSize: 0.04, 
+        bottomMargin: 0.1, 
+        fadeInDuration: 0.5, 
+        fadeOutDuration: 0.5,
+        enableWaveEffect: false,
+      }),
+    initConfig: initGlowingWaveform,
+  },
+  {
+    name: 'SymmetricWaveParticles',
+    draw: SymmetricWaveParticlesEffect,
+    drawTitle: SymmetricWaveParticlesTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
+        fontSize: 0.04, 
+        bottomMargin: 0.1, 
+        fadeInDuration: 0.5, 
+        fadeOutDuration: 0.5,
+        enableWaveEffect: true,
+        waveAmplitude: 3,
+        waveFrequency: 0.05,
+        waveSpeed: 0.03
+      }),
+    initConfig: initSymmetricWaveParticles,
+  },
 ];
