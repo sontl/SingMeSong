@@ -4,7 +4,6 @@ let blurredImg: p5.Image | null = null;
 let originalImg: p5.Image | null = null;
 let time = 0;
 export const SunoEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]): void => {
-  p.background(0);
   
   if (blurredImg) {
     // Calculate animation values
@@ -62,6 +61,7 @@ export const SunoTitleStyle = (p: p5, title: string): void => {
 };
 
 export const initSunoEffect = (p: p5): void => {
+  p.background(0);
   p.imageMode(p.CORNER);
   p.rectMode(p.CORNER);
 };

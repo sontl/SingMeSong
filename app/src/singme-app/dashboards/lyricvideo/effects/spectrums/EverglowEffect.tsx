@@ -11,8 +11,8 @@ class Particle {
     this.pos = p5.Vector.random2D().mult(250);
     this.vel = p.createVector(0, 0);
     this.acc = this.pos.copy().mult(p.random(0.0001, 0.00001));
-    this.w = p.random(3, 5);
-    this.color = [p.random(200, 255), p.random(200, 255), p.random(200, 255)];
+    this.w = p.random(5, 8); // Increased particle size
+    this.color = [p.random(200, 255), p.random(200, 255), p.random(200, 255), 255]; // Added full opacity
   }
 
   update(p: p5, cond: boolean): void {
@@ -79,13 +79,26 @@ export const EverglowEffect = (p: p5, spectrum: number[], energy: number, wavefo
       const x = r * p.sin(i) * t;
       const y = r * p.cos(i);
       p.vertex(x, y);
+      
+      // Increase particle generation
+      if (p.random() < 0.2 && amp > 150) { // Increased probability and lowered amplitude threshold
+        const angle = p.random(360);
+        const speed = p.random(3, 8); // Increased speed range
+        const newParticle = new Particle(p);
+        newParticle.pos = p.createVector(x, y);
+        newParticle.vel = p5.Vector.fromAngle(p.radians(angle)).mult(speed);
+        newParticle.color = [255, p.random(200, 255), p.random(100, 200), 255]; // Added full opacity
+        particles.push(newParticle);
+      }
     }
     p.endShape();
   }
   
   // Create multiple particles each frame
+  for (let i = 0; i < 3; i++) { // Increased number of particles created per frame
     const newParticle = new Particle(p);
     particles.push(newParticle);
+  }
 
   for (let i = particles.length - 1; i >= 0; i--) {
     particles[i].update(p, amp > 230);
@@ -96,8 +109,8 @@ export const EverglowEffect = (p: p5, spectrum: number[], energy: number, wavefo
     }
   }
 
-  // Limit the number of particles
-  while (particles.length > 1000) {
+  // Increase the maximum number of particles
+  while (particles.length > 2000) {
     particles.shift();
   }
 

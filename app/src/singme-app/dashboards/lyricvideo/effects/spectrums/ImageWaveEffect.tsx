@@ -8,7 +8,8 @@ const energyThreshold = 200; // Minimum energy to trigger a shake (0-255)
 export const ImageWaveEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]) => {
   let shakeX = 0;
   let shakeY = 0;
-
+ 
+  p.background(240, 240, 240);
   // Only shake if energy is above threshold and enough time has passed since last shake
   if (energy > energyThreshold && p.millis() - lastShakeTime > shakeInterval) {
     const maxShake = 10; // Increased maximum shake amount
@@ -91,3 +92,9 @@ export const loadSongImage = (p: p5, imageUrl: string) => {
 export const clearSongImage = () => {
   songImage = null;
 };
+
+export const initImageWaveEffect = (p: p5) => {
+  p.colorMode(p.RGB);
+  p.background(240, 240, 240);
+};
+

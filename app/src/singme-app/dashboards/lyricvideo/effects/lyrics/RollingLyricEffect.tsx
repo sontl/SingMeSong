@@ -107,7 +107,7 @@ export const RollingLyricEffect = (
         const waveOffset = enableWaveEffect
           ? Math.sin((x + p.frameCount * waveSpeed) * waveFrequency) * waveAmplitude
           : 0;
-
+        p.colorMode(p.RGB);
         p.fill(255, 255, 255, word.opacity);
         p.text(word.text, x + p.textWidth(word.text) / 2, y + waveOffset);
       }

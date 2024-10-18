@@ -82,7 +82,6 @@ const FullscreenVisualizerPage = () => {
     };
 
     p.draw = () => {
-      p.background(0, 10);
       frameCount++;
       p.background(0, 10);
       if (p5SoundRef.current  && songRef.current) {

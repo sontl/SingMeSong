@@ -16,30 +16,16 @@ interface MusicNote {
 let waves: Wave[] = [];
 const numWaves = 5;
 let particles: p5.Vector[] = [];
-const numParticles = 100;
 let musicNotes: MusicNote[] = [];
 const numNotes = 10;
-let isInitialized = false;
 
 const noteSymbols = ['♪', '♫', '♬', '♩', '♭', '♮', '♯'];
-
-let canvasWidth: number;
-let canvasHeight: number;
-
-let songImage: p5.Image | null = null;
-let rotation = 0;
 
 let isLightning = false;
 let lightningIntensity = 0;
 let lightningDuration = 0;
 
 export const OceanWaveEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]) => {
-  if (!isInitialized || canvasWidth !== p.width || canvasHeight !== p.height) {
-    initOceanWaveEffect(p);
-    isInitialized = true;
-    canvasWidth = p.width;
-    canvasHeight = p.height;
-  }
 
   p.background(0, 0, 10, 10); // Deep blue background with slight transparency for trail effect
 
@@ -58,12 +44,6 @@ export const OceanWaveEffect = (p: p5, spectrum: number[], energy: number, wavef
 
   // Update and draw music notes
   updateAndDrawMusicNotes(p, spectrum);
-
-  // Draw rotating song image
-  drawRotatingSongImage(p);
-
-  // Update rotation
-  rotation += 0.01; // Adjust this value to change rotation speed
 };
 
 function drawWave(p: p5, wave: Wave, spectrum: number[], index: number, totalWaves: number) {
@@ -147,7 +127,7 @@ function updateAndDrawMusicNotes(p: p5, spectrum: number[]) {
     }
 
     // Draw note
-    p.fill(255, 255, 255, 150); // Lighter music notes with more transparency
+    p.fill(0, 0, 100, 150); // Lighter music notes with more transparency in HSB mode
     p.text(note.symbol, note.x, note.y);
   }
 }
@@ -158,7 +138,7 @@ function averageSpectrum(spectrum: number[]): number {
 }
 
 export const OceanWaveTitleStyle = (p: p5, title: string) => {
-  p.fill(255, 255, 255, 180); // Lighter white text with some transparency
+  p.fill(0, 0, 100, 150);  // Lighter white text with some transparency
   p.textAlign(p.LEFT, p.TOP);
   p.textSize(24); // Adjust this size as needed
   p.textStyle(p.BOLD);
@@ -171,6 +151,9 @@ export const OceanWaveTitleStyle = (p: p5, title: string) => {
 
 export function initOceanWaveEffect(p: p5) {
   // Clear existing waves, particles, and notes
+  p.colorMode(p.HSB);
+  p.background(0);
+
   waves = [];
   particles = [];
   musicNotes = [];
@@ -255,52 +238,3 @@ function updateLightning(p: p5, spectrum: number[]) {
     }
   }
 }
-
-function drawRotatingSongImage(p: p5) {
-  if (songImage) {
-    console.log('drawRotatingSongImage', songImage);
-    p.push();
-    const x = p.width * 0.8;
-    const y = p.height * 0.2;
-    const diameter = Math.min(p.width, p.height) * 0.3;
-
-    // Create a circular mask
-    let mask = p.createGraphics(diameter, diameter);
-    mask.ellipseMode(p.CENTER);
-    mask.fill(255);
-    mask.noStroke();
-    mask.ellipse(diameter / 2, diameter / 2, diameter, diameter);
-
-    // Create a new graphics object for the rotated and masked image
-    let rotatedImage = p.createGraphics(diameter, diameter);
-    rotatedImage.imageMode(p.CENTER);
-    rotatedImage.translate(diameter / 2, diameter / 2);
-    rotatedImage.rotate(rotation);
-    rotatedImage.image(songImage, 0, 0, diameter, diameter);
-
-    // Apply the mask (with type assertion)
-    (rotatedImage as any).mask(mask);
-
-    // Draw the final image
-    p.image(rotatedImage, x - diameter / 2, y - diameter / 2);
-
-    // Draw a white circle border
-    p.noFill();
-    p.stroke(255);
-    p.strokeWeight(4);
-    p.ellipse(x, y, diameter, diameter);
-
-    p.pop();
-  }
-}
-
-// Add these functions to load and clear the song image
-export const loadSongImage = (p: p5, imageUrl: string) => {
-  p.loadImage(imageUrl, (img) => {
-    songImage = img;
-  });
-};
-
-export const clearSongImage = () => {
-  songImage = null;
-};

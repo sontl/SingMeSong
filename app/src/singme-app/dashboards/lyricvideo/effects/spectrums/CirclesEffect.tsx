@@ -168,3 +168,8 @@ const drawGlowingDottedBorder = (p: p5, x: number, y: number, size: number, spec
 
   p.pop();
 };
+
+export const initCirclesEffect = (p: p5) => {
+  p.background(0);
+};
+

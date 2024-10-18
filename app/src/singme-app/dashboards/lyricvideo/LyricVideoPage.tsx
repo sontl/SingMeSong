@@ -410,7 +410,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
           console.log('Seek operation detected, not ending recording');
         }
       });
-
+      currentEffect.setup(p);
     
     };
 
@@ -431,7 +431,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         
         // Use p.push() and p.pop() to isolate drawing settings
         p.push();
-        currentEffect.initConfig(p);
         currentEffect.draw(p, spectrum, energy, waveform);
         currentEffect.drawTitle(p, currentSong.title || '');
         

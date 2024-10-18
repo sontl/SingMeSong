@@ -1,17 +1,17 @@
 import p5 from 'p5';
 import { ParticlesEffect, ParticlesTitleStyle } from './spectrums/ParticlesEffect';
 import { BarsEffect, BarsTitleStyle } from './spectrums/BarsEffect';
-import { CirclesEffect, CirclesTitleStyle, loadCirclesBlurImage, loadCirclesImage } from './spectrums/CirclesEffect';
+import { CirclesEffect, CirclesTitleStyle, initCirclesEffect, loadCirclesBlurImage, loadCirclesImage } from './spectrums/CirclesEffect';
 import { WaveEffect, WaveTitleStyle } from './spectrums/WaveEffect';
 import { StarfieldEffect, StarfieldTitleStyle } from './spectrums/StarfieldEffect';
 import { SpectrogramEffect, SpectrogramTitleStyle } from './spectrums/SpectrogramEffect';
 import { LyricEffect } from './lyrics/LyricEffect1';
 import { GlowingLyricEffect} from './lyrics/GlowingLyricEffect';
-import { ImageWaveEffect, ImageWaveTitleStyle, loadSongImage } from './spectrums/ImageWaveEffect';
+import { ImageWaveEffect, ImageWaveTitleStyle, initImageWaveEffect, loadSongImage } from './spectrums/ImageWaveEffect';
 import { ShadowLyricEffect, loadJosefinSansFont } from './lyrics/ShadowLyricEffect';
 import { RandomHighlightLyricEffect } from './lyrics/RandomHighlightLyricEffect';
 import { SixLineFadeEffect } from './lyrics/SixLineFadeEffect';
-import { OceanWaveEffect, OceanWaveTitleStyle } from './spectrums/OceanWaveEffect';
+import { OceanWaveEffect, OceanWaveTitleStyle, initOceanWaveEffect } from './spectrums/OceanWaveEffect';
 import { RollingLyricEffect } from './lyrics/RollingLyricEffect';
 import { PastelWaves3DEffect, PastelWaves3DTitleStyle, initPastelWaves3D } from './spectrums/PastelWaves3DEffect';
 import { EverglowEffect, EverglowTitleStyle, initEverglowEffect, loadEverglowImage } from './spectrums/EverglowEffect';
@@ -28,7 +28,7 @@ export type VisualizerEffect = {
   displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; sentence: string; words: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => void;
   loadImage?: (p: p5, imageUrl: string) => void;
   loadSmallImage?: (p: p5, imageUrl: string) => void;
-  initConfig: (p: p5) => void;
+  setup: (p: p5) => void;
 };
 
 export const visualizerEffects: VisualizerEffect[] = [
@@ -39,7 +39,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime),
     loadImage: loadSunoImage,
     loadSmallImage: loadBlurImage,
-    initConfig: initSunoEffect,
+    setup: initSunoEffect,
   },
 
   {
@@ -48,9 +48,9 @@ export const visualizerEffects: VisualizerEffect[] = [
     drawTitle: RuvoTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => 
       RollingLyricEffect(p, lyrics, isPlaying, currentTime, {fontSize: 0.05, bottomMargin: 0.06}),
-    initConfig: initRuvoEffect,
     loadImage: loadRuvoImages,
     loadSmallImage: loadRuvoBlurImage,
+    setup: initRuvoEffect,
   },
   {
     name: 'Circles',
@@ -64,9 +64,9 @@ export const visualizerEffects: VisualizerEffect[] = [
         fadeOutDuration: 0.5,
         enableWaveEffect: false // Wave effect disabled
       }),
-    initConfig: (p: p5) => p.background(0),
     loadImage: loadCirclesImage,
     loadSmallImage: loadCirclesBlurImage,
+    setup: initCirclesEffect,
   },
   {
     name: 'ImageWave',
@@ -75,13 +75,8 @@ export const visualizerEffects: VisualizerEffect[] = [
     displayLyrics: (p, lyrics, isPlaying, currentTime) => RandomHighlightLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04, fontSize: 0.66 }),
     loadImage: loadSongImage,
     loadSmallImage: loadSongImage,
-    initConfig: (p: p5) => {
-      p.colorMode(p.RGB);
-      p.background(240, 240, 240);
-      loadJosefinSansFont(p);
-    }
+    setup: initImageWaveEffect,
   },
-   
   {
     name: 'OceanWave',
     draw: OceanWaveEffect,
@@ -97,102 +92,98 @@ export const visualizerEffects: VisualizerEffect[] = [
         waveFrequency: 0.1,
         waveSpeed: 0.05
       }),
-    loadImage: loadSongImage,  // Add this line
-    initConfig: (p: p5) => {
-      p.colorMode(p.HSB);
-      p.background(0);
-    },
+    setup: initOceanWaveEffect,
   },
-  {
-    name: 'Starfield',
-    draw: StarfieldEffect,
-    drawTitle: StarfieldTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
-    initConfig: (p: p5) => p.background(0),
-  },
-  {
-    name: 'Particles',
-    draw: ParticlesEffect,
-    drawTitle: ParticlesTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
-    initConfig: (p: p5) => p.background(0, 10),
+  // {
+  //   name: 'Starfield',
+  //   draw: StarfieldEffect,
+  //   drawTitle: StarfieldTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+  //   initConfig: (p: p5) => p.background(0),
+  // },
+  // {
+  //   name: 'Particles',
+  //   draw: ParticlesEffect,
+  //   drawTitle: ParticlesTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+  //   initConfig: (p: p5) => p.background(0, 10),
   
-  },
-  {
-    name: 'Bars',
-    draw: BarsEffect,
-    drawTitle: BarsTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.5, textColor: p.color(255, 255, 255) }),
-    initConfig: (p: p5) => p.background(0),
+  // },
+  // {
+  //   name: 'Bars',
+  //   draw: BarsEffect,
+  //   drawTitle: BarsTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.5, textColor: p.color(255, 255, 255) }),
+  //   initConfig: (p: p5) => p.background(0),
    
-  },
+  // },
   
-  {
-    name: 'Wave',
-    draw: WaveEffect,
-    drawTitle: WaveTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
-    initConfig: (p: p5) => p.background(0),
-  },
-  {
-    name: 'Spectrogram',
-    draw: SpectrogramEffect,
-    drawTitle: SpectrogramTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.36, textColor: p.color(255, 255, 255) }),
-    initConfig: (p: p5) => p.background(0),
+  // {
+  //   name: 'Wave',
+  //   draw: WaveEffect,
+  //   drawTitle: WaveTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+  //   initConfig: (p: p5) => p.background(0),
+  // },
+  // {
+  //   name: 'Spectrogram',
+  //   draw: SpectrogramEffect,
+  //   drawTitle: SpectrogramTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.36, textColor: p.color(255, 255, 255) }),
+  //   initConfig: (p: p5) => p.background(0),
     
-  }, 
+  // }, 
  
-  {
-    name: 'PastelWaves3D',
-    draw: PastelWaves3DEffect,
-    drawTitle: PastelWaves3DTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
-      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
-        fontSize: 0.04, 
-        bottomMargin: 0.1, 
-        fadeInDuration: 0.5, 
-        fadeOutDuration: 0.5,
-        enableWaveEffect: true,
-        waveAmplitude: 3,
-        waveFrequency: 0.05,
-        waveSpeed: 0.03
-      }),
-    initConfig: initPastelWaves3D,
-  },
-  {
-    name: 'Everglow',
-    draw: EverglowEffect,
-    drawTitle: EverglowTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
-      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
-        fontSize: 0.04, 
-        bottomMargin: 0.1, 
-        fadeInDuration: 0.5, 
-        fadeOutDuration: 0.5,
-        enableWaveEffect: true,
-        waveAmplitude: 3,
-        waveFrequency: 0.05,
-        waveSpeed: 0.03
-      }),
-    initConfig: initEverglowEffect,
-    loadImage: loadEverglowImage,
-  },
+  // {
+  //   name: 'PastelWaves3D',
+  //   draw: PastelWaves3DEffect,
+  //   drawTitle: PastelWaves3DTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+  //     RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
+  //       fontSize: 0.04, 
+  //       bottomMargin: 0.1, 
+  //       fadeInDuration: 0.5, 
+  //       fadeOutDuration: 0.5,
+  //       enableWaveEffect: true,
+  //       waveAmplitude: 3,
+  //       waveFrequency: 0.05,
+  //       waveSpeed: 0.03
+  //     }),
+  //   initConfig: initPastelWaves3D,
+  // },
+  // {
+  //   name: 'Everglow',
+  //   draw: EverglowEffect,
+  //   drawTitle: EverglowTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+  //     RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
+  //       fontSize: 0.04, 
+  //       bottomMargin: 0.1, 
+  //       fadeInDuration: 0.5, 
+  //       fadeOutDuration: 0.5,
+  //       enableWaveEffect: true,
+  //       waveAmplitude: 3,
+  //       waveFrequency: 0.05,
+  //       waveSpeed: 0.03
+  //     }),
+  //   initConfig: initEverglowEffect,
+  //   loadImage: loadEverglowImage,
+  // },
   
-  {
-    name: 'GlowingWaveform',
-    draw: GlowingWaveformEffect,
-    drawTitle: GlowingWaveformTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
-      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
-        fontSize: 0.04, 
-        bottomMargin: 0.1, 
-        fadeInDuration: 0.5, 
-        fadeOutDuration: 0.5,
-        enableWaveEffect: false,
-      }),
-    initConfig: initGlowingWaveform,
-  },
+  // {
+  //   name: 'GlowingWaveform',
+  //   draw: GlowingWaveformEffect,
+  //   drawTitle: GlowingWaveformTitleStyle,
+  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+  //     RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
+  //       fontSize: 0.04, 
+  //       bottomMargin: 0.1, 
+  //       fadeInDuration: 0.5, 
+  //       fadeOutDuration: 0.5,
+  //       enableWaveEffect: false,
+  //     }),
+  //   initConfig: initGlowingWaveform,
+  // },
   {
     name: 'SymmetricWaveParticles',
     draw: SymmetricWaveParticlesEffect,
@@ -208,6 +199,6 @@ export const visualizerEffects: VisualizerEffect[] = [
         waveFrequency: 0.05,
         waveSpeed: 0.03
       }),
-    initConfig: initSymmetricWaveParticles,
+    setup: initSymmetricWaveParticles,
   },
 ];
