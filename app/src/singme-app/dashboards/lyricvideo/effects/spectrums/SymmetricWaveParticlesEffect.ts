@@ -5,7 +5,6 @@ const listOfColors = [
 ];
 
 let particles: Particle[] = [];
-let fft: p5.FFT;
 const MAX_PARTICLES = 100; // Adjust this number as needed
 
 class Particle {
@@ -13,7 +12,6 @@ class Particle {
   vel: p5.Vector;
   acc: p5.Vector;
   w: number;
-  color: p5.Color;
   active: boolean;
 
   constructor(p: p5) {
@@ -21,9 +19,7 @@ class Particle {
     this.vel = p.createVector(0, 0);
     this.acc = this.pos.copy().mult(p.random(0.0001, 0.00001));
     this.w = p.random(3, 12);
-    this.color = p.color(listOfColors[p.floor(p.random(listOfColors.length))]);
     this.active = true;
-    console.log("Particle created");
   }
 
   edges(p: p5): boolean {
@@ -48,7 +44,6 @@ class Particle {
     p.noStroke();
     p.fill(col);
     p.ellipse(this.pos.x, this.pos.y, this.w);
-    console.log("Particle shown");
   }
 
   reset(p: p5): void {
@@ -61,17 +56,17 @@ class Particle {
 }
 
 export function initSymmetricWaveParticles(p: p5): void {
- // p.angleMode(p.DEGREES);
- // p.background(0);
+    p.angleMode(p.DEGREES);
+    p.background(0);
+    particles = [];
 }
 
-export function SymmetricWaveParticlesEffect(p: p5, spectrum: number[], energy: number, waveform: number[]): void {
+export function SymmetricWaveParticlesEffect(p: p5, spectrum: number[], energy: number, waveform: number[], fft?: p5.FFT): void {
   p.background(0, 50);
-  p.angleMode(p.DEGREES);
   p.push();
   p.translate(p.width / 2, p.height / 2);
-  fft = new p5.FFT(0.3)
-  const amp = fft.getEnergy(20, 200);
+  
+  const amp = fft ? fft.getEnergy(20, 200) : energy;
   const wave = waveform;
 
   const col = p.color(listOfColors[p.floor(p.random(listOfColors.length))]);
@@ -123,12 +118,13 @@ export function SymmetricWaveParticlesEffect(p: p5, spectrum: number[], energy: 
   if (inactiveParticle) {
     inactiveParticle.reset(p);
   } else if (particles.length < MAX_PARTICLES) {
-  //  particles.push(new Particle(p));
+    particles.push(new Particle(p));
   }
 
   // Update and show particles
   for (let l = particles.length - 1; l >= 0; l--) {
     if (!particles[l].edges(p)) {
+      console.log(amp);
       particles[l].update(p, amp > 200);
       particles[l].show(p);
     } else {
@@ -137,8 +133,8 @@ export function SymmetricWaveParticlesEffect(p: p5, spectrum: number[], energy: 
   }
 
   if (particles.length === 0) {
-    for (let i = 0; i < 100; i++) {
-  //    particles.push(new Particle(p));
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+      particles.push(new Particle(p));
     }
   }
   p.pop();
@@ -151,10 +147,4 @@ export function SymmetricWaveParticlesTitleStyle(p: p5, title: string): void {
   p.textAlign(p.CENTER, p.TOP);
   p.text(title, p.width / 2, p.height * 0.05);
   p.pop();
-}
-
-export function setupSymmetricWaveParticles(p: p5): void {
-  p.angleMode(p.DEGREES);
-  p.background(0);
-  particles = [];
 }

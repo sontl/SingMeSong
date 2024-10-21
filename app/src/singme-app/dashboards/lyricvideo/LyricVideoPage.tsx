@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { ReactP5Wrapper } from '@p5-wrapper/react';
 import p5 from 'p5';
+import "p5/lib/addons/p5.sound"; 
 import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { type AuthUser } from 'wasp/auth';
@@ -15,18 +16,18 @@ import { useLocation } from 'react-router-dom';
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 
-// Ensure we're in a browser environment
+//Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
   (window as any).p5 = p5;
-  
-  // Load p5.sound
-  import('p5/lib/addons/p5.sound').then(() => {
-    console.log('p5.sound loaded successfully');
-    // Create a dummy p5 instance to force p5.sound initialization
-    new p5(() => {});
-  }).catch(err => {
-    console.error('Failed to load p5.sound:', err);
-  });
+  new p5(() => {});
+  // // Load p5.sound
+  // import('p5/lib/addons/p5.sound').then(() => {
+  //   console.log('p5.sound loaded successfully');
+  //   // Create a dummy p5 instance to force p5.sound initialization
+  //   new p5(() => {});
+  // }).catch(err => {
+  //   console.error('Failed to load p5.sound:', err);
+  // });
 }
 
 const LyricVideoPage = ({ user }: { user: AuthUser }) => {
@@ -344,6 +345,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
   const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
+
     const calculateCanvasSize = () => {
       if (isFullscreen) {
         return fullscreenDimensions;
@@ -383,6 +385,9 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       if (currentImageUrl && currentEffect.loadImage) {
         currentEffect.loadImage(p, currentImageUrl);
       }
+      if (currentSong && currentSong.audioUrl) {
+         p5.prototype.loadSound(currentSong.audioUrl);
+      }
 
     };
 
@@ -391,25 +396,30 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       const { width, height } = calculateCanvasSize();
       const canvas = p.createCanvas(width, height);
       canvasRef.current = canvas.elt;
-      fft = new p5.FFT();
+      if (!fft) {
+        fft = new p5.FFT();
+      }
       console.log('setup p5');
       // Set up the onended event
-      p5SoundRef.current.onended(() => {
-        if (!isSeeking) {
-          console.log('Song ended naturally');
-          if (isRecordingRef.current) {
-            stopRecording();
-          }
-          if (isPlaying) {
-            setIsPlaying(false);
-          }
-          p.noLoop();
-          return;
-          
-        } else {
-          console.log('Seek operation detected, not ending recording');
-        }
-      });
+
+      if (p5SoundRef.current) {
+        p5SoundRef.current.onended(() => {
+          if (!isSeeking) {
+            console.log('Song ended naturally');
+            if (isRecordingRef.current) {
+              stopRecording();
+            }
+            if (isPlaying) {
+              setIsPlaying(false);
+            }
+            p.noLoop();
+            return;
+            
+          } else {
+            console.log('Seek operation detected, not ending recording');
+            }
+          });
+      }
       currentEffect.setup(p);
     
     };

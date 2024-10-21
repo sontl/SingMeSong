@@ -23,7 +23,7 @@ import { SymmetricWaveParticlesEffect, SymmetricWaveParticlesTitleStyle, initSym
 
 export type VisualizerEffect = {
   name: string;
-  draw: (p: p5, spectrum: number[], energy: number, waveform: number[]) => void;
+  draw: (p: p5, spectrum: number[], energy: number, waveform: number[], fft?: p5.FFT) => void;
   drawTitle: (p: p5, title: string) => void;
   displayLyrics: (p: p5, lyrics: Array<{ start: number; end: number; sentence: string; words: Array<{ text: string; start: number; end: number }> }>, isPlaying: boolean, currentTime: number) => void;
   loadImage?: (p: p5, imageUrl: string) => void;
@@ -94,21 +94,7 @@ export const visualizerEffects: VisualizerEffect[] = [
       }),
     setup: initOceanWaveEffect,
   },
-  // {
-  //   name: 'Starfield',
-  //   draw: StarfieldEffect,
-  //   drawTitle: StarfieldTitleStyle,
-  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
-  //   initConfig: (p: p5) => p.background(0),
-  // },
-  // {
-  //   name: 'Particles',
-  //   draw: ParticlesEffect,
-  //   drawTitle: ParticlesTitleStyle,
-  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
-  //   initConfig: (p: p5) => p.background(0, 10),
   
-  // },
   // {
   //   name: 'Bars',
   //   draw: BarsEffect,
@@ -151,24 +137,6 @@ export const visualizerEffects: VisualizerEffect[] = [
   //     }),
   //   initConfig: initPastelWaves3D,
   // },
-  // {
-  //   name: 'Everglow',
-  //   draw: EverglowEffect,
-  //   drawTitle: EverglowTitleStyle,
-  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => 
-  //     RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
-  //       fontSize: 0.04, 
-  //       bottomMargin: 0.1, 
-  //       fadeInDuration: 0.5, 
-  //       fadeOutDuration: 0.5,
-  //       enableWaveEffect: true,
-  //       waveAmplitude: 3,
-  //       waveFrequency: 0.05,
-  //       waveSpeed: 0.03
-  //     }),
-  //   initConfig: initEverglowEffect,
-  //   loadImage: loadEverglowImage,
-  // },
   
   // {
   //   name: 'GlowingWaveform',
@@ -182,7 +150,7 @@ export const visualizerEffects: VisualizerEffect[] = [
   //       fadeOutDuration: 0.5,
   //       enableWaveEffect: false,
   //     }),
-  //   initConfig: initGlowingWaveform,
+  //   setup: initGlowingWaveform,
   // },
   {
     name: 'SymmetricWaveParticles',
@@ -200,5 +168,21 @@ export const visualizerEffects: VisualizerEffect[] = [
         waveSpeed: 0.03
       }),
     setup: initSymmetricWaveParticles,
+  },
+
+  {
+    name: 'Starfield',
+    draw: StarfieldEffect,
+    drawTitle: StarfieldTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    setup: (p: p5) => p.background(0),
+  },
+  {
+    name: 'Particles',
+    draw: ParticlesEffect,
+    drawTitle: ParticlesTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    setup: (p: p5) => p.background(0, 10),
+  
   },
 ];
