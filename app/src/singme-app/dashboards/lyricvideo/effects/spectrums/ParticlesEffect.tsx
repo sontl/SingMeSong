@@ -5,15 +5,17 @@ class Particle {
   pos: p5.Vector;
   vel: p5.Vector;
   acc: p5.Vector;
-  w: number;
+  radius: number;
   color: p5.Color;
+  strokeColor: p5.Color;
 
   constructor(p: p5) {
     this.pos = p.createVector(p.random(p.width), p.random(p.height));
     this.vel = p.createVector(0, 0);
     this.acc = p.createVector(0, 0);
-    this.w = p.random(3, 5);
-    this.color = p.color(p.random(200, 255), p.random(200, 255), p.random(200, 255), 150);
+    this.radius = p.random(10, 30);  // Increased size range
+    this.color = p.color(p.random(255), p.random(255), p.random(255), 30);  // More transparent
+    this.strokeColor = p.color(255, 255, 255, 80);  // More transparent stroke
   }
 
   update(p: p5, energy: number) {
@@ -31,16 +33,37 @@ class Particle {
   }
 
   show(p: p5) {
-    p.noStroke();
+    p.noFill();
+    p.stroke(this.strokeColor);
+    p.strokeWeight(0.5);  // Thinner stroke
     p.fill(this.color);
-    p.ellipse(this.pos.x, this.pos.y, this.w);
+    p.ellipse(this.pos.x, this.pos.y, this.radius * 2);
+    
+    // Add highlight to create bubble effect
+    p.noStroke();
+    p.fill(255, 255, 255, 40);  // More transparent highlight
+    p.ellipse(this.pos.x - this.radius / 3, this.pos.y - this.radius / 3, this.radius / 2);
   }
 }
 
 let particles: Particle[] = [];
 let time = 0;
+let prevWidth = 0;
+let prevHeight = 0;
 
 export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
+  // Check if canvas size has changed
+  if (p.width !== prevWidth || p.height !== prevHeight) {
+    // Reinitialize particles
+    particles = [];
+    const particleCount = 30;
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle(p));
+    }
+    prevWidth = p.width;
+    prevHeight = p.height;
+  }
+
   const blurredImg = getSharedBlurImage();
   const originalImg = getSharedImage();
 
@@ -65,21 +88,22 @@ export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
   p.noStroke();
   p.rect(0, 0, p.width, p.height);
 
-  // Existing particle logic
-  if (particles.length === 0) {
-    for (let i = 0; i < 100; i++) {
-      particles.push(new Particle(p));
-    }
-  }
-
+  // Particle logic
+  p.push();
   particles.forEach(particle => {
     let x = p.map(particle.pos.x, 0, p.width, 0, spectrum.length);
     let scaleVal = p.map(spectrum[Math.floor(x)], 0, 255, 0, 1);
-    particle.vel.y = p.map(scaleVal, 0, 1, -1, 1);
+    particle.vel.y = p.map(scaleVal, 0, 1, -0.5, 0.5);  // Reduced velocity for slower movement
     particle.update(p, energy);
     particle.show(p);
-  });
 
+    // Wrap particles around the canvas
+    if (particle.pos.x < 0) particle.pos.x = p.width;
+    if (particle.pos.x > p.width) particle.pos.x = 0;
+    if (particle.pos.y < 0) particle.pos.y = p.height;
+    if (particle.pos.y > p.height) particle.pos.y = 0;
+  });
+  p.pop();
   time += p.deltaTime * 1;
 };
 
