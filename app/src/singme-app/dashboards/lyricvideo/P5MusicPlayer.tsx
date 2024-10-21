@@ -68,9 +68,9 @@ const P5MusicPlayer: React.FC = () => {
       const clickPercentage = clickPosition / progressBarWidth;
       const newTime = clickPercentage * duration;
       
-      setIsSeeking(true);
+      //setIsSeeking(true);
       p5SoundRef.current.jump(newTime);
-      setTimeout(() => setIsSeeking(false), 100);
+     //  setTimeout(() => setIsSeeking(false), 100);
     }
   };
 

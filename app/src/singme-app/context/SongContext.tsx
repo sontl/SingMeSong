@@ -115,14 +115,25 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     import('p5/lib/addons/p5.sound').then(() => {
+  //       if (p5SoundRef.current) {
+  //         p5SoundRef.current.disconnect()
+  //         p5SoundRef.current.dispose();
+  //       }
+  //       p5SoundRef.current = new p5.SoundFile(audioRef.current.src);
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
-      if (p5SoundRef.current) {
-      p5SoundRef.current.disconnect()
-      p5SoundRef.current.dispose();
-      p5SoundRef.current = null;
-    }
-    p5SoundRef.current = new p5.SoundFile(audioRef.current.src);
-  }, []);
+    if (p5SoundRef.current) {
+    p5SoundRef.current.disconnect()
+    p5SoundRef.current.dispose();
+    p5SoundRef.current = null;
+  }
+}, []);
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -216,7 +227,6 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (p5SoundRef.current) {
             p5SoundRef.current.disconnect()
             p5SoundRef.current.dispose();
-            p5SoundRef.current = null;
           }
           p5SoundRef.current = new p5.SoundFile(song.audioUrl, 
             () => {

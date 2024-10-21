@@ -37,10 +37,10 @@
     // it to prevent this error:
     // https://stackoverflow.com/questions/42609768/typescript-error-cannot-write-file-because-it-would-overwrite-input-file
     "outDir": ".wasp/phantom"
-  },
-  "include": [
-    "./src",
-    "node_modules/@types/p5/index.d.ts"
-  ]
+  }
+  // "include": [
+  //   "./src",
+  //   "node_modules/@types/p5/index.d.ts"
+  // ]
 
 }

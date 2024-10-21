@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { ReactP5Wrapper } from '@p5-wrapper/react';
 import p5 from 'p5';
-import "p5/lib/addons/p5.sound"; 
 import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
 import { type AuthUser } from 'wasp/auth';
@@ -16,18 +15,18 @@ import { useLocation } from 'react-router-dom';
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 
-//Ensure we're in a browser environment
+// Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
   (window as any).p5 = p5;
-  new p5(() => {});
-  // // Load p5.sound
-  // import('p5/lib/addons/p5.sound').then(() => {
-  //   console.log('p5.sound loaded successfully');
-  //   // Create a dummy p5 instance to force p5.sound initialization
-  //   new p5(() => {});
-  // }).catch(err => {
-  //   console.error('Failed to load p5.sound:', err);
-  // });
+  
+  // Load p5.sound
+  import('p5/lib/addons/p5.sound').then(() => {
+    console.log('p5.sound loaded successfully');
+    // Create a dummy p5 instance to force p5.sound initialization
+    new p5(() => {});
+  }).catch(err => {
+    console.error('Failed to load p5.sound:', err);
+  });
 }
 
 const LyricVideoPage = ({ user }: { user: AuthUser }) => {
@@ -152,18 +151,19 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     if (isRecordingRef.current) {
       stopRecording();
     } else {
-      setIsSeeking(true);
+     // setIsSeeking(true);
       p5SoundRef.current.jump(0);
       
-      setTimeout(() => {
-        setIsSeeking(false);
-        //wait for 100ms to make sure the seek is complete
-        setTimeout(() => {
-          startRecording();
-        }, 100);
-      }, 100);
+      // setTimeout(() => {
+      //   setIsSeeking(false);
+      //   //wait for 100ms to make sure the seek is complete
+      //   setTimeout(() => {
+      //     startRecording();
+      //   }, 100);
+      // }, 100);
     }
-  }, [startRecording, stopRecording, setIsSeeking]);
+  //}, [startRecording, stopRecording, setIsSeeking]);
+}, [startRecording, stopRecording]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -385,9 +385,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       if (currentImageUrl && currentEffect.loadImage) {
         currentEffect.loadImage(p, currentImageUrl);
       }
-      if (currentSong && currentSong.audioUrl) {
-         p5.prototype.loadSound(currentSong.audioUrl);
-      }
 
     };
 
@@ -402,24 +399,25 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       console.log('setup p5');
       // Set up the onended event
 
-      if (p5SoundRef.current) {
-        p5SoundRef.current.onended(() => {
-          if (!isSeeking) {
-            console.log('Song ended naturally');
-            if (isRecordingRef.current) {
-              stopRecording();
-            }
-            if (isPlaying) {
-              setIsPlaying(false);
-            }
-            p.noLoop();
-            return;
+      // if (p5SoundRef.current) {
+      //   p5SoundRef.current.onended(() => {
+      //     console.log('isSeeking in onended', isSeeking);
+      //     if (!isSeeking) {
+      //       console.log('Song ended naturally');
+      //       if (isRecordingRef.current) {
+      //         stopRecording();
+      //       }
+      //       if (isPlaying) {
+      //         setIsPlaying(false);
+      //       }
+      //       p.noLoop();
+      //       return;
             
-          } else {
-            console.log('Seek operation detected, not ending recording');
-            }
-          });
-      }
+      //     } else {
+      //       console.log('Seek operation detected, not ending recording');
+      //       }
+      //     });
+      // }
       currentEffect.setup(p);
     
     };
