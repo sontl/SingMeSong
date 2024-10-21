@@ -11,7 +11,7 @@ import P5MusicPlayer from './P5MusicPlayer';
 import debounce from 'lodash/debounce';
 import { FaSearch } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
-import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
+import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning, FaRecordVinyl } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { loadSharedImage, loadSharedBlurImage } from './effects/SharedImageLoader';
 
@@ -45,6 +45,9 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const isMediaRecorderSetupRef = useRef(false);
   const isFlashingRef = useRef(false);
   const flashingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isCountingDown, setIsCountingDown] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [showCursor, setShowCursor] = useState(true);
 
   const { 
     setAllSongs, 
@@ -148,23 +151,34 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [, updateState] = useState({});
   const forceUpdate = useCallback(() => updateState({}), []);
 
+  const startCountdown = useCallback(() => {
+    setIsCountingDown(true);
+    setCountdown(3);
+    const countdownInterval = setInterval(() => {
+      setCountdown((prevCount) => {
+        if (prevCount <= 1) {
+          clearInterval(countdownInterval);
+          setIsCountingDown(false);
+          startRecording();
+          return 0;
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
+  }, [startRecording]);
+
   const toggleRecording = useCallback(() => {
     if (isRecordingRef.current) {
       stopRecording();
+      setShowCursor(true);
     } else {
-     // setIsSeeking(true);
+      setShowCursor(false);
       p5SoundRef.current.jump(0);
-      
       setTimeout(() => {
-     //   setIsSeeking(false);
-        //wait for 100ms to make sure the seek is complete
-        setTimeout(() => {
-          startRecording();
-        }, 100);
+        startCountdown();
       }, 100);
     }
-  //}, [startRecording, stopRecording, setIsSeeking]);
-}, [startRecording, stopRecording]);
+  }, [startCountdown, stopRecording]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -498,7 +512,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     <DefaultLayout user={user} hideFloatingPlayer={true} isFullscreen={isFullscreen}>
       {isFullscreen ? (
         <div 
-          className="fixed inset-0 z-50 bg-black flex items-center justify-center cursor-none"
+          className={`fixed inset-0 z-50 bg-black flex items-center justify-center ${showCursor ? 'cursor-auto' : 'cursor-none'}`}
           onContextMenu={handleRightClick}
         >
           <div className="w-full h-full">
@@ -519,6 +533,26 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                 Exit Fullscreen
               </button>
               {/* Add more menu items here if needed */}
+            </div>
+          )}
+          <div className={`absolute top-4 right-4 flex items-center space-x-4 ${showCursor ? '' : 'opacity-0 hover:opacity-100 transition-opacity duration-300'}`}>
+            <button
+              onClick={toggleRecording}
+              className={`p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200 ${
+                isRecordingRef.current ? 'text-red-500' : 'text-white'
+              }`}
+              aria-label={isRecordingRef.current ? 'Stop Recording' : 'Start Recording'}
+            >
+              {isRecordingRef.current ? (
+                <FaVideoSlash size={24} />
+              ) : (
+                <FaRecordVinyl size={24} />
+              )}
+            </button>
+          </div>
+          {isCountingDown && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="text-white text-6xl font-bold">{countdown}</div>
             </div>
           )}
         </div>
