@@ -84,9 +84,28 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       console.error('Canvas not found');
       return;
     }
-    const stream = canvas.captureStream(30);
 
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+    // Increase the canvas resolution
+    const scaleFactor = 2; // Adjust this value to balance quality and performance
+    canvas.width = canvas.offsetWidth * scaleFactor;
+    canvas.height = canvas.offsetHeight * scaleFactor;
+    canvas.style.width = `${canvas.offsetWidth}px`;
+    canvas.style.height = `${canvas.offsetHeight}px`;
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(scaleFactor, scaleFactor);
+    }
+
+    const stream = canvas.captureStream(60); // Increase frame rate to 60 fps
+
+    // Set up MediaRecorder with higher quality options
+    const options = {
+      mimeType: 'video/webm; codecs=vp9',
+      videoBitsPerSecond: 8000000, // 8 Mbps
+    };
+
+    const mediaRecorder = new MediaRecorder(stream, options);
 
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
@@ -101,7 +120,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       document.body.appendChild(a);
       a.style.display = 'none';
       a.href = url;
-      a.download = 'lyric-video-recording.webm';
+      a.download = 'high-quality-lyric-video.webm';
       a.click();
       window.URL.revokeObjectURL(url);
     };
@@ -287,8 +306,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     // }
 
     // Clear the previous image and set the new image URLs
-    setCurrentImageUrl(song.imageUrl || null);
-    setCurrentSmallImageUrl(song.imageUrl ? song.imageUrl.replace('image_large', 'image') : null);
+    setCurrentSmallImageUrl(song.imageUrl || null);
+    setCurrentImageUrl(song.imageUrl ? song.imageUrl.replace('image', 'image_large') : null);
 
     try {
       // Reset the audio context
@@ -396,6 +415,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.preload = () => {
+      console.log('currentImageUrl', currentImageUrl);
+      console.log('currentSmallImageUrl', currentSmallImageUrl);
       if (currentSmallImageUrl) {
         loadSharedBlurImage(p, currentSmallImageUrl);
       }
@@ -405,10 +426,12 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.setup = () => {
-     
       const { width, height } = calculateCanvasSize();
       const canvas = p.createCanvas(width, height);
       canvasRef.current = canvas.elt;
+
+      // Set the pixel density to 2 for higher resolution
+      p.pixelDensity(2);
 
       if (!sketchRef.current) {
         sketchRef.current = p;
@@ -673,8 +696,15 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                   </div>
                 ) : (
                   <div className={`m-0 flex justify-center items-center ${isRecordingRef.current ? 'border-4 border-red-500' : ''} mb-20 md:mb-0`}>
-                    <ReactP5Wrapper sketch={sketch} key="p5-sketch" />
+                   <div className="relative">
+              <ReactP5Wrapper sketch={sketch} />
+              {isCountingDown && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="text-white text-6xl font-bold">{countdown}</div>
+                </div>
+                    )}
                   </div>
+                </div>
                 )}
           </div>
         </div>
