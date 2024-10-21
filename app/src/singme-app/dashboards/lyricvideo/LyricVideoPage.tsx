@@ -120,7 +120,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       document.body.appendChild(a);
       a.style.display = 'none';
       a.href = url;
-      a.download = 'high-quality-lyric-video.webm';
+      a.download = 'lyric-video-recording.webm';
       a.click();
       window.URL.revokeObjectURL(url);
     };
@@ -601,17 +601,19 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                   <li
                     id={`song-${song.id}`}
                     key={song.id}
-                    className={`cursor-pointer p-2 hover:bg-gray-100 rounded ${
-                      selectedSong?.id === song.id ? 'bg-blue-100' : ''
+                    className={`cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded ${
+                      selectedSong?.id === song.id ? 'bg-blue-100 dark:bg-blue-800' : ''
                     } flex items-start`}
                     onClick={() => handleSongClick(song)}
                   >
                     <div className="flex-grow pr-2 break-words">
-                      <span>{song.title}</span>
+                      <span className={`${selectedSong?.id === song.id ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                        {song.title}
+                      </span>
                     </div>
                     {song.subtitle && (
                       <FaClosedCaptioning 
-                        className="text-gray-500 flex-shrink-0 mt-1" 
+                        className="text-gray-500 dark:text-gray-400 flex-shrink-0 mt-1" 
                         title="This song has lyrics"
                         size={16}
                       />
