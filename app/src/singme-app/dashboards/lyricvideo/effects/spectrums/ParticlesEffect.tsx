@@ -1,4 +1,5 @@
 import p5 from 'p5';
+import { getSharedImage, getSharedBlurImage } from '../SharedImageLoader';
 
 class Particle {
   pos: p5.Vector;
@@ -37,9 +38,34 @@ class Particle {
 }
 
 let particles: Particle[] = [];
+let time = 0;
 
 export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
-  p.background(0);
+  const blurredImg = getSharedBlurImage();
+  const originalImg = getSharedImage();
+
+  if (originalImg) {
+    // Calculate animation values
+    const scaleRange = 0.05;
+    const scale = 1.2 + scaleRange + Math.sin(time * 0.001) * scaleRange;
+    const xOffset = Math.cos(time * 0.0007) * 20;
+    const yOffset = Math.sin(time * 0.0005) * 20;
+
+    // Draw animated blurred background
+    const newWidth = p.width * scale;
+    const newHeight = p.height * scale;
+    const x = (p.width - newWidth) / 2 + xOffset;
+    const y = (p.height - newHeight) / 2 + yOffset;
+    p.image(originalImg, x, y, newWidth, newHeight);
+  }
+
+  // Apply semi-transparent overlay
+  const alpha = p.map(energy, 0, 255, 180, 150);
+  p.fill(0, alpha);
+  p.noStroke();
+  p.rect(0, 0, p.width, p.height);
+
+  // Existing particle logic
   if (particles.length === 0) {
     for (let i = 0; i < 100; i++) {
       particles.push(new Particle(p));
@@ -53,6 +79,8 @@ export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
     particle.update(p, energy);
     particle.show(p);
   });
+
+  time += p.deltaTime * 1;
 };
 
 export const ParticlesTitleStyle = (p: p5, title: string) => {
@@ -72,4 +100,10 @@ export const ParticlesTitleStyle = (p: p5, title: string) => {
   // Reset shadow
   p.drawingContext.shadowBlur = 0;
   p.pop();
+};
+
+export const initParticlesEffect = (p: p5): void => {
+  p.background(0);
+  p.imageMode(p.CORNER);
+  p.rectMode(p.CORNER);
 };

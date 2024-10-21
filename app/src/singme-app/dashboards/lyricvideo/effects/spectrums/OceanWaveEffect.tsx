@@ -26,8 +26,9 @@ let lightningIntensity = 0;
 let lightningDuration = 0;
 
 export const OceanWaveEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]) => {
-
-  p.background(0, 0, 10, 10); // Deep blue background with slight transparency for trail effect
+  // Use a more efficient way to set background
+  p.clear();
+  p.background(0, 0, 10);
 
   // Update lightning effect
   updateLightning(p, spectrum);

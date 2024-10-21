@@ -155,13 +155,13 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
      // setIsSeeking(true);
       p5SoundRef.current.jump(0);
       
-      // setTimeout(() => {
-      //   setIsSeeking(false);
-      //   //wait for 100ms to make sure the seek is complete
-      //   setTimeout(() => {
-      //     startRecording();
-      //   }, 100);
-      // }, 100);
+      setTimeout(() => {
+     //   setIsSeeking(false);
+        //wait for 100ms to make sure the seek is complete
+        setTimeout(() => {
+          startRecording();
+        }, 100);
+      }, 100);
     }
   //}, [startRecording, stopRecording, setIsSeeking]);
 }, [startRecording, stopRecording]);
@@ -411,10 +411,12 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
             console.log('Song ended naturally');
             setIsAudioEnded(true);
             p.noLoop();
+            if (isRecordingRef.current) {
+              stopRecording();
+           }
+           return;
           }
-          //  if (isRecordingRef.current) {
-            //  stopRecording();
-           // }
+         
           //  p.noLoop();
            // return;
             

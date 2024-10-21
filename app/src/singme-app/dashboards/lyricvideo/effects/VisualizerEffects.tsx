@@ -87,14 +87,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     setup: initOceanWaveEffect,
   },
   
-  // {
-  //   name: 'Bars',
-  //   draw: BarsEffect,
-  //   drawTitle: BarsTitleStyle,
-  //   displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.5, textColor: p.color(255, 255, 255) }),
-  //   initConfig: (p: p5) => p.background(0),
-   
-  // },
+ 
   
   // {
   //   name: 'Wave',
@@ -157,7 +150,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Starfield',
     draw: StarfieldEffect,
     drawTitle: StarfieldTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.6, textColor: p.color(255, 255, 255) }),
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.7, textColor: p.color(255, 255, 255) }),
     setup: (p: p5) => p.background(0),
   },
   {
@@ -167,5 +160,18 @@ export const visualizerEffects: VisualizerEffect[] = [
     displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
     setup: (p: p5) => p.background(0, 10),
   
+  },
+  {
+    name: 'Bars',
+    draw: BarsEffect,
+    drawTitle: BarsTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime, {
+      fontSize: 0.04,
+      leftMargin: 0.1,
+      verticalAlign: 'center',
+      lineSpacing: 1.7
+    }),
+    setup: (p: p5) => p.background(0),
+   
   },
 ];
