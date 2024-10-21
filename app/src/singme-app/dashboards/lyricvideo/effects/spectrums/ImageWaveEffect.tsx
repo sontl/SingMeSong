@@ -1,6 +1,6 @@
 import p5 from 'p5';
+import { getSharedImage } from '../SharedImageLoader';
 
-let songImage: p5.Image | null = null;
 let lastShakeTime = 0;
 const shakeInterval = 500; // Minimum time between shakes in milliseconds
 const energyThreshold = 200; // Minimum energy to trigger a shake (0-255)
@@ -18,7 +18,7 @@ export const ImageWaveEffect = (p: p5, spectrum: number[], energy: number, wavef
     lastShakeTime = p.millis();
   }
 
-  // Draw the song image on the right side with shake effect
+  const songImage = getSharedImage();
   if (songImage) {
     const targetWidth = p.width * 0.36; // Target width is 1/4 of canvas width
     const targetHeight = p.height; // Target height is full canvas height
@@ -79,22 +79,7 @@ export const ImageWaveTitleStyle = (p: p5, title: string) => {
   p.text(title, 34, 34);
 };
 
-// Modify the loadSongImage function
-export const loadSongImage = (p: p5, imageUrl: string) => {
-  if (!songImage) {
-    p.loadImage(imageUrl, (img) => {
-      songImage = img;
-    });
-  }
-};
-
-// Add a new function to clear the image when changing songs
-export const clearSongImage = () => {
-  songImage = null;
-};
-
 export const initImageWaveEffect = (p: p5) => {
   p.colorMode(p.RGB);
   p.background(240, 240, 240);
 };
-

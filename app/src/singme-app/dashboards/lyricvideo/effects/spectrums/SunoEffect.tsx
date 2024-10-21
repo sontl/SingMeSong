@@ -1,10 +1,12 @@
 import p5 from 'p5';
+import { getSharedImage, getSharedBlurImage } from '../SharedImageLoader';
 
-let blurredImg: p5.Image | null = null;
-let originalImg: p5.Image | null = null;
 let time = 0;
 export const SunoEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]): void => {
   
+  const blurredImg = getSharedBlurImage();
+  const originalImg = getSharedImage();
+
   if (blurredImg) {
     // Calculate animation values
     const scaleRange = 0.05;
@@ -65,17 +67,3 @@ export const initSunoEffect = (p: p5): void => {
   p.imageMode(p.CORNER);
   p.rectMode(p.CORNER);
 };
-
-export const loadSunoImage = (p: p5, imageUrl: string): void => {
-  p.loadImage(imageUrl, (loadedImg) => {
-    originalImg = loadedImg.get();
-  });
-};
-
-export const loadBlurImage = (p: p5, imageUrl: string): void => {
-  p.loadImage(imageUrl, (loadedImg) => {
-    blurredImg = loadedImg.get();
-    blurredImg.filter(p.BLUR, 10); // Increased blur amount from 12 to 24
-  });
-};
-

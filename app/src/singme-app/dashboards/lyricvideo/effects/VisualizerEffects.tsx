@@ -1,14 +1,14 @@
 import p5 from 'p5';
 import { ParticlesEffect, ParticlesTitleStyle } from './spectrums/ParticlesEffect';
 import { BarsEffect, BarsTitleStyle } from './spectrums/BarsEffect';
-import { CirclesEffect, CirclesTitleStyle, initCirclesEffect, loadCirclesBlurImage, loadCirclesImage } from './spectrums/CirclesEffect';
+import { CirclesEffect, CirclesTitleStyle, initCirclesEffect } from './spectrums/CirclesEffect';
 import { WaveEffect, WaveTitleStyle } from './spectrums/WaveEffect';
 import { StarfieldEffect, StarfieldTitleStyle } from './spectrums/StarfieldEffect';
 import { SpectrogramEffect, SpectrogramTitleStyle } from './spectrums/SpectrogramEffect';
 import { LyricEffect } from './lyrics/LyricEffect1';
 import { GlowingLyricEffect} from './lyrics/GlowingLyricEffect';
 import { SingleWordLyricEffect } from './lyrics/SingleWordLyricEffect';
-import { ImageWaveEffect, ImageWaveTitleStyle, initImageWaveEffect, loadSongImage } from './spectrums/ImageWaveEffect';
+import { ImageWaveEffect, ImageWaveTitleStyle, initImageWaveEffect } from './spectrums/ImageWaveEffect';
 import { ShadowLyricEffect, loadJosefinSansFont } from './lyrics/ShadowLyricEffect';
 import { RandomHighlightLyricEffect } from './lyrics/RandomHighlightLyricEffect';
 import { SixLineFadeEffect } from './lyrics/SixLineFadeEffect';
@@ -16,8 +16,8 @@ import { OceanWaveEffect, OceanWaveTitleStyle, initOceanWaveEffect } from './spe
 import { RollingLyricEffect } from './lyrics/RollingLyricEffect';
 import { PastelWaves3DEffect, PastelWaves3DTitleStyle, initPastelWaves3D } from './spectrums/PastelWaves3DEffect';
 import { ScrollingUpLyricEffect } from './lyrics/ScrollingUpLyricEffect';
-import { SunoEffect, SunoTitleStyle, initSunoEffect, loadSunoImage, loadBlurImage } from './spectrums/SunoEffect';
-import { RuvoEffect, RuvoTitleStyle, initRuvoEffect, loadRuvoImages, loadRuvoBlurImage } from './spectrums/RuvoEffect';
+import { SunoEffect, SunoTitleStyle, initSunoEffect } from './spectrums/SunoEffect';
+import { RuvoEffect, RuvoTitleStyle, initRuvoEffect } from './spectrums/RuvoEffect';
 import { GlowingWaveformEffect, GlowingWaveformTitleStyle, initGlowingWaveform } from './spectrums/GlowingWaveformEffect';
 import { SymmetricWaveParticlesEffect, SymmetricWaveParticlesTitleStyle, initSymmetricWaveParticles } from './spectrums/SymmetricWaveParticlesEffect';
 
@@ -37,8 +37,6 @@ export const visualizerEffects: VisualizerEffect[] = [
     draw: SunoEffect,
     drawTitle: SunoTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => ScrollingUpLyricEffect(p, lyrics, isPlaying, currentTime),
-    loadImage: loadSunoImage,
-    loadSmallImage: loadBlurImage,
     setup: initSunoEffect,
   },
 
@@ -48,8 +46,6 @@ export const visualizerEffects: VisualizerEffect[] = [
     drawTitle: RuvoTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => 
       RollingLyricEffect(p, lyrics, isPlaying, currentTime, {fontSize: 0.05, bottomMargin: 0.06}),
-    loadImage: loadRuvoImages,
-    loadSmallImage: loadRuvoBlurImage,
     setup: initRuvoEffect,
   },
   {
@@ -64,8 +60,6 @@ export const visualizerEffects: VisualizerEffect[] = [
         fadeOutDuration: 0.5,
         enableWaveEffect: false // Wave effect disabled
       }),
-    loadImage: loadCirclesImage,
-    loadSmallImage: loadCirclesBlurImage,
     setup: initCirclesEffect,
   },
   {
@@ -73,8 +67,6 @@ export const visualizerEffects: VisualizerEffect[] = [
     draw: ImageWaveEffect,
     drawTitle: ImageWaveTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => RandomHighlightLyricEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.04, fontSize: 0.66 }),
-    loadImage: loadSongImage,
-    loadSmallImage: loadSongImage,
     setup: initImageWaveEffect,
   },
   {

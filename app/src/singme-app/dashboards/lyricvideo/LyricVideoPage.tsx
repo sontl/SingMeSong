@@ -8,12 +8,12 @@ import { useQuery, getAllSongsByUser } from 'wasp/client/operations';
 import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import P5MusicPlayer from './P5MusicPlayer';
-import { clearSongImage } from './effects/spectrums/ImageWaveEffect';
 import debounce from 'lodash/debounce';
 import { FaSearch } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
+import { loadSharedImage, loadSharedBlurImage } from './effects/SharedImageLoader';
 
 // Ensure we're in a browser environment
 if (typeof window !== 'undefined') {
@@ -268,7 +268,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     }
 
     // Clear the previous image and set the new image URLs
-    clearSongImage();
     setCurrentImageUrl(song.imageUrl || null);
     setCurrentSmallImageUrl(song.imageUrl ? song.imageUrl.replace('image_large', 'image') : null);
 
@@ -378,14 +377,12 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     };
 
     p.preload = () => {
-      if (currentSmallImageUrl && currentEffect.loadSmallImage) {
-        currentEffect.loadSmallImage(p, currentSmallImageUrl);
+      if (currentSmallImageUrl) {
+        loadSharedBlurImage(p, currentSmallImageUrl);
       }
-      // Load the images if available
-      if (currentImageUrl && currentEffect.loadImage) {
-        currentEffect.loadImage(p, currentImageUrl);
+      if (currentImageUrl) {
+        loadSharedImage(p, currentImageUrl);
       }
-
     };
 
     p.setup = () => {

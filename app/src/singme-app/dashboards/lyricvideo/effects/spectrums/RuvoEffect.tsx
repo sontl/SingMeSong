@@ -1,46 +1,36 @@
 import p5 from 'p5';
+import { getSharedImage, getSharedBlurImage } from '../SharedImageLoader';
 
-let img: p5.Image;
-let bgimg: p5.Image;
 let imgMask: p5.Graphics;
 let font: p5.Font;
 let time = 0;
 
-export const loadRuvoImages = (p: p5, imageUrl: string) => {
-  img = p.loadImage(imageUrl);
-  font = p.loadFont('https://cdnjs.cloudflare.com/ajax/libs/topcoat/0.8.0/font/SourceCodePro-Bold.otf');
-};
-
-export const loadRuvoBlurImage = (p: p5, imageUrl: string) => {
-  p.loadImage(imageUrl, (loadedImg) => {
-    bgimg = loadedImg.get();
-    bgimg.filter(p.BLUR, 6);
-  });   
-
-
-};
-
 export const initRuvoEffect = (p: p5) => {
+  font = p.loadFont('https://cdnjs.cloudflare.com/ajax/libs/topcoat/0.8.0/font/SourceCodePro-Bold.otf');
   p.textFont(font);
   p.textAlign(p.CENTER, p.CENTER);
   p.textSize(16);
-        // Create a circular mask for the image
-    if (!imgMask) {
-        imgMask = p.createGraphics(img.width, img.height);
-        imgMask.ellipse(img.width/2, img.height/2, img.width, img.height);
-    }
+
+  const img = getSharedImage();
+  if (img && !imgMask) {
+    imgMask = p.createGraphics(img.width, img.height);
+    imgMask.ellipse(img.width/2, img.height/2, img.width, img.height);
+  }
 };
 
 export const RuvoEffect = (p: p5, spectrum: number[], energy: number, waveform: number[]) => {
-  drawAnimatedBackground(p, energy);
+  const img = getSharedImage();
+  const bgimg = getSharedBlurImage();
+
+  drawAnimatedBackground(p, energy, bgimg);
   drawVisualizer(p, spectrum, waveform);
-  createCircularImage(p, spectrum, waveform);
+  createCircularImage(p, spectrum, waveform, img);
   
   // Update time for animation
-  time += p.deltaTime * 0.001;  // Slowed down animation
+  time += p.deltaTime * 0.001;
 };
 
-const drawAnimatedBackground = (p: p5, energy: number) => {
+const drawAnimatedBackground = (p: p5, energy: number, bgimg: p5.Image | null) => {
   p.push();
   
   // Calculate animation values
@@ -49,13 +39,14 @@ const drawAnimatedBackground = (p: p5, energy: number) => {
   const xOffset = p.cos(time * 0.3) * 20;
   const yOffset = p.sin(time * 0.2) * 20;
 
-  // Draw animated blurred background
-  const newWidth = p.width * scale;
-  const newHeight = p.height * scale;
-  const x = (p.width - newWidth) / 2 + xOffset;
-  const y = (p.height - newHeight) / 2 + yOffset;
-  
-  p.image(bgimg, x, y, newWidth, newHeight);
+  // Draw animated blurred background if bgimg is not null
+  if (bgimg) {
+    const newWidth = p.width * scale;
+    const newHeight = p.height * scale;
+    const x = (p.width - newWidth) / 2 + xOffset;
+    const y = (p.height - newHeight) / 2 + yOffset;
+    p.image(bgimg, x, y, newWidth, newHeight);
+  }
   
   // Apply semi-transparent overlay with reduced opacity
   const alpha = p.map(energy, 0, 255, 150, 150);
@@ -100,7 +91,7 @@ const drawVisualizer = (p: p5, spectrum: number[], wave: number[]) => {
   p.endShape(p.CLOSE);
 };
 
-const createCircularImage = (p: p5, spectrum: number[], wave: number[]) => {
+const createCircularImage = (p: p5, spectrum: number[], wave: number[], img: p5.Image | null) => {
   // Calculate the size and position of the circular image
   let imgSize = p.min(p.width, p.height) * 0.56;  // Increased from 0.4 to 0.7
   let imgX = p.width/2 - imgSize/2;
@@ -110,8 +101,10 @@ const createCircularImage = (p: p5, spectrum: number[], wave: number[]) => {
   p.push();
   p.translate(p.width/2, p.height/2);
   p.imageMode(p.CENTER);
-  (img as any).mask(imgMask);
-  p.image(img, 0, 0, imgSize, imgSize);
+  if (img && imgMask) {
+    (img as any).mask(imgMask);
+    p.image(img, 0, 0, imgSize, imgSize);
+  }
   p.pop();
   
   // Draw the central visualizer
