@@ -9,9 +9,8 @@ import { SongContext } from '../../context/SongContext';
 import { visualizerEffects, VisualizerEffect } from './effects/VisualizerEffects';
 import P5MusicPlayer from './P5MusicPlayer';
 import debounce from 'lodash/debounce';
-import { FaSearch } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
-import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
+import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning, FaUpload, FaSearch } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { loadSharedImage, loadSharedBlurImage } from './effects/SharedImageLoader';
 
@@ -380,6 +379,65 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     }
   };
 
+  const mergeSoundAndVideo = async (videoFile: File, audioUrl: string): Promise<{ success: boolean, mergedVideoUrl?: string }> => {
+    const formData = new FormData();
+    formData.append('video', videoFile);
+    formData.append('audio_url', audioUrl);
+
+    try {
+      const response = await fetch('https://mp4.singmesong.com/predict', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const mergedVideoUrl = URL.createObjectURL(blob);
+
+      return { success: true, mergedVideoUrl };
+    } catch (error) {
+      console.error('Error merging sound and video:', error);
+      return { success: false };
+    }
+  };
+
+  const handleMergeSound = async () => {
+    if (!selectedSong) {
+      alert('Please select a song first');
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'video/webm';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        try {
+          setIsLoading(true);
+          const result = await mergeSoundAndVideo(file, selectedSong.audioUrl || '');
+          if (result.success) {
+            const a = document.createElement('a');
+            a.href = result.mergedVideoUrl || '';
+            a.download = 'merged_video.mp4';
+            a.click();
+          } else {
+            alert('Failed to merge sound and video');
+          }
+        } catch (error) {
+          console.error('Error merging sound and video:', error);
+          alert('An error occurred while merging sound and video');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    input.click();
+  };
+
   const sketch = useCallback((p: p5) => {
     let fft: p5.FFT;
 
@@ -573,6 +631,14 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                 <FaVideo size={24} />
               )}
             </button>
+            
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200 text-white"
+              aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            >
+              {isFullscreen ? <FaCompress size={24} /> : <FaExpand size={24} />}
+            </button>
           </div>
           {isCountingDown && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -658,6 +724,13 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                     {isRecordingRef.current ? 'Stop Recording' : 'Start Recording'}
                   </span>
                 </div>
+                <button
+              onClick={handleMergeSound}
+              className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
+              aria-label="Merge Sound"
+            >
+              <FaUpload className="text-primary"/>
+            </button>
                 <div className="relative group">
                 <button
                   onClick={toggleFullscreen}
