@@ -11,7 +11,6 @@ interface SongContextType {
   setCurrentSong: (song: Song | null) => void;
   isPlaying: boolean;
   togglePlay: (song: Song) => void;
-  setIsPlaying: (isPlaying: boolean) => void;
   setIsAudioEnded: (isEnded: boolean) => void;
   audioRef: React.RefObject<HTMLAudioElement>;
   allSongs: Song[];
@@ -38,7 +37,6 @@ export const SongContext = createContext<SongContextType>({
   setCurrentSong: () => {},
   isPlaying: false,
   togglePlay: () => {},
-  setIsPlaying: () => {},
   setIsAudioEnded: () => {},
   audioRef: { current: null },
   allSongs: [],
@@ -73,6 +71,15 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const p5SoundRef = useRef<any>(null); // Add this line
 
+  const getIsPlaying = useCallback(() => {
+    if (currentPage === 'lyricVideo' && p5SoundRef.current) {
+      return p5SoundRef.current.isPlaying();
+    } else if (audioRef.current) {
+      return !audioRef.current.paused;
+    }
+    return isPlaying;
+  }, [currentPage, isPlaying]);
+
   const stopP5Sound = () => {
     if (p5SoundRef.current && p5SoundRef.current.isPlaying()) {
       p5SoundRef.current.stop();
@@ -84,7 +91,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetContext = () => {
     setCurrentSong(null);
-    setIsPlaying(false);
+    
     setProgress(0);
     setDuration(0);
     setIsAudioEnded(false);
@@ -194,13 +201,12 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const togglePlay = async (song: Song) => {
     if (currentSong?.id === song.id) {
-      if (isPlaying) {
+      if (getIsPlaying()) {
         if (currentPage === 'lyricVideo') {
           p5SoundRef.current?.pause();
         } else {
           audioRef.current.pause();
         }
-        setIsPlaying(false);
       } else {
         try {
           if (currentPage === 'lyricVideo') {
@@ -208,14 +214,12 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             await audioRef.current.play();
           }
-          setIsPlaying(true);
         } catch (error) {
           console.error('Error playing audio:', error);
         }
       }
     } else {
       cleanupP5Audio();
-      setIsPlaying(false);
       audioRef.current.innerHTML = '';
       audioRef.current.removeAttribute('src');
       setIsAudioLoading(true);
@@ -232,12 +236,10 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
             () => {
               p5SoundRef.current?.play();
               setCurrentSong(song);
-              setIsPlaying(true);
               setIsAudioLoading(false);
             },
             (error) => {
               console.error('Error loading audio:', error);
-              setIsPlaying(false);
               setIsAudioLoading(false);
             }
           );
@@ -252,7 +254,6 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             await audioRef.current.play();
             setCurrentSong(song);
-            setIsPlaying(true);
           } catch (error: any) {
             if (error.name === 'AbortError') {
               console.log('AbortError occurred, fetching latest song details');
@@ -261,13 +262,11 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setCurrentSong(updatedSong);
                 // Retry playing the audio by running tooglePlay again
                 togglePlay(updatedSong);
-                setIsPlaying(true);
               } catch (fetchError) {
                 console.error('Error fetching and updating song details:', fetchError);
               }
             } else {
               console.error('Error playing audio:', error);
-              setIsPlaying(false);
             }
           } finally {
             setIsAudioLoading(false);
@@ -298,7 +297,6 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleAudioEnded = () => {
-    setIsPlaying(false);
     setIsAudioEnded(true);
   };
 
@@ -324,9 +322,8 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <SongContext.Provider value={{
       currentSong,
       setCurrentSong,
-      isPlaying,
+      isPlaying: getIsPlaying(),
       togglePlay,
-      setIsPlaying,
       setIsAudioEnded,
       audioRef,
       allSongs,
@@ -339,11 +336,11 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       handleAudioEnded,
       isAudioLoading,
       setIsAudioLoading,
-      p5SoundRef, // Add this line
+      p5SoundRef,
       currentPage,
       setCurrentPage,
-      resetContext, // Add this new function
-      stopP5Sound, // Add this new function
+      resetContext,
+      stopP5Sound,
       isSeeking,
       setIsSeeking,
     }}>

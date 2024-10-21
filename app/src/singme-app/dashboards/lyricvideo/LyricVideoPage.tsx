@@ -51,7 +51,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     allSongs, 
     currentSong, 
     isPlaying, 
-    setIsPlaying,
     togglePlay, 
     p5SoundRef, 
     isAudioLoading, 
@@ -60,7 +59,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     resetContext,
     stopP5Sound,
     isSeeking,
-    setIsSeeking
+    setIsAudioEnded
   } = useContext(SongContext);
   const [currentEffect, setCurrentEffect] = useState<VisualizerEffect>(visualizerEffects[0]);
   const isInitialMount = useRef(true);
@@ -70,6 +69,8 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const location = useLocation();
   const songListRef = useRef<HTMLUListElement>(null);
   const history = useHistory();
+
+  const sketchRef = useRef<p5 | null>(null);
 
   const setupMediaRecorder = useCallback(() => {
     // if (isMediaRecorderSetupRef.current || !canvasRef.current) return;
@@ -258,14 +259,17 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
   const handleSongClick = async (song: Song) => {
     console.log('handleSongClick');
+  
+    if (currentSong?.id === song.id) {
+      return;
+    }
     setIsLoading(true);
     setSelectedSong(song);
     
     // Stop the currently playing song, if any
-    if (currentSong && p5SoundRef.current) {
-      p5SoundRef.current.stop();
-      setIsPlaying(false);
-    }
+    // if (currentSong && p5SoundRef.current) {
+    //   p5SoundRef.current.stop();
+    // }
 
     // Clear the previous image and set the new image URLs
     setCurrentImageUrl(song.imageUrl || null);
@@ -273,7 +277,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
     try {
       // Reset the audio context
-      resetContext();
+      await resetContext();
       
       // Play the new song
       await togglePlay(song);
@@ -390,31 +394,37 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       const { width, height } = calculateCanvasSize();
       const canvas = p.createCanvas(width, height);
       canvasRef.current = canvas.elt;
+
+      if (!sketchRef.current) {
+        sketchRef.current = p;
+      }
       if (!fft) {
         fft = new p5.FFT();
       }
       console.log('setup p5');
-      // Set up the onended event
 
-      // if (p5SoundRef.current) {
-      //   p5SoundRef.current.onended(() => {
-      //     console.log('isSeeking in onended', isSeeking);
-      //     if (!isSeeking) {
-      //       console.log('Song ended naturally');
-      //       if (isRecordingRef.current) {
-      //         stopRecording();
-      //       }
-      //       if (isPlaying) {
-      //         setIsPlaying(false);
-      //       }
-      //       p.noLoop();
-      //       return;
+      if (p5SoundRef.current) {
+        p5SoundRef.current.onended(() => {
+         // console.log('isSeeking in onended', isSeeking);
+          //if (!isSeeking) {
+          console.log("current time", p5SoundRef.current.currentTime());
+          console.log("duration", p5SoundRef.current.duration());
+          if (Math.floor(p5SoundRef.current.currentTime()) >= Math.floor(p5SoundRef.current.duration())) {
+            console.log('Song ended naturally');
+            setIsAudioEnded(true);
+            p.noLoop();
+          }
+          //  if (isRecordingRef.current) {
+            //  stopRecording();
+           // }
+          //  p.noLoop();
+           // return;
             
-      //     } else {
-      //       console.log('Seek operation detected, not ending recording');
-      //       }
-      //     });
-      // }
+          // } else {
+          //   console.log('Seek operation detected, not ending recording');
+          //   }
+        });
+      }
       currentEffect.setup(p);
     
     };
@@ -463,7 +473,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         p.noLoop();
       }
     };
-  }, [isFullscreen, fullscreenDimensions, isPlaying, currentSong, currentEffect, p5SoundRef, stopRecording, isSeeking, currentImageUrl, currentSmallImageUrl]);
+  }, [isFullscreen, fullscreenDimensions, isPlaying, setIsAudioEnded, currentSong, currentEffect, p5SoundRef, stopRecording, currentImageUrl, currentSmallImageUrl]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -628,7 +638,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
                   </div>
                 ) : (
                   <div className={`m-0 flex justify-center items-center ${isRecordingRef.current ? 'border-4 border-red-500' : ''} mb-20 md:mb-0`}>
-                    <ReactP5Wrapper sketch={sketch} />
+                    <ReactP5Wrapper sketch={sketch} key="p5-sketch" />
                   </div>
                 )}
           </div>
