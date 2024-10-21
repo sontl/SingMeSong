@@ -157,7 +157,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     name: 'Starfield',
     draw: StarfieldEffect,
     drawTitle: StarfieldTitleStyle,
-    displayLyrics: (p, lyrics, isPlaying, currentTime) => GlowingLyricEffect(p, lyrics, isPlaying, currentTime),
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => SixLineFadeEffect(p, lyrics, isPlaying, currentTime, { leftMargin: 0.1, fontSize: 0.6, textColor: p.color(255, 255, 255) }),
     setup: (p: p5) => p.background(0),
   },
   {

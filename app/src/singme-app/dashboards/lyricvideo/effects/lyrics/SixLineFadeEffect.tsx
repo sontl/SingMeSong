@@ -11,6 +11,7 @@ let currentLyricIndex = -1;
 let fadeInStartTime = 0;
 let fadeOutStartTime = 0;
 let textColor: p5.Color;
+let lastProcessedLyrics: Array<{ start: number; end: number; sentence: string }> | null = null;
 
 function processLyrics(lyrics: Array<{ start: number; end: number; sentence: string }>, startIndex: number): LyricLine[] {
   return lyrics.map(lyric => ({
@@ -46,12 +47,21 @@ export const SixLineFadeEffect = (
   // Set the textColor variable
   textColor = config.textColor;
 
-  const currentLyricIndex = lyrics.findIndex(lyric => currentTime >= lyric.start && currentTime < lyric.end);
+  // Check if lyrics have changed
+  if (lyrics !== lastProcessedLyrics) {
+    currentLines = [];
+    currentLyricIndex = -1;
+    fadeInStartTime = 0;
+    fadeOutStartTime = 0;
+    lastProcessedLyrics = lyrics;
+  }
+
+  const activeLyricIndex = lyrics.findIndex(lyric => currentTime >= lyric.start && currentTime < lyric.end);
   
   // If we've passed the last lyric, return
-  if (currentLyricIndex === -1) return;
+  if (activeLyricIndex === -1) return;
 
-  const currentSetIndex = Math.floor(currentLyricIndex / 6);
+  const currentSetIndex = Math.floor(activeLyricIndex / 6);
 
   if (currentSetIndex !== Math.floor(currentLyricIndex / 6) || currentLines.length === 0 || currentTime >= fadeOutStartTime) {
     const startIndex = currentSetIndex * 6;
@@ -62,6 +72,7 @@ export const SixLineFadeEffect = (
 
     fadeInStartTime = currentLines[0].start;
     fadeOutStartTime = currentLines[currentLines.length - 1].end - 2; // Start fade-out 2 seconds before the last line ends
+    currentLyricIndex = activeLyricIndex; // Update the currentLyricIndex
   }
 
   // Reduce the lineHeight to make the space between lines shorter

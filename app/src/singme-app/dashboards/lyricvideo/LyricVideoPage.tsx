@@ -407,8 +407,6 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         p5SoundRef.current.onended(() => {
          // console.log('isSeeking in onended', isSeeking);
           //if (!isSeeking) {
-          console.log("current time", p5SoundRef.current.currentTime());
-          console.log("duration", p5SoundRef.current.duration());
           if (Math.floor(p5SoundRef.current.currentTime()) >= Math.floor(p5SoundRef.current.duration()) && p5SoundRef.current.currentTime() > 0) {
             console.log('Song ended naturally');
             setIsAudioEnded(true);

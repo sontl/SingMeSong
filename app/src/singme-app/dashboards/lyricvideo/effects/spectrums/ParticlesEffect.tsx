@@ -39,6 +39,7 @@ class Particle {
 let particles: Particle[] = [];
 
 export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
+  p.background(0);
   if (particles.length === 0) {
     for (let i = 0; i < 100; i++) {
       particles.push(new Particle(p));
@@ -55,6 +56,7 @@ export const ParticlesEffect = (p: p5, spectrum: number[], energy: number) => {
 };
 
 export const ParticlesTitleStyle = (p: p5, title: string) => {
+  p.push();
   p.colorMode(p.HSB);
   p.fill(255);
   p.textAlign(p.CENTER, p.CENTER);
@@ -69,4 +71,5 @@ export const ParticlesTitleStyle = (p: p5, title: string) => {
   
   // Reset shadow
   p.drawingContext.shadowBlur = 0;
+  p.pop();
 };

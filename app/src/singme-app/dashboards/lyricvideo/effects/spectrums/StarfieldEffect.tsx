@@ -1,4 +1,5 @@
 import p5 from 'p5';
+import { getSharedImage, getSharedBlurImage } from '../SharedImageLoader';
 
 class Star {
   x: number;
@@ -31,15 +32,41 @@ class Star {
 }
 
 const stars: Star[] = [];
+let time = 0;
 
 export const StarfieldEffect = (p: p5, spectrum: number[], energy: number) => {
+ // const blurredImg = getSharedBlurImage();
+  const originalImg = getSharedImage();
+
+  if (originalImg) {
+    // Calculate animation values
+    const scaleRange = 0.05;
+    const scale = 1.2 + scaleRange + Math.sin(time * 0.001) * scaleRange;
+    const xOffset = Math.cos(time * 0.0007) * 20;
+    const yOffset = Math.sin(time * 0.0005) * 20;
+
+    // Draw animated blurred background
+    const newWidth = p.width * scale;
+    const newHeight = p.height * scale;
+    const x = (p.width - newWidth) / 2 + xOffset;
+    const y = (p.height - newHeight) / 2 + yOffset;
+    p.image(originalImg, x, y, newWidth, newHeight);
+  }
+
+  // Apply semi-transparent overlay
+  const alpha = p.map(energy, 0, 255, 180, 150);
+  p.fill(0, alpha);
+  p.noStroke();
+  p.rect(0, 0, p.width, p.height);
+
+  // Initialize stars if needed
   if (stars.length === 0) {
     for (let i = 0; i < 800; i++) {
       stars.push(new Star(p));
     }
   }
 
-  p.push(); // Save the current drawing state
+  p.push();
   p.translate(p.width / 2, p.height / 2);
   let speed = p.map(energy, 0, 255, 0, 20);
   
@@ -47,7 +74,9 @@ export const StarfieldEffect = (p: p5, spectrum: number[], energy: number) => {
     star.update(p, speed);
     star.show(p);
   });
-  p.pop(); // Restore the previous drawing state
+  p.pop();
+
+  time += p.deltaTime * 1;
 };
 
 export const StarfieldTitleStyle = (p: p5, title: string) => {
@@ -64,4 +93,10 @@ export const StarfieldTitleStyle = (p: p5, title: string) => {
     p.fill(255, p.random(100, 255));
     p.ellipse(x, y, size, size);
   }
+};
+
+export const initStarfieldEffect = (p: p5): void => {
+  p.background(0);
+  p.imageMode(p.CORNER);
+  p.rectMode(p.CORNER);
 };
