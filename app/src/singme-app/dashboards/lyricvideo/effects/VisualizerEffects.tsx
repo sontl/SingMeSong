@@ -20,6 +20,7 @@ import { SunoEffect, SunoTitleStyle, initSunoEffect } from './spectrums/SunoEffe
 import { RuvoEffect, RuvoTitleStyle, initRuvoEffect } from './spectrums/RuvoEffect';
 import { GlowingWaveformEffect, GlowingWaveformTitleStyle, initGlowingWaveform } from './spectrums/GlowingWaveformEffect';
 import { SymmetricWaveParticlesEffect, SymmetricWaveParticlesTitleStyle, initSymmetricWaveParticles } from './spectrums/SymmetricWaveParticlesEffect';
+import { ModulatedWaveEffect, ModulatedWaveTitleStyle, initModulatedWaveEffect } from './spectrums/ModulatedWaveEffect';
 
 export type VisualizerEffect = {
   name: string;
@@ -173,5 +174,22 @@ export const visualizerEffects: VisualizerEffect[] = [
     }),
     setup: (p: p5) => p.background(0),
    
+  },
+  {
+    name: 'ModulatedWave',
+    draw: ModulatedWaveEffect,
+    drawTitle: ModulatedWaveTitleStyle,
+    displayLyrics: (p, lyrics, isPlaying, currentTime) => 
+      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
+        fontSize: 0.05, 
+        bottomMargin: 0.06,
+        fadeInDuration: 0.4,
+        fadeOutDuration: 0.4,
+        enableWaveEffect: true,
+        waveAmplitude: 4,
+        waveFrequency: 0.08,
+        waveSpeed: 0.04
+      }),
+    setup: initModulatedWaveEffect,
   },
 ];
