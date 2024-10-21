@@ -7,6 +7,7 @@ import { StarfieldEffect, StarfieldTitleStyle } from './spectrums/StarfieldEffec
 import { SpectrogramEffect, SpectrogramTitleStyle } from './spectrums/SpectrogramEffect';
 import { LyricEffect } from './lyrics/LyricEffect1';
 import { GlowingLyricEffect} from './lyrics/GlowingLyricEffect';
+import { SingleWordLyricEffect } from './lyrics/SingleWordLyricEffect';
 import { ImageWaveEffect, ImageWaveTitleStyle, initImageWaveEffect, loadSongImage } from './spectrums/ImageWaveEffect';
 import { ShadowLyricEffect, loadJosefinSansFont } from './lyrics/ShadowLyricEffect';
 import { RandomHighlightLyricEffect } from './lyrics/RandomHighlightLyricEffect';
@@ -14,7 +15,6 @@ import { SixLineFadeEffect } from './lyrics/SixLineFadeEffect';
 import { OceanWaveEffect, OceanWaveTitleStyle, initOceanWaveEffect } from './spectrums/OceanWaveEffect';
 import { RollingLyricEffect } from './lyrics/RollingLyricEffect';
 import { PastelWaves3DEffect, PastelWaves3DTitleStyle, initPastelWaves3D } from './spectrums/PastelWaves3DEffect';
-import { EverglowEffect, EverglowTitleStyle, initEverglowEffect, loadEverglowImage } from './spectrums/EverglowEffect';
 import { ScrollingUpLyricEffect } from './lyrics/ScrollingUpLyricEffect';
 import { SunoEffect, SunoTitleStyle, initSunoEffect, loadSunoImage, loadBlurImage } from './spectrums/SunoEffect';
 import { RuvoEffect, RuvoTitleStyle, initRuvoEffect, loadRuvoImages, loadRuvoBlurImage } from './spectrums/RuvoEffect';
@@ -157,16 +157,7 @@ export const visualizerEffects: VisualizerEffect[] = [
     draw: SymmetricWaveParticlesEffect,
     drawTitle: SymmetricWaveParticlesTitleStyle,
     displayLyrics: (p, lyrics, isPlaying, currentTime) => 
-      RollingLyricEffect(p, lyrics, isPlaying, currentTime, { 
-        fontSize: 0.04, 
-        bottomMargin: 0.1, 
-        fadeInDuration: 0.5, 
-        fadeOutDuration: 0.5,
-        enableWaveEffect: true,
-        waveAmplitude: 3,
-        waveFrequency: 0.05,
-        waveSpeed: 0.03
-      }),
+      SingleWordLyricEffect(p, lyrics, isPlaying, currentTime),
     setup: initSymmetricWaveParticles,
   },
 
