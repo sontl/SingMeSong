@@ -11,7 +11,7 @@ import P5MusicPlayer from './P5MusicPlayer';
 import debounce from 'lodash/debounce';
 import { FaSearch } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
-import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning, FaRecordVinyl } from 'react-icons/fa';
+import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { loadSharedImage, loadSharedBlurImage } from './effects/SharedImageLoader';
 
@@ -159,6 +159,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
         if (prevCount <= 1) {
           clearInterval(countdownInterval);
           setIsCountingDown(false);
+          p5SoundRef.current.jump(0);
           startRecording();
           return 0;
         }
@@ -173,7 +174,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       setShowCursor(true);
     } else {
       setShowCursor(false);
-      p5SoundRef.current.jump(0);
+      
       setTimeout(() => {
         startCountdown();
       }, 100);
@@ -546,7 +547,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
               {isRecordingRef.current ? (
                 <FaVideoSlash size={24} />
               ) : (
-                <FaRecordVinyl size={24} />
+                <FaVideo size={24} />
               )}
             </button>
           </div>
