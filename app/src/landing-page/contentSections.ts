@@ -139,7 +139,7 @@ export const faqs = [
   {
     id: 11,
     question: 'Can I get a refund?',
-    answer: 'Due to the high resources required for image generation, we do not offer refunds. Please carefully select your plan before purchase.',
+    answer: 'Due to the high resources required for song generation, lyric transcription, and video processing, we do not offer refunds. Please carefully select your plan before purchase.',
     href: '/refunds',
   },
 ];
