@@ -96,15 +96,32 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
       ctx.scale(scaleFactor, scaleFactor);
     }
 
-    const stream = canvas.captureStream(60); // Increase frame rate to 60 fps
+    // Get the canvas stream
+    const canvasStream = canvas.captureStream(60);
+
+    // Get the audio stream from p5.sound
+    let audioStream;
+    if (p5SoundRef.current) {
+      const audioContext = p5.prototype.getAudioContext();
+      const audioSource = (audioContext as any).createMediaStreamDestination();
+      p5SoundRef.current.connect(audioSource);
+      audioStream = audioSource.stream;
+      console.log('audioStream', audioStream);
+    }
+
+    // Combine video and audio streams
+    const combinedStream = new MediaStream([
+      ...canvasStream.getVideoTracks(),
+      ...(audioStream ? audioStream.getAudioTracks() : [])
+    ]);
 
     // Set up MediaRecorder with higher quality options
     const options = {
-      mimeType: 'video/webm; codecs=vp9',
+      mimeType: 'video/webm; codecs=vp9,opus',
       videoBitsPerSecond: 8000000, // 8 Mbps
     };
 
-    const mediaRecorder = new MediaRecorder(stream, options);
+    const mediaRecorder = new MediaRecorder(combinedStream, options);
 
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
@@ -127,7 +144,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
     mediaRecorderRef.current = mediaRecorder;
     isMediaRecorderSetupRef.current = true;
     console.log('MediaRecorder set up');
-  }, []);
+  }, [p5SoundRef]);
 
   const startRecording = useCallback(() => {
     setupMediaRecorder();
