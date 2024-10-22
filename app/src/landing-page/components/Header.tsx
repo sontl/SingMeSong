@@ -20,7 +20,7 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
 
   const { data: user, isLoading: isUserLoading } = useAuth();
 
-  const NavLogo = () => <img className='h-8 w-8' src={logo} alt='SingMeSong App' />;
+  const NavLogo = () => <img className='h-12 w-12' src={logo} alt='SingMeSong App' />;
 
   return (
     <header className='absolute inset-x-0 top-0 z-50 dark:bg-boxdark-2'>

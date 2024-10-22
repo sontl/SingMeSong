@@ -12,11 +12,11 @@ import { DocsUrl, BlogUrl } from '../../shared/common';
 import DarkModeSwitcher from './DarkModeSwitcher';
 
 const navigation = [
-  { name: 'AI Scheduler (Demo App)', href: routes.DemoAppRoute.build() },
-  { name: 'File Upload (AWS S3)', href: routes.FileUploadRoute.build() },
+  { name: 'Home', href: routes.LandingPageRoute.build() },
+  { name: 'Create', href: routes.SingmeAppRoute.build() },
   { name: 'Pricing', href: routes.PricingPageRoute.build() },
   { name: 'Documentation', href: DocsUrl },
-  { name: 'Blog', href: BlogUrl },
+  // { name: 'Blog', href: BlogUrl },
 ];
 
 const NavLogo = () => <img className='h-8 w-8' src={logo} alt='SingMeSong App' />;
@@ -30,7 +30,7 @@ export default function AppNavBar() {
       <nav className='flex items-center justify-between p-6 lg:px-8' aria-label='Global'>
         <div className='flex lg:flex-1'>
           <a href='/' className='-m-1.5 p-1.5'>
-            <img className='h-8 w-8' src={logo} alt='My SaaS App' />
+            <img className='h-12 w-12' src={logo} alt='SingMeSong App' />
           </a>
         </div>
         <div className='flex lg:hidden'>

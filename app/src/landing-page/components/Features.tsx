@@ -13,8 +13,7 @@ export default function Features({ features }: { features: Feature[] }) {
           The <span className='text-yellow-500'>Best</span> Features
         </p>
         <p className='mt-6 text-lg leading-8 text-gray-600 dark:text-white'>
-          Don't work harder.
-          <br /> Work smarter.
+        Your Music. Our AI. Pure Magic.
         </p>
       </div>
       <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl'>

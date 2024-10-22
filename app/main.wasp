@@ -460,3 +460,9 @@ job sendNewsletter {
   entities: [User]
 }
 //#endregion
+
+// Add this new route and page definition
+route ContactRoute { path: "/contact", to: ContactPage }
+page ContactPage {
+  component: import ContactPage from "@src/contact/ContactPage"
+}
