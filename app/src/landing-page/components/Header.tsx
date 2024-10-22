@@ -3,7 +3,7 @@ import { HiBars3 } from 'react-icons/hi2';
 import { BiLogIn } from 'react-icons/bi';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { Dialog } from '@headlessui/react';
-import { Link } from 'wasp/client/router';
+import { Link, routes } from 'wasp/client/router';
 import { useAuth } from 'wasp/client/auth';
 import logo from '../../client/static/logo.png';
 import DarkModeSwitcher from '../../client/components/DarkModeSwitcher';
@@ -21,6 +21,10 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
   const { data: user, isLoading: isUserLoading } = useAuth();
 
   const NavLogo = () => <img className='h-12 w-12' src={logo} alt='SingMeSong App' />;
+
+  const fullNavigation = user
+    ? [{ name: 'Create Song', href: routes.SingmeAppRoute.build() }, ...navigation]
+    : navigation;
 
   return (
     <header className='absolute inset-x-0 top-0 z-50 dark:bg-boxdark-2'>
@@ -45,7 +49,7 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
           </button>
         </div>
         <div className='hidden lg:flex lg:gap-x-12'>
-          {navigation.map((item) => (
+          {fullNavigation.map((item) => (
             <a
               key={item.name}
               href={item.href}
@@ -93,7 +97,7 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
           <div className='mt-6 flow-root'>
             <div className='-my-6 divide-y divide-gray-500/10'>
               <div className='space-y-2 py-6'>
-                {navigation.map((item) => (
+                {fullNavigation.map((item) => (
                   <a
                     key={item.name}
                     href={item.href}

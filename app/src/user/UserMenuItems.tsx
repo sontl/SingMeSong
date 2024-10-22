@@ -20,7 +20,7 @@ export const UserMenuItems = ({ user, setMobileMenuOpen }: { user?: Partial<User
           'px-6': path === '/admin',
         })}
       >
-        {path === '/' || path === '/admin' ? (
+        {/* {path === '/' || path === '/admin' ? (
           <li>
             <Link
               to='/create'
@@ -30,7 +30,7 @@ export const UserMenuItems = ({ user, setMobileMenuOpen }: { user?: Partial<User
               Dashboard
             </Link>
           </li>
-        ) : null}
+        ) : null} */}
         <li>
           <Link
             to='/account'
