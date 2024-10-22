@@ -30,13 +30,13 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
     <header className='absolute inset-x-0 top-0 z-50 dark:bg-boxdark-2'>
       <nav className='flex items-center justify-between p-6 lg:px-8' aria-label='Global'>
         <div className='flex items-center lg:flex-1'>
-          <a
-            href='/'
+          <Link
+            to='/'
             className='flex items-center -m-1.5 p-1.5 text-gray-900 duration-300 ease-in-out hover:text-yellow-500'
           >
             <NavLogo />
             <span className='ml-2 text-sm font-semibold leading-6 dark:text-white'>SingMeSong</span>
-          </a>
+          </Link>
         </div>
         <div className='flex lg:hidden'>
           <button
@@ -50,13 +50,13 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
         </div>
         <div className='hidden lg:flex lg:gap-x-12'>
           {fullNavigation.map((item) => (
-            <a
+            <Link
               key={item.name}
-              href={item.href}
+              to={item.href as any}
               className='text-sm font-semibold leading-6 text-gray-900 duration-300 ease-in-out hover:text-yellow-500 dark:text-white'
             >
               {item.name}
-            </a>
+            </Link>
           ))}
         </div>
         <div className='hidden lg:flex lg:flex-1 lg:justify-end lg:align-end'>
@@ -82,7 +82,7 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
         <Dialog.Panel className='fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:bg-boxdark dark:text-white'>
           <div className='flex items-center justify-between'>
             <Link to={routes.LandingPageRoute.to} className='-m-1.5 p-1.5'>
-              <span className='sr-only'>Your SaaS</span>
+              <span className='sr-only'>SingMeSong</span>
               <NavLogo />
             </Link>
             <button
@@ -98,14 +98,14 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
             <div className='-my-6 divide-y divide-gray-500/10'>
               <div className='space-y-2 py-6'>
                 {fullNavigation.map((item) => (
-                  <a
+                  <Link
                     key={item.name}
-                    href={item.href}
+                    to={item.href as any}
                     onClick={() => setMobileMenuOpen(false)}
                     className='-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-boxdark-2'
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 ))}
               </div>
               <div className='py-6'>
