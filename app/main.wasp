@@ -1,4 +1,4 @@
-app OpenSaaS {
+app SingMeSong {
   wasp: {
     version: "^0.14.0"
   },
@@ -8,10 +8,10 @@ app OpenSaaS {
   head: [
         "<meta property='og:type' content='website' />",
         "<meta property='og:title' content='SingMeSong App' />",
-        "<meta property='og:url' content='https://opensaas.sh' />",
+        "<meta property='og:url' content='https://singmesong.com' />",
         "<meta property='og:description' content='I made a SaaS App. Buy my stuff.' />",
-        "<meta property='og:image' content='https://opensaas.sh/public-banner.png' />",
-        "<meta name='twitter:image' content='https://opensaas.sh/public-banner.png' />",
+        "<meta property='og:image' content='https://singmesong.com/public-banner.png' />",
+        "<meta name='twitter:image' content='https://singmesong.com/public-banner.png' />",
         "<meta name='twitter:image:width' content='800' />",
         "<meta name='twitter:image:height' content='400' />",
         "<meta name='twitter:card' content='summary_large_image' />",
@@ -31,7 +31,7 @@ app OpenSaaS {
       //   (RequestPasswordReset(Route|Page), PasswordReset(Route|Page), EmailVerification(Route|Page))
       email: {
         fromField: {
-          name: "Open SaaS App",
+          name: "SingMeSong App",
           email: "me@example.com"
         },
         emailVerification: {
@@ -62,7 +62,7 @@ app OpenSaaS {
     },
     onAfterSignup: import { onAfterSignup } from "@src/auth/hooks",
     onAuthFailedRedirectTo: "/login",
-    onAuthSucceededRedirectTo: "/demo-app",
+    onAuthSucceededRedirectTo: "/create",
   },
 
   db: {
@@ -83,13 +83,13 @@ app OpenSaaS {
     //   Once you are ready for production, switch to e.g. "SendGrid" or "Mailgun" providers. Check out https://docs.opensaas.sh/guides/email-sending/ .
     provider: Dummy,
     defaultFrom: {
-      name: "Open SaaS App",
+      name: "SingMeSong App",
       // When using a real provider, e.g. SendGrid, you must use the same email address that you configured your account to send out emails with!
       email: "me@example.com"
     },
     // provider: Mailgun,
     // defaultFrom: {
-    //   name: "Open SaaS App",
+    //   name: "SingMeSong App",
     //   // When using SendGrid, you must use the same email address that you configured your account to send out emails with!
     //   email: "support@mail.singmesong.com"
     // },
