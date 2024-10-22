@@ -12,12 +12,7 @@ interface DefaultLayoutProps {
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ user, children, hideFloatingPlayer = false, isFullscreen = false }) => {
-  useEffect(() => {
-    const mainElement = document.getElementById('defaultCanvas0');
-    if (mainElement) {
-      mainElement.remove();
-    }
-  }, []);
+ 
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

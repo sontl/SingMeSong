@@ -1,6 +1,7 @@
 import { DocsUrl } from '../../shared/common';
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from 'wasp/client/auth';
 
 const VideoPopup = ({ src , onClose }: { src: string, onClose: () => void })  => (
   <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -87,6 +88,8 @@ const VideoThumbnail = ({ videoId, thumbnail, title }: { videoId: string, thumbn
 };
 
 export default function Hero() {
+  const { data: user } = useAuth();
+
   return (
     <div className='relative pt-14 w-full '>
       <div
@@ -124,12 +127,12 @@ export default function Hero() {
               <div className='w-full max-w-3xl flex shadow-lg rounded-lg overflow-hidden'>
                 <input
                   type="text"
-                  placeholder="An acoustic ode to a banana’s downfall!"
-                  className="flex-grow px-6 py-4 text-base text-gray-700 bg-white border-0 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                  placeholder="An acoustic ode to a banana's downfall!"
+                  className="flex-grow px-6 py-4 text-base text-gray-700 bg-white border-0 focus:outline-none focus:ring-2 focus:ring-yellow-300 hidden sm:block"
                 />
-                <a
-                  href="/signup"
-                  className="flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                <Link
+                  to={user ? "/create" : "/signup"}
+                  className="flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors duration-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18V5l12-2v13"></path>
@@ -137,7 +140,7 @@ export default function Hero() {
                     <circle cx="18" cy="16" r="3"></circle>
                   </svg>
                   Create a Song
-                </a>
+                </Link>
               </div>
             </div>
           </div>

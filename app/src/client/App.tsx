@@ -19,8 +19,6 @@ export default function App({ children }: { children: ReactNode }) {
   const shouldDisplayAppNavBar = useMemo(() => {
     return (
       location.pathname !== '/' &&
-      location.pathname !== '/login' &&
-      location.pathname !== '/signup' &&
       location.pathname !== '/create' &&
       location.pathname !== '/lyric-video' &&
       location.pathname !== '/transcribe' &&
@@ -59,6 +57,16 @@ export default function App({ children }: { children: ReactNode }) {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    // wait for 1 second before removing the canvas element
+    setTimeout(() => {
+      const mainElement = document.getElementById('defaultCanvas0');
+      if (mainElement) {
+      mainElement.remove();
+      }
+    }, 1000);
+  }, []);
 
   return (
     <>
