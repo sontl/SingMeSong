@@ -176,8 +176,6 @@ export const getAllSongsByUser = async ({ searchTerm }: { searchTerm?: string },
       throw new HttpError(401, 'Unauthorized');
     }
   
-    console.log('Received searchTerm:', searchTerm); // Add this log for debugging
-  
     const whereClause: any = {
       userId: context.user.id,
     };
@@ -189,14 +187,10 @@ export const getAllSongsByUser = async ({ searchTerm }: { searchTerm?: string },
       };
     }
   
-    console.log('Where clause:', whereClause); // Add this log for debugging
-  
     const songs = await context.entities.Song.findMany({
       where: whereClause,
       orderBy: { createdAt: 'desc' },
     });
-  
-    console.log('Found songs:', songs.length); // Add this log for debugging
   
     return songs;
   };

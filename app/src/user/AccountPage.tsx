@@ -1,15 +1,17 @@
-import type { User } from 'wasp/entities';
 import {
   type SubscriptionStatus,
   prettyPaymentPlanName,
   parsePaymentPlanId
 } from '../payment/plans';
 import { Link } from 'wasp/client/router';
+import DefaultLayout from '../singme-app/layout/DefaultLayout';
 import { logout } from 'wasp/client/auth';
 import { z } from 'zod';
+import { type AuthUser } from 'wasp/auth';
 
-export default function AccountPage({ user }: { user: User }) {
+export default function AccountPage({ user }: { user: AuthUser }) {
   return (
+    <DefaultLayout user={user}>
     <div className='mt-10 px-6'>
       <div className='overflow-hidden border border-gray-900/10 shadow-lg sm:rounded-lg mb-4 lg:m-8 dark:border-gray-100/10'>
         <div className='px-4 py-5 sm:px-6 lg:px-8'>
@@ -55,7 +57,8 @@ export default function AccountPage({ user }: { user: User }) {
           logout
         </button>
       </div>
-    </div>
+      </div>
+    </DefaultLayout>
   );
 }
 

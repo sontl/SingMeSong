@@ -1,7 +1,6 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { type AuthUser } from 'wasp/auth';
 import DefaultLayout from '../../layout/DefaultLayout';
-import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import MusicStyle from './MusicStyle';
 import Title from './Title';
 import Lyrics from './Lyrics';
@@ -41,8 +40,6 @@ const CreatePage = ({ user }: { user: AuthUser }) => {
     setCurrentPage('create');
     stopP5Sound(); // Stop P5 sound when CreatePage mounts
   }, [setCurrentPage, stopP5Sound]);
-
-  useRedirectHomeUnlessUserIsAdmin({ user });
 
   const handleLyricsChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLyricsValue(event.target.value);

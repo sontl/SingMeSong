@@ -3,7 +3,6 @@ import { type AuthUser } from 'wasp/auth';
 import { useQuery, getAllSongsByUser, transcribeSong, aiCorrectTranscription, updateSubtitleSentence } from 'wasp/client/operations';
 import { type Song } from 'wasp/entities';
 import DefaultLayout from '../../layout/DefaultLayout';
-import { useRedirectHomeUnlessUserIsAdmin } from '../../useRedirectHomeUnlessUserIsAdmin';
 import { SongContext } from '../../context/SongContext';
 import { FaDownload, FaClosedCaptioning, FaSpinner, FaArrowRight, FaRobot, FaSearch, FaPencilAlt, FaCheck, FaPlay } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -14,7 +13,6 @@ import { useLocation, useHistory } from 'react-router-dom';
 import JokeDisplay from '../../components/JokeDisplay';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
-  useRedirectHomeUnlessUserIsAdmin({ user });
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcribingSongId, setTranscribingSongId] = useState<string | null>(null);

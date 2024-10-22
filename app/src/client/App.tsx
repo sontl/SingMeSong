@@ -23,7 +23,8 @@ export default function App({ children }: { children: ReactNode }) {
       location.pathname !== '/signup' &&
       location.pathname !== '/create' &&
       location.pathname !== '/lyric-video' &&
-      location.pathname !== '/transcribe'
+      location.pathname !== '/transcribe' &&
+      location.pathname !== '/account'
     );
   }, [location]);
 
@@ -32,7 +33,7 @@ export default function App({ children }: { children: ReactNode }) {
   }, [location]);
 
   const isUserDashboard = useMemo(() => {
-    return location.pathname.startsWith('/create') || location.pathname.startsWith('/lyric-video') || location.pathname.startsWith('/transcribe');
+    return location.pathname.startsWith('/create') || location.pathname.startsWith('/lyric-video') || location.pathname.startsWith('/transcribe') || location.pathname.startsWith('/account');
   }, [location]);
 
   const isFullscreenVisualizerPage = useMemo(() => {
@@ -65,7 +66,7 @@ export default function App({ children }: { children: ReactNode }) {
         {isAdminDashboard ? (
           <>{children}</>
         ) : isUserDashboard ? (
-          <><SongProvider>{children}</SongProvider></>
+          <SongProvider>{children}</SongProvider>
         ) : (
           <>
             {shouldDisplayAppNavBar && !isFullscreenVisualizerPage && <AppNavBar />}
