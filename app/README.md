@@ -45,3 +45,13 @@ To run the unit tests for this project:
    ```
 
 Remember to write your tests in files with the `.test.ts` or `.spec.ts` extension in the `tests` directory.
+
+## Deployment
+
+To deploy the app, run the `deploy.sh` script. This script will build the app, clone the remote backend and frontend repositories, copy the build files to the cloned repositories, and push the changes to the remote repositories.
+There are 2 remote repositories:
+
+- [Backend](https://github.com/sontl/SingMeSong-build)
+- [Frontend](https://github.com/sontl/SingMeSong-frontend-prod)
+
+The backend deployment is for docker deployment, and the frontend deployment is for static file serving.
