@@ -2,12 +2,12 @@ import React from 'react';
 import { FaMusic, FaMagic, FaPlayCircle } from 'react-icons/fa';
 
 const steps = [
-  {
-    number: '01',
-    title: 'Create',
-    description: 'Enter the song description, or your own lyric, or import from Suno. You even can upload your own mp3 file',
-    icon: <FaMusic className="text-5xl text-orange-500 mb-4" />,
-  },
+    {
+        number: '01',
+        title: 'Create',
+        description: 'Describe your song idea or enter lyrics. AI will generate the music, or you can import from Suno or upload an MP3.',
+        icon: <FaMusic className="text-5xl text-orange-500 mb-4" />,
+      },
   {
     number: '02',
     title: 'Transcribe',
@@ -31,8 +31,8 @@ const HowItWorks: React.FC = () => {
             How It Works
             <div className="w-24 h-2 bg-orange-500 mx-auto mt-4"></div>
           </h2>
-          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-white">
-            Your Music. Our AI. Pure Magic.
+          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+            Turn your music into visual lyrics easily
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
@@ -40,10 +40,10 @@ const HowItWorks: React.FC = () => {
             {steps.map((step, index) => (
               <div 
                 key={step.number}
-                className="relative bg-white dark:bg-boxdark-2 p-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out mx-4 my-4"
+                className="relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out mx-4 my-4"
               >
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-500 via-yellow-500 to-amber-500"></div>
-                <div className="text-6xl font-bold text-gray-200 dark:text-gray-700 absolute top-4 right-4 opacity-50">
+                <div className="text-6xl font-bold text-gray-300 dark:text-gray-500 absolute top-4 right-4 opacity-70">
                   {step.number}
                 </div>
                 <div className="relative z-10">
