@@ -466,3 +466,13 @@ route ContactRoute { path: "/contact", to: ContactPage }
 page ContactPage {
   component: import ContactPage from "@src/contact/ContactPage"
 }
+
+route PrivacyPolicyRoute { path: "/privacy-policy", to: PrivacyPolicyPage }
+page PrivacyPolicyPage {
+  component: import PrivacyPolicyPage from "@src/landing-page/PrivacyPolicy"
+}
+
+route TermsOfServiceRoute { path: "/terms-of-service", to: TermsOfServicePage }
+page TermsOfServicePage {
+  component: import TermsOfServicePage from "@src/landing-page/TermsOfService"
+}

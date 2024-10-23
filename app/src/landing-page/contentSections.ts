@@ -18,7 +18,7 @@ export const features = [
   },
   {
     name: 'Crystal-Clear Transcription',
-    description: 'Industry-leading accuracy in music transcription powered by advanced neural networks. Get detailed notation, chord progressions, and lyrics with 95% accuracy.',
+    description: 'Experience industry-leading accuracy in music transcription, powered by advanced neural networks. Additionally, automatically add animated captions to your videos with over 97% accuracy, and choose from a variety of templates to enhance your visual content.',
     icon: '📝',
     href: DocsUrl,
   },
@@ -150,7 +150,7 @@ export const footerNavigation = {
   ],
   company: [
     { name: 'Contact', href: '/contact' },
-    { name: 'Privacy', href: '#' },
-    { name: 'Terms of Service', href: '#' },
+    { name: 'Privacy', href: '/privacy-policy' },
+    { name: 'Terms of Service', href: '/terms-of-service' },
   ],
 };
