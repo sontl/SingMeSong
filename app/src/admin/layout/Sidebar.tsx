@@ -103,12 +103,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Dashboard --> */}
               <NavLink
                 to='/admin'
-                isActive={(_match, location) => location.pathname === '/admin'}
-                className={(isActive) =>
+                className={() =>
                   cn(
                     'group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-gray-700 dark:hover:bg-meta-4',
                     {
-                      'bg-gray-700 dark:bg-meta-4': isActive,
+                      'bg-gray-700 dark:bg-meta-4': location.pathname === '/admin',
                     }
                   )
                 }
@@ -279,12 +278,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <NavLink
                         to='#'
-                        isActive={(_match, location) => location.pathname.includes('forms')}
-                        className={(isActive) =>
+                        className={() =>
                           cn(
                             'group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-gray-700 dark:hover:bg-meta-4',
                             {
-                              'bg-gray-700 dark:bg-meta-4': isActive,
+                              'bg-gray-700 dark:bg-meta-4': location.pathname.includes('forms'),
                             }
                           )
                         }
@@ -417,12 +415,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <NavLink
                         to='#'
-                        isActive={(_match, location) => location.pathname.includes('ui')}
-                        className={(isActive) =>
+                        className={() =>
                           cn(
                             'group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-gray-700 dark:hover:bg-meta-4',
                             {
-                              'bg-gray-700 dark:bg-meta-4': isActive,
+                              'bg-gray-700 dark:bg-meta-4':  location.pathname.includes('ui'),
                             }
                           )
                         }

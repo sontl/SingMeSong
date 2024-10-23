@@ -11,7 +11,7 @@ import P5MusicPlayer from './P5MusicPlayer';
 import debounce from 'lodash/debounce';
 import { useLocation } from 'react-router-dom';
 import { FaSpinner, FaExpand, FaCompress, FaVideo, FaVideoSlash, FaClosedCaptioning, FaUpload, FaSearch } from 'react-icons/fa';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { loadSharedImage, loadSharedBlurImage } from './effects/SharedImageLoader';
 
 // Ensure we're in a browser environment
@@ -70,7 +70,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
   const [currentSmallImageUrl, setCurrentSmallImageUrl] = useState<string | null>(null);
   const location = useLocation();
   const songListRef = useRef<HTMLUListElement>(null);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const sketchRef = useRef<p5 | null>(null);
 
@@ -392,7 +392,7 @@ const LyricVideoPage = ({ user }: { user: AuthUser }) => {
 
   const handleTranscribe = () => {
     if (selectedSong) {
-      history.push(`/transcribe?songId=${selectedSong.id}`);
+      navigate(`/transcribe?songId=${selectedSong.id}`);
     }
   };
 

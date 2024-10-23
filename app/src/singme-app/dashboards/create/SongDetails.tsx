@@ -1,6 +1,6 @@
 import React from 'react';
 import { type Song, User } from 'wasp/entities';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaTrash, FaClosedCaptioning } from 'react-icons/fa';
 
 type SongDetailsProps = {
@@ -9,7 +9,7 @@ type SongDetailsProps = {
 };
 
 const SongDetails: React.FC<SongDetailsProps> = ({ song, onDeleteSong }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   if (!song) {
     return (
@@ -46,7 +46,7 @@ const SongDetails: React.FC<SongDetailsProps> = ({ song, onDeleteSong }) => {
 
   const handleTranscribe = () => {
     if (song) {
-      history.push(`/transcribe?songId=${song.id}`);
+      navigate(`/transcribe?songId=${song.id}`);
     }
   };
 

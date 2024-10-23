@@ -39,16 +39,20 @@ export const transcribeSong = async ({songId, inputLang, outputLang}: {songId: s
   }
 
   try {
-    // Prepare form data
-    const formData = new FormData();
-    formData.append('url', song.audioUrl);
-    formData.append('lng', outputLang); // Use the outputLang parameter
-    formData.append('lng_input', inputLang); // Use the inputLang parameter
+    // Prepare request body as JSON
+    const requestBody = JSON.stringify({
+      url: song.audioUrl,
+      lng: outputLang,
+      lng_input: inputLang
+    });
 
     // Send request to Hallu API
     const transcriptionResponse = await fetch(API_URL, {
       method: 'POST',
-      body: formData,
+      body: requestBody,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!transcriptionResponse.ok) {
@@ -241,4 +245,3 @@ function mergeSubtitles(originalSubtitle: any[], correctedSubtitle: any[]): any[
     return original;
   });
 }
-

@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { LANGUAGES } from '../../shared/constants';
 import { ignoreOverride } from 'openai/_vendor/zod-to-json-schema/Options.mjs';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import JokeDisplay from '../../components/JokeDisplay';
 
 const TranscribePage = ({ user }: { user: AuthUser }) => {
@@ -30,7 +30,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
   const [transcriptionProgress, setTranscriptionProgress] = useState('');
   const location = useLocation();
   const songListRef = useRef<HTMLUListElement>(null);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const isTranscribeDisabled = !selectedSong || isTranscribing;
 
@@ -243,7 +243,7 @@ const TranscribePage = ({ user }: { user: AuthUser }) => {
 
   const handlePreview = () => {
     if (selectedSong) {
-      history.push(`/lyric-video?songId=${selectedSong.id}`);
+      navigate(`/lyric-video?songId=${selectedSong.id}`);
     } else {
       toast.error('Please select a song to preview');
     }
