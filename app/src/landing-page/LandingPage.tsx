@@ -10,6 +10,7 @@ import Hero from './components/Hero';
 import Clients from './components/Clients';
 import Features from './components/Features';
 import Testimonials from './components/Testimonials';
+import HowItWorks from './components/HowItWorks';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 
@@ -23,6 +24,7 @@ export default function LandingPage() {
         <Clients />
         <Features features={features} />
         <Testimonials testimonials={testimonials} />
+        <HowItWorks />
         <FAQ faqs={faqs} />
       </main>
 
