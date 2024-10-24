@@ -79,14 +79,14 @@ export const testimonials = [
   {
     name: 'Thomas Blakemore',
     role: 'Edu-Influencer Of The Year',
-    avatarSrc: 'https://p16-sign-sg.tiktokcdn.com/aweme/1080x1080/tos-alisg-avt-0068/c86638e3ffb7671151336cdf81fe73f8.jpeg?lk3s=a5d48078&nonce=10511&refresh_token=573139821f7bbb331bb9fbaaee38e606&x-expires=1729742400&x-signature=saRUA2DQPrAMselOGRdEzHFXCNk%3D&shp=a5d48078&shcp=81f88b70',
+    avatarSrc: 'https://singmesong.com/avatar1.jpeg',
     socialUrl: 'https://www.tiktok.com/@thomasblakemore',
     quote: 'The AI transcription has transformed how I teach. My students can now focus on the creative aspects of music, while the technology handles the tedious tasks.',
   },
   {
     name: 'Agaust West',
     role: 'TikTok Creator',
-    avatarSrc: 'https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/c98dd6bac3cf20de6abf4cb5f8281174~c5_1080x1080.jpeg?lk3s=a5d48078&nonce=67988&refresh_token=2991cb70ab07d3beeb8f9f914b415b2b&x-expires=1729742400&x-signature=MKd%2F4xTd7xzWmIScBRK%2FbXsXWP4%3D&shp=a5d48078&shcp=81f88b70',
+    avatarSrc: 'https://singmesong.com/avatar2.jpeg',
     socialUrl: 'https://www.tiktok.com/@agaustwest',
     quote: "I've been able to create professional-quality videos in minutes that used to take me hours.",
   },

@@ -82,8 +82,8 @@ const HowItWorks: React.FC = () => {
         </div>
       </div>
 
-      {/* Updated Customize Your Experience section */}
-      <div className="mt-12 sm:mt-56">
+      {/* Updated Customize Your Experience section with reduced margin */}
+      <div className="mt-12 sm:mt-32">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
             Customize Your Experience
