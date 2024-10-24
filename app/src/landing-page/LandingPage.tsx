@@ -23,10 +23,12 @@ export default function LandingPage() {
       <main className='isolate dark:bg-boxdark-2'>
         <Hero />
         <Clients />
-        <UseCases />
+        
         <Features features={features} />
+      
         <Testimonials testimonials={testimonials} />
         <HowItWorks />
+        <UseCases />
         <FAQ faqs={faqs} />
       </main>
 

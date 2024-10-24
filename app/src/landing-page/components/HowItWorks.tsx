@@ -42,7 +42,7 @@ const customizationOptions = [
 
 const HowItWorks: React.FC = () => {
   return (
-    <div className="mx-auto mt-24 max-w-7xl sm:mt-56 sm:px-6 lg:px-8">
+    <div className="mx-auto mt-32 max-w-7xl sm:mt-56 sm:px-6 lg:px-8">
       <div className="relative overflow-hidden">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
@@ -83,7 +83,7 @@ const HowItWorks: React.FC = () => {
       </div>
 
       {/* Updated Customize Your Experience section with reduced margin */}
-      <div className="mt-12 sm:mt-32">
+      <div className="mt-24 sm:mt-32">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
             Customize Your Experience

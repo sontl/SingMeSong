@@ -15,7 +15,7 @@ const useCases = [
 export default function UseCases() {
   return (
     <section className="mt-12 mx-auto max-w-7xl px-6 lg:px-8">
-      <div className="py-24 relative">
+      <div className="pt-24 relative">
         <div className="relative">
           <h2 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-white text-center relative z-10">
             Unleash Creativity <br/> <span className="text-yellow-500">Across Industries</span>
