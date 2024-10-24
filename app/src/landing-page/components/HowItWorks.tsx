@@ -16,7 +16,7 @@ const steps = [
   },
   {
     number: '03',
-    title: 'Review',
+    title: 'Play',
     description: 'Review with live caption and stunning lyric effect. Choose from various preset effects',
     icon: <FaPlayCircle className="text-5xl text-amber-500 mb-4" />,
   },

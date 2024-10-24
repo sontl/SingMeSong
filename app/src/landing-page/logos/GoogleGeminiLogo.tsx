@@ -1,6 +1,6 @@
 export default function GoogleGeminiLogo() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="48" height="48">
       <path
         className="dark:fill-white"
         fill="#545454"

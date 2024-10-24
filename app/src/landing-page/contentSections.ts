@@ -18,14 +18,26 @@ export const features = [
   },
   {
     name: 'Crystal-Clear Transcription',
-    description: 'Experience industry-leading accuracy in music transcription, powered by advanced neural networks. Additionally, automatically add animated captions to your videos with over 97% accuracy, and choose from a variety of templates to enhance your visual content.',
+    description: 'Unlock industry-leading music transcription accuracy with AI-powered neural networks. Enjoy automated, high-accuracy video captions and customizable templates for enhanced visuals.',
     icon: '📝',
+    href: DocsUrl,
+  },
+  {
+    name: 'Multilingual Support',
+    description: 'With advanced voice recognition and translation capabilities, your music and videos can reach a global audience, supporting over 100 languages.',
+    icon: '🌎',
     href: DocsUrl,
   },
   {
     name: 'Immersive Lyric Videos',
     description: 'Create stunning lyric videos with dynamic visual effects, synchronized typography, and AI-generated backgrounds that match your song\'s mood and energy.',
     icon: '🎥',
+    href: DocsUrl,
+  },
+  {
+    name: 'Instant Lyric Video Preview',
+    description: 'Experience the thrill of instant gratification with our real-time lyric video preview feature. Review your creations without any waiting time, ensuring a seamless and efficient workflow.',
+    icon: '🚀',
     href: DocsUrl,
   },
   {

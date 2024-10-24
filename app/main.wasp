@@ -87,11 +87,11 @@ app SingMeSong {
     //   // When using a real provider, e.g. SendGrid, you must use the same email address that you configured your account to send out emails with!
     //   email: "me@example.com"
     // },
-    provider: Mailgun,
+    provider: SendGrid,
     defaultFrom: {
-      name: "SingMeSong App",
+      name: "SingMeSong",
       // When using SendGrid, you must use the same email address that you configured your account to send out emails with!
-      email: "support@mail.singmesong.com"
+      email: "son@singmesong.com"
     },
   },
 }

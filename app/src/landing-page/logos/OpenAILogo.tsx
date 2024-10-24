@@ -1,6 +1,6 @@
 export default function OpenAILogo() {
   return (
-    <svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid' viewBox='0 0 256 260'>
+    <svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid' viewBox='0 0 256 260' width="48" height="48">
       <path
         className='dark:fill-white'
         fill='#545454'

@@ -10,10 +10,10 @@ export default function Features({ features }: { features: Feature[] }) {
     <div id='features' className='mx-auto mt-48 max-w-7xl px-6 lg:px-8'>
       <div className='mx-auto max-w-2xl text-center'>
         <p className='mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-white'>
-          The <span className='text-yellow-500'>Best</span> Features
+          Create Viral-ready Music Clips <span className='text-yellow-500'>in Seconds</span>
         </p>
         <p className='mt-6 text-lg leading-8 text-gray-600 dark:text-white'>
-        Your Music. Our AI. Pure Magic.
+          Cut editing time by 80% to unleash your creativity and spend less time behind the scenes.
         </p>
       </div>
       <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl'>
