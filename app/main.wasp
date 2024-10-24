@@ -9,7 +9,7 @@ app SingMeSong {
         "<meta property='og:type' content='website' />",
         "<meta property='og:title' content='SingMeSong App' />",
         "<meta property='og:url' content='https://singmesong.com' />",
-        "<meta property='og:description' content='I made a SaaS App. Buy my stuff.' />",
+        "<meta property='og:description' content='Unlock your music creation potential with SingMeSong, the ultimate app for AI-powered song composition, crystal-clear transcription, and stunning lyric video production.' />",
         "<meta property='og:image' content='https://singmesong.com/public-banner.png' />",
         "<meta name='twitter:image' content='https://singmesong.com/public-banner.png' />",
         "<meta name='twitter:image:width' content='800' />",
