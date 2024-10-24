@@ -30,11 +30,11 @@ const Tooltip = ({ children, content }: { children: React.ReactNode, content: st
 export default function Clients() {
   const clients = [
     { logo: <OpenAILogo />, tooltip: "OpenAI for advanced music composition and precise audio transcription" },
-    { logo: <ClaudeLogo />, tooltip: "Anthropic Claude for lyric enhancement" },
+    { logo: <ClaudeLogo />, tooltip: "Anthropic Claude for creative direction" },
     { logo: <FFMPEGLogo />, tooltip: "FFMPEG for professional video processing" },
-    { logo: <GoogleGeminiLogo />, tooltip: "Google Gemini for creative direction" },
+    { logo: <GoogleGeminiLogo />, tooltip: "Google Gemini for lyric enhancement" },
     { logo: <SunoLogo />, tooltip: "Suno for advanced music composition" },
-    { logo: <RunwayMLLogo width={230}/>, tooltip: "RunwayML for video processing" }
+    { logo: <RunwayMLLogo width={230}/>, tooltip: "RunwayML for cutting-edge video generation" }
   ];
 
   return (

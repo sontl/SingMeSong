@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaMusic, FaMagic, FaPlayCircle } from 'react-icons/fa';
+import { FaMusic, FaMagic, FaPlayCircle, FaFileImport, FaEdit, FaFilm } from 'react-icons/fa';
 
 const steps = [
     {
@@ -19,6 +19,24 @@ const steps = [
     title: 'Play',
     description: 'Review with live caption and stunning lyric effect. Choose from various preset effects',
     icon: <FaPlayCircle className="text-5xl text-amber-500 mb-4" />,
+  },
+];
+
+const customizationOptions = [
+  {
+    title: 'Flexible Song Creation',
+    description: 'Import from Suno or upload your own file to customize your song creation process.',
+    icon: <FaFileImport className="text-4xl text-pink-400 mb-4" />,
+  },
+  {
+    title: 'One-Click Text Editing',
+    description: 'Easily edit the transcribed text with just one click for perfect accuracy.',
+    icon: <FaEdit className="text-4xl text-orange-400 mb-4" />,
+  },
+  {
+    title: 'Professional Music Videos',
+    description: 'Coming soon: Create animated storytelling music videos with customizable content and cutscenes.',
+    icon: <FaFilm className="text-4xl text-pink-500 mb-4" />,
   },
 ];
 
@@ -58,6 +76,36 @@ const HowItWorks: React.FC = () => {
                     </svg>
                   </div>
                 )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Updated Customize Your Experience section */}
+      <div className="mt-32 sm:mt-56">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+            Customize Your Experience
+            <div className="w-24 h-2 bg-pink-400 mx-auto mt-4"></div>
+          </h2>
+          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+            Tailor every aspect of your music creation and visualization process
+          </p>
+        </div>
+        <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+          <div className="grid grid-cols-1 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-0">
+            {customizationOptions.map((option, index) => (
+              <div 
+                key={option.title}
+                className="relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out mx-4 my-4"
+              >
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-300 via-pink-400 to-orange-300"></div>
+                <div className="relative z-10">
+                  {option.icon}
+                  <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">{option.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{option.description}</p>
+                </div>
               </div>
             ))}
           </div>
