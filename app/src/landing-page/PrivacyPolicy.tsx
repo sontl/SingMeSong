@@ -2,7 +2,7 @@ import React from 'react';
 
 const PrivacyPolicy: React.FC = () => {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 font-sans leading-relaxed">
+    <div className="max-w-3xl mx-auto px-4 py-8 leading-relaxed">
       <h1 className="text-3xl font-bold text-gray-800 border-b-2 border-gray-800 pb-2 mb-6">Privacy Policy</h1>
       <p className="mb-6">
         At SingMeSong, we value your privacy and are committed to safeguarding your personal information. 

@@ -2,7 +2,7 @@ import React from 'react';
 
 const TermsOfService: React.FC = () => {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 font-sans leading-relaxed">
+    <div className="max-w-3xl mx-auto px-4 py-8 leading-relaxed">
       <h1 className="text-3xl font-bold text-gray-800 border-b-2 border-gray-800 pb-2 mb-6">Terms of Service</h1>
       <p className="mb-6">
         Effective Date: 23rd October 2024
