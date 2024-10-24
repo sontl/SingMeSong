@@ -42,14 +42,14 @@ const customizationOptions = [
 
 const HowItWorks: React.FC = () => {
   return (
-    <div className="mx-auto mt-32 max-w-7xl sm:mt-56 sm:px-6 lg:px-8">
+    <div className="mx-auto mt-24 max-w-7xl sm:mt-56 sm:px-6 lg:px-8">
       <div className="relative overflow-hidden">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
             How It Works
             <div className="w-24 h-2 bg-orange-500 mx-auto mt-4"></div>
           </h2>
-          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+          <p className="mt-6 mx-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
             Turn your music into visual lyrics easily
           </p>
         </div>
@@ -58,7 +58,7 @@ const HowItWorks: React.FC = () => {
             {steps.map((step, index) => (
               <div 
                 key={step.number}
-                className="relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out mx-4 my-4"
+                className="relative bg-white dark:bg-gray-800 p-8 rounded-lg border border-gray-200 dark:border-gray-700 transform hover:scale-105 transition-transform duration-300 ease-in-out mx-4 my-4"
               >
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-500 via-yellow-500 to-amber-500"></div>
                 <div className="text-6xl font-bold text-gray-300 dark:text-gray-500 absolute top-4 right-4 opacity-70">
@@ -83,13 +83,13 @@ const HowItWorks: React.FC = () => {
       </div>
 
       {/* Updated Customize Your Experience section */}
-      <div className="mt-32 sm:mt-56">
+      <div className="mt-12 sm:mt-56">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
             Customize Your Experience
-            <div className="w-24 h-2 bg-pink-400 mx-auto mt-4"></div>
+            <div className="w-24 h-2 bg-gradient-to-r from-orange-500 to-pink-400 mx-auto mt-4"></div>
           </h2>
-          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+          <p className="mt-6 mx-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
             Tailor every aspect of your music creation and visualization process
           </p>
         </div>
@@ -98,11 +98,11 @@ const HowItWorks: React.FC = () => {
             {customizationOptions.map((option, index) => (
               <div 
                 key={option.title}
-                className="relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out mx-4 my-4"
+                className="relative bg-white dark:bg-gray-800 p-8 rounded-lg border border-gray-200 dark:border-gray-700 transform hover:scale-105 transition-transform duration-300 ease-in-out mx-4 my-4"
               >
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-300 via-pink-400 to-orange-300"></div>
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 via-orange-300 to-pink-300"></div>
                 <div className="relative z-10">
-                  {option.icon}
+                  {React.cloneElement(option.icon, { className: "text-4xl text-orange-500 mb-4" })}
                   <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">{option.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300">{option.description}</p>
                 </div>

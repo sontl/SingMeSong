@@ -32,7 +32,7 @@ export default function Header({ navigation }: { navigation: NavigationItem[] })
         <Link to="/pricing" className="hidden lg:block cursor-pointer hover:opacity-90 hover:drop-shadow">🚨 Don’t miss out on SingMeSong’s limited-time deal—enjoy 53% off!  🚀</Link>
         <div className="hidden lg:block self-stretch w-0.5 bg-white"></div>
         <Link to="/pricing" className="hidden lg:block cursor-pointer rounded-full bg-neutral-700 px-2.5 py-1 text-xs hover:bg-neutral-600 tracking-wider">Check it out today!→</Link>
-        <Link to="/pricing" className="lg:hidden cursor-pointer rounded-full bg-neutral-700 px-2.5 py-1 text-xs hover:bg-neutral-600 tracking-wider">🚀 Check it out today! 🚀 →</Link>
+        <Link to="/pricing" className="lg:hidden cursor-pointer rounded-full bg-neutral-700 px-2.5 py-1 text-xs hover:bg-neutral-600 tracking-wider">🚀 Unlock limited-time 53% off now! 🚀 →</Link>
       </div>
       <nav className='flex items-center justify-between p-6 lg:px-8' aria-label='Global'>
         <div className='flex items-center lg:flex-1'>

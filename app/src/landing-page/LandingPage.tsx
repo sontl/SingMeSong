@@ -8,6 +8,7 @@ import {
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Clients from './components/Clients';
+import UseCases from './components/UseCases';
 import Features from './components/Features';
 import Testimonials from './components/Testimonials';
 import HowItWorks from './components/HowItWorks';
@@ -22,6 +23,7 @@ export default function LandingPage() {
       <main className='isolate dark:bg-boxdark-2'>
         <Hero />
         <Clients />
+        <UseCases />
         <Features features={features} />
         <Testimonials testimonials={testimonials} />
         <HowItWorks />
